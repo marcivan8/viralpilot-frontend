@@ -1,35 +1,137 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useState } from "react";
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const [page, setPage] = useState("upload");
+  const [uploadedVideo, setUploadedVideo] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [analysisResults, setAnalysisResults] = useState(null);
+
+  function analyzeVideo(file) {
+    if (!file) return;
+    setUploading(true);
+    setTimeout(() => {
+      setUploading(false);
+      setAnalysisResults({
+        viralityRate: "87%",
+        platform: "TikTok",
+        suggestions: [
+          "Add a catchy intro in the first 3 seconds.",
+          "Increase brightness for better visibility.",
+          "Use trending music relevant to your content.",
+        ],
+      });
+      setPage("results");
+    }, 2500);
+  }
+
+  function handleFileChange(e) {
+    const file = e.target.files[0];
+    if (file) {
+      setUploadedVideo(file);
+    }
+  }
+
+  function reset() {
+    setPage("upload");
+    setUploadedVideo(null);
+    setAnalysisResults(null);
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <div className="min-h-screen bg-gradient-to-b from-sky-100 via-sky-200 to-sky-300 flex items-center justify-center px-4 py-10 font-sans">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-6 sm:p-8 z-10">
+        {/* Upload Page */}
+        {page === "upload" && (
+          <div className="flex flex-col items-center space-y-6">
+            <h1 className="text-3xl font-extrabold text-blue-700 text-center">
+              Upload Your Video
+            </h1>
+            <p className="text-gray-600 text-center">
+              Get your virality score, best platform, and improvement tips—instantly!
+            </p>
 
-export default App
+            <label className="cursor-pointer border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition font-semibold px-6 py-3 rounded-full shadow-md focus:ring-4 focus:outline-none focus:ring-blue-300">
+              {uploadedVideo ? "Change Video" : "Choose Video"}
+              <input
+                type="file"
+                accept="video/*"
+                className="hidden"
+                disabled={uploading}
+                onChange={handleFileChange}
+              />
+            </label>
+
+            {uploadedVideo && (
+              <div className="w-full space-y-4">
+                <video
+                  src={URL.createObjectURL(uploadedVideo)}
+                  controls
+                  className="w-full rounded-md border"
+                  style={{ maxHeight: 200 }}
+                />
+                <button
+                  onClick={() => analyzeVideo(uploadedVideo)}
+                  className="w-full bg-gradient-to-r from-pink-600 to-yellow-400 text-white px-6 py-3 rounded-full font-bold shadow-lg hover:opacity-90 transition"
+                  disabled={uploading}
+                >
+                  {uploading ? "Analyzing..." : "Analyze Video"}
+                </button>
+              </div>
+            )}
+
+            {uploading && (
+              <div className="text-blue-600 font-medium">
+                Analyzing your video...
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Results Page */}
+        {page === "results" && analysisResults && (
+          <div className="flex flex-col items-center space-y-4">
+            <h2 className="text-2xl font-bold text-green-600 text-center">
+              Analysis Complete!
+            </h2>
+            <video
+              src={uploadedVideo ? URL.createObjectURL(uploadedVideo) : ""}
+              controls
+              className="w-full rounded-md border"
+              style={{ maxHeight: 200 }}
+            />
+            <div className="w-full text-left space-y-2">
+              <div>
+                <span className="font-semibold text-gray-700">Virality Rate: </span>
+                <span className="text-blue-600 font-bold">
+                  {analysisResults.viralityRate}
+                </span>
+              </div>
+              <div>
+                <span className="font-semibold text-gray-700">Best Platform: </span>
+                <span className="text-blue-600 font-bold">
+                  {analysisResults.platform}
+                </span>
+              </div>
+              <div>
+                <span className="font-semibold text-gray-700">
+                  Improvement Suggestions:
+                </span>
+                <ul className="list-disc list-inside text-sm text-gray-600 mt-1">
+                  {analysisResults.suggestions.map((s, i) => (
+                    <li key={i}>{s}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+            <button
+              className="bg-blue-500 hover:bg-blue-700 text-white px-6 py-3 rounded-full transition shadow-md font-medium"
+              onClick={reset}
+            >
+              Analyze Another Video
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg class="logo" preserveAspectRatio="xMidYMid meet" version="1.2" viewBox="0 0 1104 623.999998" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" zoomAndPan="magnify">
+  <metadata>
+    <ContainsAiGeneratedContent>Yes</ContainsAiGeneratedContent>
+  </metadata>
+  <defs>
+    <clipPath id="32471fe8db">
+      <path d="M 0 85.941406 L 1104 85.941406 L 1104 508.191406 L 0 508.191406 Z M 0 85.941406 "/>
+    </clipPath>
+  </defs>
+  <g id="8cd2b30ed2">
+    <g clip-path="url(#32471fe8db)">
+      <!-- all your actual shapes go here -->
+    </g>
+  </g>
+</svg>
