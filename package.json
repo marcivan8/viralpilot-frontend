@@ -4,13 +4,15 @@
   "private": true,
   "scripts": {
     "dev": "vite",
+    "start": "serve -s dist",
     "build": "vite build",
     "preview": "vite preview",
     "deploy:github": "npm run build && gh-pages -d dist"
   },
   "dependencies": {
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "serve": "^14.2.4"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.0.0",
