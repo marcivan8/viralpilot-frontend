@@ -5,23 +5,46 @@ export default function App() {
   const [uploadedVideo, setUploadedVideo] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [analysisResults, setAnalysisResults] = useState(null);
+  const [error, setError] = useState(null);
 
-  function analyzeVideo(file) {
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+
+  const BACKEND_URL = "https://clean-vp-backend-production.up.railway.app";
+
+  async function analyzeVideo(file) {
     if (!file) return;
+
     setUploading(true);
-    setTimeout(() => {
-      setUploading(false);
-      setAnalysisResults({
-        viralityRate: "87%",
-        platform: "TikTok",
-        suggestions: [
-          "Add a catchy intro in the first 3 seconds.",
-          "Increase brightness for better visibility.",
-          "Use trending music relevant to your content.",
-        ],
+    setError(null);
+    setAnalysisResults(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("video", file);
+      formData.append("title", title);
+      formData.append("description", description);
+
+      const response = await fetch(`${BACKEND_URL}/analyze`, {
+        method: "POST",
+        body: formData,
       });
+
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || "Server error during analysis");
+      }
+
+      const data = await response.json();
+
+      setAnalysisResults(data.analysis);
       setPage("results");
-    }, 2500);
+    } catch (err) {
+      console.error("Analysis error:", err);
+      setError(err.message || "Unexpected error during video analysis");
+    } finally {
+      setUploading(false);
+    }
   }
 
   function handleFileChange(e) {
@@ -35,6 +58,9 @@ export default function App() {
     setPage("upload");
     setUploadedVideo(null);
     setAnalysisResults(null);
+    setError(null);
+    setTitle("");
+    setDescription("");
   }
 
   return (
@@ -42,7 +68,7 @@ export default function App() {
       <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-6 sm:p-8 z-10">
         {/* Upload Page */}
         {page === "upload" && (
-          <div className="flex flex-col items-center space-y-6">
+          <div className="flex flex-col space-y-4">
             <h1 className="text-3xl font-extrabold text-blue-700 text-center">
               Upload Your Video
             </h1>
@@ -50,7 +76,25 @@ export default function App() {
               Get your virality score, best platform, and improvement tips—instantly!
             </p>
 
-            <label className="cursor-pointer border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition font-semibold px-6 py-3 rounded-full shadow-md focus:ring-4 focus:outline-none focus:ring-blue-300">
+            <input
+              type="text"
+              placeholder="Video Title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={uploading}
+            />
+
+            <textarea
+              placeholder="Video Description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full px-4 py-2 border rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+              rows={3}
+              disabled={uploading}
+            />
+
+            <label className="cursor-pointer border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition font-semibold px-6 py-3 rounded-full shadow-md focus:ring-4 focus:outline-none focus:ring-blue-300 text-center">
               {uploadedVideo ? "Change Video" : "Choose Video"}
               <input
                 type="file"
@@ -80,9 +124,13 @@ export default function App() {
             )}
 
             {uploading && (
-              <div className="text-blue-600 font-medium">
+              <div className="text-blue-600 font-medium text-center">
                 Analyzing your video...
               </div>
+            )}
+
+            {error && (
+              <div className="text-red-600 text-sm text-center">{error}</div>
             )}
           </div>
         )}
@@ -99,32 +147,30 @@ export default function App() {
               className="w-full rounded-md border"
               style={{ maxHeight: 200 }}
             />
-            <div className="w-full text-left space-y-2">
+            <div className="w-full text-left space-y-3 mt-4">
               <div>
-                <span className="font-semibold text-gray-700">Virality Rate: </span>
+                <span className="font-semibold text-gray-700">Virality Score: </span>
                 <span className="text-blue-600 font-bold">
-                  {analysisResults.viralityRate}
+                  {analysisResults.viralityScore}
                 </span>
               </div>
               <div>
                 <span className="font-semibold text-gray-700">Best Platform: </span>
                 <span className="text-blue-600 font-bold">
-                  {analysisResults.platform}
+                  {analysisResults.platformSuggestion}
                 </span>
               </div>
               <div>
-                <span className="font-semibold text-gray-700">
-                  Improvement Suggestions:
-                </span>
+                <span className="font-semibold text-gray-700">Improvement Suggestions:</span>
                 <ul className="list-disc list-inside text-sm text-gray-600 mt-1">
-                  {analysisResults.suggestions.map((s, i) => (
-                    <li key={i}>{s}</li>
+                  {analysisResults.insights.map((insight, index) => (
+                    <li key={index}>{insight}</li>
                   ))}
                 </ul>
               </div>
             </div>
             <button
-              className="bg-blue-500 hover:bg-blue-700 text-white px-6 py-3 rounded-full transition shadow-md font-medium"
+              className="bg-blue-500 hover:bg-blue-700 text-white px-6 py-3 rounded-full transition shadow-md font-medium mt-4"
               onClick={reset}
             >
               Analyze Another Video
