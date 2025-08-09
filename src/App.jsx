@@ -15,6 +15,7 @@ export default function App() {
   async function analyzeVideo(file) {
     if (!file) return;
 
+    console.log("🚀 Début analyse - fichier:", file.name);
     setUploading(true);
     setError(null);
     setAnalysisResults(null);
@@ -25,20 +26,42 @@ export default function App() {
       formData.append("title", title);
       formData.append("description", description);
 
+      console.log("📤 Envoi requête vers:", `${BACKEND_URL}/analyze`);
+      console.log("📝 Titre:", title);
+      console.log("📝 Description:", description);
+
       const response = await fetch(`${BACKEND_URL}/analyze`, {
         method: "POST",
         body: formData,
       });
 
+      console.log("📡 Response status:", response.status);
+      console.log("📡 Response ok:", response.ok);
+
       if (!response.ok) {
-        throw new Error(`Server error: ${response.statusText}`);
+        const errorText = await response.text();
+        console.error("❌ Server error:", errorText);
+        throw new Error(`Server error: ${response.status} - ${errorText}`);
       }
 
       const data = await response.json();
+      console.log("📥 Données reçues:");
+      console.log(JSON.stringify(data, null, 2));
+
+      // Vérification que les données sont valides
+      if (!data || typeof data !== 'object') {
+        throw new Error("Réponse invalide du serveur");
+      }
+
+      console.log("✅ Mise à jour état avec:", data);
       setAnalysisResults(data);
+      
+      // CHANGEMENT IMPORTANT: On change de page seulement après avoir mis à jour les résultats
+      console.log("🔄 Changement vers page results");
       setPage("results");
+      
     } catch (err) {
-      console.error("Analysis error:", err);
+      console.error("❌ Erreur analyse:", err);
       setError(err.message || "Unexpected error during video analysis");
     } finally {
       setUploading(false);
@@ -48,11 +71,13 @@ export default function App() {
   function handleFileChange(e) {
     const file = e.target.files[0];
     if (file) {
+      console.log("📁 Fichier sélectionné:", file.name, file.size, "bytes");
       setUploadedVideo(file);
     }
   }
 
   function reset() {
+    console.log("🔄 Reset application");
     setPage("upload");
     setUploadedVideo(null);
     setAnalysisResults(null);
@@ -62,7 +87,10 @@ export default function App() {
   }
 
   function AnalysisResults({ analysis }) {
+    console.log("🎨 Render AnalysisResults avec:", analysis);
+
     if (!analysis) {
+      console.log("⚠️ Aucune donnée d'analyse disponible");
       return <p>No analysis data available.</p>;
     }
 
@@ -72,40 +100,64 @@ export default function App() {
           Analysis Complete!
         </h2>
 
-        <p>
-          <strong>Best Platform:</strong>{" "}
-          {analysis.bestPlatform || "N/A"}
-        </p>
+        <div className="bg-gray-50 p-4 rounded-lg">
+          <p className="text-lg">
+            <strong>Best Platform:</strong>{" "}
+            <span className="text-blue-600 font-semibold">
+              {analysis.bestPlatform || "N/A"}
+            </span>
+          </p>
 
-        <p>
-          <strong>Virality Score:</strong>{" "}
-          {analysis.viralityScore ?? 0}
-        </p>
+          <p className="text-lg">
+            <strong>Virality Score:</strong>{" "}
+            <span className="text-green-600 font-bold text-xl">
+              {analysis.viralityScore ?? 0}/100
+            </span>
+          </p>
+        </div>
 
-        <h3 className="font-semibold">Platform Scores:</h3>
-        <ul className="list-disc list-inside">
+        <div className="bg-blue-50 p-4 rounded-lg">
+          <h3 className="font-semibold text-blue-800 mb-2">Platform Scores:</h3>
           {analysis.platformScores && Object.keys(analysis.platformScores).length > 0 ? (
-            Object.entries(analysis.platformScores).map(([platform, score]) => (
-              <li key={platform}>
-                {platform}: {score}
-              </li>
-            ))
+            <ul className="space-y-1">
+              {Object.entries(analysis.platformScores).map(([platform, score]) => (
+                <li key={platform} className="flex justify-between">
+                  <span>{platform}:</span>
+                  <span className="font-semibold">{score}/100</span>
+                </li>
+              ))}
+            </ul>
           ) : (
-            <li>No platform scores available</li>
+            <p className="text-gray-500">No platform scores available</p>
           )}
-        </ul>
+        </div>
 
-        <h3 className="font-semibold">Improvement Suggestions:</h3>
-        <ul className="list-disc list-inside">
+        <div className="bg-yellow-50 p-4 rounded-lg">
+          <h3 className="font-semibold text-yellow-800 mb-2">Improvement Suggestions:</h3>
           {(analysis.insights || []).length > 0 ? (
-            analysis.insights.map((tip, idx) => <li key={idx}>{tip}</li>)
+            <ul className="space-y-1">
+              {analysis.insights.map((tip, idx) => (
+                <li key={idx} className="flex items-start">
+                  <span className="text-yellow-600 mr-2">•</span>
+                  <span className="text-sm">{tip}</span>
+                </li>
+              ))}
+            </ul>
           ) : (
-            <li>No suggestions available</li>
+            <p className="text-gray-500">No suggestions available</p>
           )}
-        </ul>
+        </div>
+
+        {/* DEBUG INFO - À retirer en production */}
+        <details className="bg-gray-100 p-2 rounded text-xs">
+          <summary className="cursor-pointer text-gray-600">Debug Info</summary>
+          <pre className="mt-2 overflow-auto">
+            {JSON.stringify(analysis, null, 2)}
+          </pre>
+        </details>
 
         <button
-          className="bg-blue-500 hover:bg-blue-700 text-white px-6 py-3 rounded-full transition shadow-md font-medium mt-4"
+          className="w-full bg-blue-500 hover:bg-blue-700 text-white px-6 py-3 rounded-full transition shadow-md font-medium mt-4"
           onClick={reset}
         >
           Analyze Another Video
@@ -176,13 +228,20 @@ export default function App() {
             )}
 
             {uploading && (
-              <div className="text-blue-600 font-medium text-center">
-                Analyzing your video...
+              <div className="text-blue-600 font-medium text-center animate-pulse">
+                <div className="flex items-center justify-center space-x-2">
+                  <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce"></div>
+                  <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                  <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                </div>
+                <p className="mt-2">Analyzing your video...</p>
               </div>
             )}
 
             {error && (
-              <div className="text-red-600 text-sm text-center">{error}</div>
+              <div className="bg-red-50 border border-red-200 text-red-600 text-sm p-3 rounded-md text-center">
+                {error}
+              </div>
             )}
           </div>
         )}
