@@ -171,8 +171,8 @@ export default function App() {
             <div className="space-y-3">
               {analysis.insights.map((tip, idx) => (
                 <div key={idx} className="flex items-start bg-white p-3 rounded border-l-4 border-yellow-400">
-                  <span className="text-yellow-600 mr-3 mt-1">•</span>
-                  <span className="text-sm text-gray-700 leading-relaxed">{tip}</span>
+                  <span className="text-yellow-600 mr-2 font-bold">•</span>
+                  <span className="text-sm text-gray-700">{tip}</span>
                 </div>
               ))}
             </div>
@@ -183,19 +183,29 @@ export default function App() {
 
         {/* Métadonnées d'analyse */}
         {analysis.metadata && (
-          <div className="bg-gray-50 p-3 rounded-lg text-xs text-gray-600">
-            <p>📊 Mots analysés: {analysis.metadata.wordCount}</p>
-            <p>⏱️ Durée estimée: {analysis.metadata.estimatedDuration}s</p>
+          <div className="bg-gray-50 p-3 rounded-lg text-sm text-gray-600">
+            <p>📊 Mots analysés: {analysis.metadata.wordCount || 0}</p>
+            <p>⏱️ Durée estimée: {analysis.metadata.estimatedDuration || 0}s</p>
           </div>
         )}
 
         {/* DEBUG INFO - À retirer en production */}
         <details className="bg-gray-100 p-2 rounded text-xs">
           <summary className="cursor-pointer text-gray-600">Debug Info</summary>
-          <pre className="mt-2 overflow-auto text-xs">
+          <pre className="mt-2 overflow-auto">
             {JSON.stringify(analysis, null, 2)}
           </pre>
-        </details> 
+        </details>
+
+        <button
+          className="w-full bg-blue-500 hover:bg-blue-700 text-white px-6 py-3 rounded-full transition shadow-md font-medium mt-4"
+          onClick={reset}
+        >
+          Analyze Another Video
+        </button>
+      </div>
+    );
+  } 
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-sky-100 via-sky-200 to-sky-300 flex items-center justify-center px-4 py-10 font-sans">
