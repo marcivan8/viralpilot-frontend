@@ -7,9 +7,6 @@ export default function App() {
   const [analysisResults, setAnalysisResults] = useState(null);
   const [error, setError] = useState(null);
 
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-
   const BACKEND_URL = "https://clean-vp-backend-production.up.railway.app";
 
   async function analyzeVideo(file) {
@@ -17,15 +14,12 @@ export default function App() {
 
     setUploading(true);
     setError(null);
-    setAnalysisResults(null);
 
     try {
       const formData = new FormData();
       formData.append("video", file);
-      formData.append("title", title);
-      formData.append("description", description);
 
-      const response = await fetch(`${BACKEND_URL}/analyze`, {
+      const response = await fetch(`${BACKEND_URL}/api/analyze`, {
         method: "POST",
         body: formData,
       });
@@ -37,8 +31,10 @@ export default function App() {
 
       const data = await response.json();
 
-      setAnalysisResults(data.analysis);
+      // ✅ Save the analysis results and show results page
+      setAnalysisResults(data);
       setPage("results");
+
     } catch (err) {
       console.error("Analysis error:", err);
       setError(err.message || "Unexpected error during video analysis");
@@ -59,16 +55,15 @@ export default function App() {
     setUploadedVideo(null);
     setAnalysisResults(null);
     setError(null);
-    setTitle("");
-    setDescription("");
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-sky-100 via-sky-200 to-sky-300 flex items-center justify-center px-4 py-10 font-sans">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-6 sm:p-8 z-10">
+
         {/* Upload Page */}
         {page === "upload" && (
-          <div className="flex flex-col space-y-4">
+          <div className="flex flex-col items-center space-y-6">
             <h1 className="text-3xl font-extrabold text-blue-700 text-center">
               Upload Your Video
             </h1>
@@ -76,25 +71,9 @@ export default function App() {
               Get your virality score, best platform, and improvement tips—instantly!
             </p>
 
-            <input
-              type="text"
-              placeholder="Video Title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              disabled={uploading}
-            />
+            {error && <div className="text-red-500">{error}</div>}
 
-            <textarea
-              placeholder="Video Description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="w-full px-4 py-2 border rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-              rows={3}
-              disabled={uploading}
-            />
-
-            <label className="cursor-pointer border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition font-semibold px-6 py-3 rounded-full shadow-md focus:ring-4 focus:outline-none focus:ring-blue-300 text-center">
+            <label className="cursor-pointer border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition font-semibold px-6 py-3 rounded-full shadow-md focus:ring-4 focus:outline-none focus:ring-blue-300">
               {uploadedVideo ? "Change Video" : "Choose Video"}
               <input
                 type="file"
@@ -124,13 +103,9 @@ export default function App() {
             )}
 
             {uploading && (
-              <div className="text-blue-600 font-medium text-center">
+              <div className="text-blue-600 font-medium">
                 Analyzing your video...
               </div>
-            )}
-
-            {error && (
-              <div className="text-red-600 text-sm text-center">{error}</div>
             )}
           </div>
         )}
@@ -147,30 +122,32 @@ export default function App() {
               className="w-full rounded-md border"
               style={{ maxHeight: 200 }}
             />
-            <div className="w-full text-left space-y-3 mt-4">
+            <div className="w-full text-left space-y-2">
               <div>
-                <span className="font-semibold text-gray-700">Virality Score: </span>
+                <span className="font-semibold text-gray-700">Virality Rate: </span>
                 <span className="text-blue-600 font-bold">
-                  {analysisResults.viralityScore}
+                  {analysisResults.viralityRate}
                 </span>
               </div>
               <div>
                 <span className="font-semibold text-gray-700">Best Platform: </span>
                 <span className="text-blue-600 font-bold">
-                  {analysisResults.platformSuggestion}
+                  {analysisResults.platform}
                 </span>
               </div>
               <div>
-                <span className="font-semibold text-gray-700">Improvement Suggestions:</span>
+                <span className="font-semibold text-gray-700">
+                  Improvement Suggestions:
+                </span>
                 <ul className="list-disc list-inside text-sm text-gray-600 mt-1">
-                  {analysisResults.insights.map((insight, index) => (
-                    <li key={index}>{insight}</li>
+                  {analysisResults.suggestions.map((s, i) => (
+                    <li key={i}>{s}</li>
                   ))}
                 </ul>
               </div>
             </div>
             <button
-              className="bg-blue-500 hover:bg-blue-700 text-white px-6 py-3 rounded-full transition shadow-md font-medium mt-4"
+              className="bg-blue-500 hover:bg-blue-700 text-white px-6 py-3 rounded-full transition shadow-md font-medium"
               onClick={reset}
             >
               Analyze Another Video

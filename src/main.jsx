@@ -3,16 +3,19 @@ import ReactDOM from "react-dom/client";
 import App from "./App.jsx";
 import "./index.css";
 
-ReactDOM.createRoot(document.getElementById("root")).render(
+const rootElement = document.getElementById("root");
+
+ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
     <div className="relative h-screen w-screen overflow-hidden">
-      <div className="absolute inset-0 animate-gradient bg-[length:200%_200%] bg-gradient-to-br from-sky-200 via-blue-300 to-sky-500 z-0"></div>
+      {/* Animated gradient background */}
+      <div className="absolute inset-0 animate-gradient bg-[length:200%_200%] bg-gradient-to-br from-sky-200 via-blue-300 to-sky-500 z-0" />
 
-      {/* Cloud layers */}
+      {/* Cloud layers (must have CSS classes defined for cloud animations) */}
       <div className="absolute inset-0 z-0 pointer-events-none">
-        <div className="cloud cloud-1"></div>
-        <div className="cloud cloud-2"></div>
-        <div className="cloud cloud-3"></div>
+        <div className="cloud cloud-1" />
+        <div className="cloud cloud-2" />
+        <div className="cloud cloud-3" />
       </div>
 
       {/* App content */}
