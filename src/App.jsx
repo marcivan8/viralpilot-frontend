@@ -94,77 +94,108 @@ export default function App() {
       return <p>No analysis data available.</p>;
     }
 
+    // Fonction pour afficher la barre de score
+    const ScoreBar = ({ score, platform, isSelected = false }) => (
+      <div className={`flex items-center justify-between p-3 rounded-lg ${isSelected ? 'bg-green-100 border-2 border-green-500' : 'bg-gray-50'}`}>
+        <div className="flex items-center space-x-3">
+          <span className={`font-semibold ${isSelected ? 'text-green-700' : 'text-gray-700'}`}>
+            {platform}
+            {isSelected && <span className="ml-2 text-xs bg-green-500 text-white px-2 py-1 rounded-full">RECOMMANDÉ</span>}
+          </span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div 
+              className={`h-full transition-all duration-500 ${
+                score >= 80 ? 'bg-green-500' : 
+                score >= 60 ? 'bg-yellow-500' : 
+                score >= 40 ? 'bg-orange-500' : 'bg-red-500'
+              }`}
+              style={{ width: `${score}%` }}
+            />
+          </div>
+          <span className={`font-bold text-lg ${
+            score >= 80 ? 'text-green-600' : 
+            score >= 60 ? 'text-yellow-600' : 
+            score >= 40 ? 'text-orange-600' : 'text-red-600'
+          }`}>
+            {score}
+          </span>
+        </div>
+      </div>
+    );
+
     return (
-      <div className="space-y-4 w-full">
-        <h2 className="text-2xl font-bold text-green-600 text-center">
-          Analysis Complete!
-        </h2>
-
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <p className="text-lg">
-            <strong>Best Platform:</strong>{" "}
-            <span className="text-blue-600 font-semibold">
-              {analysis.bestPlatform || "N/A"}
-            </span>
-          </p>
-
-          <p className="text-lg">
-            <strong>Virality Score:</strong>{" "}
-            <span className="text-green-600 font-bold text-xl">
-              {analysis.viralityScore ?? 0}/100
-            </span>
-          </p>
+      <div className="space-y-6 w-full">
+        <div className="text-center">
+          <h2 className="text-3xl font-bold text-green-600 mb-2">
+            Analyse Terminée !
+          </h2>
+          <div className="text-6xl font-bold text-green-500 mb-2">
+            {analysis.viralityScore ?? 0}
+            <span className="text-2xl text-gray-500">/100</span>
+          </div>
+          <p className="text-gray-600">Score de viralité global</p>
         </div>
 
-        <div className="bg-blue-50 p-4 rounded-lg">
-          <h3 className="font-semibold text-blue-800 mb-2">Platform Scores:</h3>
+        <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-xl border">
+          <h3 className="font-bold text-lg text-center mb-3 text-gray-800">
+            🏆 Meilleure Plateforme: <span className="text-blue-600">{analysis.bestPlatform || "N/A"}</span>
+          </h3>
+        </div>
+
+        <div className="space-y-3">
+          <h3 className="font-semibold text-gray-800 text-lg">📊 Scores par Plateforme:</h3>
           {analysis.platformScores && Object.keys(analysis.platformScores).length > 0 ? (
-            <ul className="space-y-1">
-              {Object.entries(analysis.platformScores).map(([platform, score]) => (
-                <li key={platform} className="flex justify-between">
-                  <span>{platform}:</span>
-                  <span className="font-semibold">{score}/100</span>
-                </li>
-              ))}
-            </ul>
+            Object.entries(analysis.platformScores)
+              .sort(([,a], [,b]) => b - a)
+              .map(([platform, score]) => (
+                <ScoreBar 
+                  key={platform} 
+                  platform={platform} 
+                  score={score} 
+                  isSelected={platform === analysis.bestPlatform}
+                />
+              ))
           ) : (
-            <p className="text-gray-500">No platform scores available</p>
+            <p className="text-gray-500">Aucun score disponible</p>
           )}
         </div>
 
-        <div className="bg-yellow-50 p-4 rounded-lg">
-          <h3 className="font-semibold text-yellow-800 mb-2">Improvement Suggestions:</h3>
+        <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
+          <h3 className="font-semibold text-yellow-800 mb-3 flex items-center">
+            <span className="mr-2">💡</span>
+            Suggestions d'Amélioration:
+          </h3>
           {(analysis.insights || []).length > 0 ? (
-            <ul className="space-y-1">
+            <div className="space-y-3">
               {analysis.insights.map((tip, idx) => (
-                <li key={idx} className="flex items-start">
-                  <span className="text-yellow-600 mr-2">•</span>
-                  <span className="text-sm">{tip}</span>
-                </li>
+                <div key={idx} className="flex items-start bg-white p-3 rounded border-l-4 border-yellow-400">
+                  <span className="text-yellow-600 mr-3 mt-1">•</span>
+                  <span className="text-sm text-gray-700 leading-relaxed">{tip}</span>
+                </div>
               ))}
-            </ul>
+            </div>
           ) : (
-            <p className="text-gray-500">No suggestions available</p>
+            <p className="text-gray-500">Aucune suggestion disponible</p>
           )}
         </div>
+
+        {/* Métadonnées d'analyse */}
+        {analysis.metadata && (
+          <div className="bg-gray-50 p-3 rounded-lg text-xs text-gray-600">
+            <p>📊 Mots analysés: {analysis.metadata.wordCount}</p>
+            <p>⏱️ Durée estimée: {analysis.metadata.estimatedDuration}s</p>
+          </div>
+        )}
 
         {/* DEBUG INFO - À retirer en production */}
         <details className="bg-gray-100 p-2 rounded text-xs">
           <summary className="cursor-pointer text-gray-600">Debug Info</summary>
-          <pre className="mt-2 overflow-auto">
+          <pre className="mt-2 overflow-auto text-xs">
             {JSON.stringify(analysis, null, 2)}
           </pre>
-        </details>
-
-        <button
-          className="w-full bg-blue-500 hover:bg-blue-700 text-white px-6 py-3 rounded-full transition shadow-md font-medium mt-4"
-          onClick={reset}
-        >
-          Analyze Another Video
-        </button>
-      </div>
-    );
-  }
+        </details> 
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-sky-100 via-sky-200 to-sky-300 flex items-center justify-center px-4 py-10 font-sans">
