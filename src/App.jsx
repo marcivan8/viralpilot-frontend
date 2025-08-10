@@ -1,79 +1,5 @@
 import React, { useState, useCallback } from "react";
 
-// Styles CSS pour les animations personnalisées
-const customStyles = `
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  @keyframes slideIn {
-    from {
-      opacity: 0;
-      transform: translateX(-20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateX(0);
-    }
-  }
-
-  @keyframes pulse {
-    0%, 100% {
-      opacity: 1;
-    }
-    50% {
-      opacity: 0.5;
-    }
-  }
-
-  .animate-fadeIn {
-    animation: fadeIn 0.6s ease-out;
-  }
-
-  .animate-slideIn {
-    animation: slideIn 0.4s ease-out;
-  }
-
-  .hover\\:scale-102:hover {
-    transform: scale(1.02);
-  }
-
-  .group:hover .group-hover\\:scale-102 {
-    transform: scale(1.02);
-  }
-
-  /* Animation du gradient de fond */
-  @keyframes gradient {
-    0% {
-      background-position: 0% 50%;
-    }
-    50% {
-      background-position: 100% 50%;
-    }
-    100% {
-      background-position: 0% 50%;
-    }
-  }
-
-  .animate-gradient {
-    animation: gradient 15s ease infinite;
-  }
-`;
-
-// Injection des styles dans le document
-if (typeof document !== 'undefined') {
-  const styleSheet = document.createElement('style');
-  styleSheet.textContent = customStyles;
-  document.head.appendChild(styleSheet);
-}
-
 export default function App() {
   const [page, setPage] = useState("upload");
   const [uploadedVideo, setUploadedVideo] = useState(null);
@@ -107,7 +33,7 @@ export default function App() {
 
       console.log("📤 Envoi requête vers:", `${BACKEND_URL}/analyze`);
 
-      // Simulation du progrès (à remplacer par un vrai suivi si disponible)
+      // Simulation du progrès
       const progressInterval = setInterval(() => {
         setUploadProgress(prev => Math.min(prev + 10, 90));
       }, 200);
@@ -195,9 +121,9 @@ export default function App() {
     }
 
     const ScoreBar = ({ score, platform, isSelected = false }) => (
-      <div className={`flex items-center justify-between p-4 rounded-xl transition-all duration-300 transform hover:scale-102 ${
+      <div className={`flex items-center justify-between p-4 rounded-xl transition-all duration-300 ${
         isSelected 
-          ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-400 shadow-lg' 
+          ? 'bg-green-100 border-2 border-green-400 shadow-lg' 
           : 'bg-gray-50 hover:bg-gray-100 border border-gray-200'
       }`}>
         <div className="flex items-center space-x-3">
@@ -205,18 +131,18 @@ export default function App() {
             {platform}
           </span>
           {isSelected && (
-            <span className="text-xs bg-gradient-to-r from-green-500 to-emerald-500 text-white px-3 py-1 rounded-full font-bold animate-pulse">
+            <span className="text-xs bg-green-500 text-white px-3 py-1 rounded-full font-bold">
               ⭐ RECOMMANDÉ
             </span>
           )}
         </div>
         <div className="flex items-center space-x-3">
-          <div className="w-32 h-3 bg-gray-200 rounded-full overflow-hidden shadow-inner">
+          <div className="w-32 h-3 bg-gray-200 rounded-full overflow-hidden">
             <div 
               className={`h-full transition-all duration-1000 ease-out ${
-                score >= 80 ? 'bg-gradient-to-r from-green-400 to-green-500' : 
-                score >= 60 ? 'bg-gradient-to-r from-yellow-400 to-orange-400' : 
-                score >= 40 ? 'bg-gradient-to-r from-orange-400 to-red-400' : 'bg-gradient-to-r from-red-400 to-red-500'
+                score >= 80 ? 'bg-green-500' : 
+                score >= 60 ? 'bg-yellow-500' : 
+                score >= 40 ? 'bg-orange-500' : 'bg-red-500'
               }`}
               style={{ width: `${score}%` }}
             />
@@ -253,15 +179,15 @@ export default function App() {
     const viralityScore = analysis.viralityScore ?? 0;
 
     return (
-      <div className="space-y-6 w-full animate-fadeIn">
-        {/* Score principal avec animation */}
+      <div className="space-y-6 w-full">
+        {/* Score principal */}
         <div className="text-center bg-gradient-to-br from-blue-50 to-purple-50 p-6 rounded-2xl border border-blue-200">
           <h2 className="text-2xl font-bold text-gray-800 mb-3">
             🎉 Analyse Terminée !
           </h2>
           <div className="flex items-center justify-center space-x-3 mb-3">
-            <span className="text-5xl animate-bounce">{getScoreEmoji(viralityScore)}</span>
-            <div className="text-6xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <span className="text-5xl">{getScoreEmoji(viralityScore)}</span>
+            <div className="text-6xl font-bold text-blue-600">
               {viralityScore}
               <span className="text-2xl text-gray-500">/100</span>
             </div>
@@ -277,7 +203,7 @@ export default function App() {
             <h3 className="font-bold text-xl text-center text-gray-800">
               🏆 Plateforme Recommandée
             </h3>
-            <p className="text-center text-2xl font-bold text-transparent bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text mt-2">
+            <p className="text-center text-2xl font-bold text-purple-600 mt-2">
               {analysis.bestPlatform || "Non déterminé"}
             </p>
           </div>
@@ -350,7 +276,7 @@ export default function App() {
         {/* Actions */}
         <div className="flex space-x-3 pt-4">
           <button
-            className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-6 py-4 rounded-xl transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-6 py-4 rounded-xl transition-all duration-300 font-semibold shadow-lg"
             onClick={reset}
           >
             🎬 Analyser une autre vidéo
@@ -361,13 +287,13 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-10 font-sans">
-      <div className="w-full max-w-lg bg-white rounded-3xl shadow-2xl p-8 backdrop-blur-sm bg-white/95 border border-white/20">
+    <div className="min-h-screen bg-gradient-to-b from-sky-100 via-sky-200 to-sky-300 flex items-center justify-center px-4 py-10 font-sans">
+      <div className="w-full max-w-lg bg-white rounded-3xl shadow-2xl p-8 z-10">
         {page === "upload" && (
           <div className="flex flex-col space-y-6">
             {/* En-tête */}
             <div className="text-center">
-              <h1 className="text-4xl font-extrabold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-3">
+              <h1 className="text-4xl font-extrabold text-blue-700 mb-3">
                 📱 Video Analyzer
               </h1>
               <p className="text-gray-600 text-lg">
@@ -410,8 +336,8 @@ export default function App() {
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   🎥 Fichier vidéo *
                 </label>
-                <label className="cursor-pointer group">
-                  <div className="w-full border-2 border-dashed border-blue-300 rounded-xl p-6 text-center hover:border-blue-500 hover:bg-blue-50 transition-all duration-300 group-hover:scale-102">
+                <label className="cursor-pointer">
+                  <div className="w-full border-2 border-dashed border-blue-300 rounded-xl p-6 text-center hover:border-blue-500 hover:bg-blue-50 transition-all duration-300">
                     <div className="text-4xl mb-2">📁</div>
                     <div className="font-semibold text-blue-600">
                       {uploadedVideo ? "Changer la vidéo" : "Sélectionner une vidéo"}
@@ -450,12 +376,12 @@ export default function App() {
                 <button
                   onClick={() => analyzeVideo(uploadedVideo)}
                   disabled={uploading || !isFormValid}
-                  className={`w-full px-6 py-4 rounded-xl font-bold text-lg transition-all duration-300 transform ${
+                  className={`w-full px-6 py-4 rounded-xl font-bold text-lg transition-all duration-300 ${
                     !isFormValid 
                       ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
                       : uploading
                       ? 'bg-blue-400 text-white cursor-wait'
-                      : 'bg-gradient-to-r from-pink-500 to-orange-400 text-white shadow-lg hover:shadow-xl hover:-translate-y-1 hover:from-pink-600 hover:to-orange-500'
+                      : 'bg-gradient-to-r from-pink-500 to-orange-400 text-white shadow-lg hover:shadow-xl hover:from-pink-600 hover:to-orange-500'
                   }`}
                 >
                   {uploading ? (
