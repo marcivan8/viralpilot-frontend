@@ -596,7 +596,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-blue-100 via-purple-50 to-pink-100 flex items-center justify-center p-4">
+    <div className="min-h-screen w-full bg-gradient-to-br from-blue-100 via-purple-50 to-pink-100 flex items-start justify-center py-8 px-4">
       <div className="w-full max-w-md bg-white backdrop-blur-sm rounded-3xl shadow-2xl p-6 border border-white mx-auto">
         {/* Sélecteur de langue */}
         <div className="flex justify-end mb-4">

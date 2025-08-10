@@ -11,13 +11,16 @@ body {
   background-color: transparent;
   margin: 0;
   padding: 0;
+  /* Permettre le scroll vertical, limiter horizontal */
   overflow-x: hidden;
+  overflow-y: auto;
 }
 
 html,
 body,
 #root {
-  height: 100%;
+  /* Changer de height: 100% à min-height pour permettre le scroll */
+  min-height: 100vh;
 }
 
 /* Background gradient animation */
@@ -39,7 +42,7 @@ body,
   animation: gradient 20s ease infinite;
 }
 
-/* Cloud animation */
+/* Cloud animation - ajustée pour ne pas bloquer le scroll */
 @keyframes moveClouds {
   0% {
     transform: translateX(-100%);
@@ -50,11 +53,11 @@ body,
 }
 
 .cloud {
-  position: absolute;
+  position: fixed; /* Changé de absolute à fixed */
   top: 0;
   left: 0;
   width: 200%;
-  height: 200%;
+  height: 100vh; /* Changé de 200% à 100vh */
   background: url('/clouds.svg') repeat-x;
   background-size: contain;
   animation: moveClouds 120s linear infinite;
@@ -106,4 +109,71 @@ button:focus,
 .app-content {
   position: relative;
   z-index: 10;
+}
+
+/* Classes pour gérer le scroll dans votre structure App.jsx */
+.min-h-screen {
+  /* S'assurer que le container principal peut s'étendre */
+  min-height: 100vh !important;
+}
+
+/* Ajustements pour les conteneurs qui pourraient couper le contenu */
+.max-w-md {
+  /* Ajouter une marge pour éviter que le contenu soit coupé */
+  margin: 2rem auto !important;
+}
+
+/* Responsive - ajustements pour mobile */
+@media (max-width: 768px) {
+  .max-w-md {
+    margin: 1rem auto !important;
+    max-width: calc(100% - 2rem) !important;
+  }
+  
+  /* S'assurer que sur mobile le contenu est visible */
+  body {
+    padding: 0.5rem 0;
+  }
+}
+
+/* Pour les divs avec espace-y qui pourraient être coupées */
+.space-y-4 > *:last-child,
+.space-y-5 > *:last-child {
+  margin-bottom: 2rem !important;
+}
+
+/* Ajustements spécifiques pour la structure de votre app */
+.bg-gradient-to-br.from-blue-100 {
+  min-height: 100vh;
+  padding: 2rem 1rem;
+}
+
+/* Assurer que les contenus avec max-height puissent scroller */
+.max-h-48.overflow-y-auto,
+.max-h-32.overflow-y-auto {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e0 #f7fafc;
+}
+
+/* Style des scrollbars sur webkit */
+.max-h-48.overflow-y-auto::-webkit-scrollbar,
+.max-h-32.overflow-y-auto::-webkit-scrollbar {
+  width: 4px;
+}
+
+.max-h-48.overflow-y-auto::-webkit-scrollbar-track,
+.max-h-32.overflow-y-auto::-webkit-scrollbar-track {
+  background: #f7fafc;
+  border-radius: 4px;
+}
+
+.max-h-48.overflow-y-auto::-webkit-scrollbar-thumb,
+.max-h-32.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: #cbd5e0;
+  border-radius: 4px;
+}
+
+.max-h-48.overflow-y-auto::-webkit-scrollbar-thumb:hover,
+.max-h-32.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: #a0aec0;
 }
