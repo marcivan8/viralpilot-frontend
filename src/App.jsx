@@ -121,28 +121,28 @@ export default function App() {
     }
 
     const ScoreBar = ({ score, platform, isSelected = false }) => (
-      <div className={`flex items-center justify-between p-4 rounded-xl transition-all duration-300 ${
+      <div className={`flex items-center justify-between p-4 rounded-xl transition-all duration-500 ${
         isSelected 
-          ? 'bg-green-100 border-2 border-green-400 shadow-lg' 
-          : 'bg-gray-50 hover:bg-gray-100 border border-gray-200'
+          ? 'bg-green-100 border-2 border-green-500 shadow-lg transform scale-105' 
+          : 'bg-white/90 backdrop-blur-sm hover:bg-white/95 border border-white/30 hover:shadow-md'
       }`}>
         <div className="flex items-center space-x-3">
           <span className={`font-semibold text-lg ${isSelected ? 'text-green-700' : 'text-gray-700'}`}>
             {platform}
           </span>
           {isSelected && (
-            <span className="text-xs bg-green-500 text-white px-3 py-1 rounded-full font-bold">
+            <span className="text-xs bg-green-500 text-white px-3 py-1 rounded-full font-bold animate-pulse">
               ⭐ RECOMMANDÉ
             </span>
           )}
         </div>
         <div className="flex items-center space-x-3">
-          <div className="w-32 h-3 bg-gray-200 rounded-full overflow-hidden">
+          <div className="w-32 h-3 bg-gray-200 rounded-full overflow-hidden shadow-inner">
             <div 
               className={`h-full transition-all duration-1000 ease-out ${
-                score >= 80 ? 'bg-green-500' : 
-                score >= 60 ? 'bg-yellow-500' : 
-                score >= 40 ? 'bg-orange-500' : 'bg-red-500'
+                score >= 80 ? 'bg-gradient-to-r from-green-400 to-green-600' : 
+                score >= 60 ? 'bg-gradient-to-r from-yellow-400 to-yellow-600' : 
+                score >= 40 ? 'bg-gradient-to-r from-orange-400 to-orange-600' : 'bg-gradient-to-r from-red-400 to-red-600'
               }`}
               style={{ width: `${score}%` }}
             />
@@ -181,13 +181,13 @@ export default function App() {
     return (
       <div className="space-y-6 w-full">
         {/* Score principal */}
-        <div className="text-center bg-gradient-to-br from-blue-50 to-purple-50 p-6 rounded-2xl border border-blue-200">
+        <div className="text-center bg-white/95 backdrop-blur-sm p-6 rounded-2xl border border-white/50 shadow-xl">
           <h2 className="text-2xl font-bold text-gray-800 mb-3">
             🎉 Analyse Terminée !
           </h2>
           <div className="flex items-center justify-center space-x-3 mb-3">
-            <span className="text-5xl">{getScoreEmoji(viralityScore)}</span>
-            <div className="text-6xl font-bold text-blue-600">
+            <span className="text-5xl animate-bounce">{getScoreEmoji(viralityScore)}</span>
+            <div className="text-6xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               {viralityScore}
               <span className="text-2xl text-gray-500">/100</span>
             </div>
@@ -198,12 +198,12 @@ export default function App() {
         </div>
 
         {/* Meilleure plateforme */}
-        <div className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 p-1 rounded-xl">
-          <div className="bg-white p-4 rounded-lg">
+        <div className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 p-1 rounded-xl shadow-xl">
+          <div className="bg-white/95 backdrop-blur-sm p-4 rounded-lg">
             <h3 className="font-bold text-xl text-center text-gray-800">
               🏆 Plateforme Recommandée
             </h3>
-            <p className="text-center text-2xl font-bold text-purple-600 mt-2">
+            <p className="text-center text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mt-2">
               {analysis.bestPlatform || "Non déterminé"}
             </p>
           </div>
@@ -227,7 +227,7 @@ export default function App() {
                   />
                 ))
             ) : (
-              <div className="bg-gray-100 p-4 rounded-lg text-center text-gray-600">
+              <div className="bg-white/90 backdrop-blur-sm p-4 rounded-lg text-center text-gray-600 border border-white/30">
                 Aucun score disponible
               </div>
             )}
@@ -235,7 +235,7 @@ export default function App() {
         </div>
 
         {/* Suggestions */}
-        <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-300 p-5 rounded-xl">
+        <div className="bg-gradient-to-r from-yellow-50/90 to-orange-50/90 backdrop-blur-sm border-2 border-yellow-300/50 p-5 rounded-xl shadow-lg">
           <h3 className="font-bold text-lg text-yellow-800 mb-4 flex items-center">
             <span className="mr-2 text-xl">💡</span>
             Conseils pour Améliorer la Viralité
@@ -243,14 +243,14 @@ export default function App() {
           {(analysis.insights || []).length > 0 ? (
             <div className="space-y-3">
               {analysis.insights.map((tip, idx) => (
-                <div key={idx} className="flex items-start bg-white p-4 rounded-lg border-l-4 border-yellow-400 shadow-sm">
+                <div key={idx} className="flex items-start bg-white/80 backdrop-blur-sm p-4 rounded-lg border-l-4 border-yellow-400 shadow-sm">
                   <span className="text-yellow-600 mr-3 font-bold text-lg">•</span>
                   <span className="text-gray-700 leading-relaxed">{tip}</span>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="bg-white p-4 rounded-lg text-center text-gray-500">
+            <div className="bg-white/80 backdrop-blur-sm p-4 rounded-lg text-center text-gray-500">
               Aucune suggestion spécifique disponible
             </div>
           )}
@@ -258,7 +258,7 @@ export default function App() {
 
         {/* Métadonnées */}
         {analysis.metadata && (
-          <div className="bg-gray-100 p-4 rounded-xl">
+          <div className="bg-white/80 backdrop-blur-sm p-4 rounded-xl border border-white/30 shadow-md">
             <h4 className="font-semibold text-gray-700 mb-2">📈 Détails de l'analyse</h4>
             <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
               <div className="flex items-center">
@@ -276,7 +276,7 @@ export default function App() {
         {/* Actions */}
         <div className="flex space-x-3 pt-4">
           <button
-            className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-6 py-4 rounded-xl transition-all duration-300 font-semibold shadow-lg"
+            className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-6 py-4 rounded-xl transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
             onClick={reset}
           >
             🎬 Analyser une autre vidéo
@@ -286,150 +286,150 @@ export default function App() {
     );
   }
 
+  // Le composant principal retourne seulement le contenu, sans fond
+  // Le fond est géré par main.jsx
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sky-100 via-sky-200 to-sky-300 flex items-center justify-center px-4 py-10 font-sans">
-      <div className="w-full max-w-lg bg-white rounded-3xl shadow-2xl p-8 z-10">
-        {page === "upload" && (
-          <div className="flex flex-col space-y-6">
-            {/* En-tête */}
-            <div className="text-center">
-              <h1 className="text-4xl font-extrabold text-blue-700 mb-3">
-                📱 Video Analyzer
-              </h1>
-              <p className="text-gray-600 text-lg">
-                Découvrez le potentiel viral de votre contenu
-              </p>
-            </div>
-
-            {/* Formulaire */}
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  📝 Titre de la vidéo *
-                </label>
-                <input
-                  type="text"
-                  placeholder="Entrez un titre accrocheur..."
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-300"
-                  disabled={uploading}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  📄 Description *
-                </label>
-                <textarea
-                  placeholder="Décrivez votre vidéo en détail..."
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl resize-none focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-300"
-                  rows={4}
-                  disabled={uploading}
-                />
-              </div>
-
-              {/* Upload de fichier */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  🎥 Fichier vidéo *
-                </label>
-                <label className="cursor-pointer">
-                  <div className="w-full border-2 border-dashed border-blue-300 rounded-xl p-6 text-center hover:border-blue-500 hover:bg-blue-50 transition-all duration-300">
-                    <div className="text-4xl mb-2">📁</div>
-                    <div className="font-semibold text-blue-600">
-                      {uploadedVideo ? "Changer la vidéo" : "Sélectionner une vidéo"}
-                    </div>
-                    <div className="text-sm text-gray-500 mt-1">
-                      MP4, MOV, AVI, etc. (Max 100MB)
-                    </div>
-                  </div>
-                  <input
-                    type="file"
-                    accept="video/*"
-                    className="hidden"
-                    disabled={uploading}
-                    onChange={handleFileChange}
-                  />
-                </label>
-              </div>
-            </div>
-
-            {/* Aperçu vidéo */}
-            {uploadedVideo && (
-              <div className="space-y-4">
-                <div className="bg-gray-50 p-4 rounded-xl">
-                  <h4 className="font-semibold text-gray-700 mb-2">📹 Aperçu</h4>
-                  <video
-                    src={URL.createObjectURL(uploadedVideo)}
-                    controls
-                    className="w-full rounded-lg border shadow-sm"
-                    style={{ maxHeight: 240 }}
-                  />
-                  <div className="mt-2 text-sm text-gray-600">
-                    {uploadedVideo.name} • {(uploadedVideo.size / 1024 / 1024).toFixed(2)} MB
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => analyzeVideo(uploadedVideo)}
-                  disabled={uploading || !isFormValid}
-                  className={`w-full px-6 py-4 rounded-xl font-bold text-lg transition-all duration-300 ${
-                    !isFormValid 
-                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
-                      : uploading
-                      ? 'bg-blue-400 text-white cursor-wait'
-                      : 'bg-gradient-to-r from-pink-500 to-orange-400 text-white shadow-lg hover:shadow-xl hover:from-pink-600 hover:to-orange-500'
-                  }`}
-                >
-                  {uploading ? (
-                    <div className="flex items-center justify-center space-x-2">
-                      <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full"></div>
-                      <span>Analyse en cours...</span>
-                    </div>
-                  ) : !isFormValid ? (
-                    "Veuillez remplir tous les champs"
-                  ) : (
-                    "🚀 Lancer l'analyse"
-                  )}
-                </button>
-              </div>
-            )}
-
-            {/* Barre de progression */}
-            {uploading && (
-              <div className="space-y-3">
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div
-                    className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-500"
-                    style={{ width: `${uploadProgress}%` }}
-                  />
-                </div>
-                <div className="text-center text-sm text-gray-600">
-                  Analyse en cours... {uploadProgress}%
-                </div>
-              </div>
-            )}
-
-            {/* Erreur */}
-            {error && (
-              <div className="bg-red-50 border-2 border-red-200 text-red-700 p-4 rounded-xl text-center">
-                <div className="flex items-center justify-center mb-2">
-                  <span className="text-xl mr-2">⚠️</span>
-                  <strong>Erreur</strong>
-                </div>
-                <div>{error}</div>
-              </div>
-            )}
+    <div className="w-full max-w-lg bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl p-8 border border-white/20">
+      {page === "upload" && (
+        <div className="flex flex-col space-y-6">
+          {/* En-tête */}
+          <div className="text-center">
+            <h1 className="text-4xl font-extrabold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-3">
+              📱 Video Analyzer
+            </h1>
+            <p className="text-gray-700 text-lg font-medium">
+              Découvrez le potentiel viral de votre contenu
+            </p>
           </div>
-        )}
 
-        {page === "results" && (
-          <AnalysisResults analysis={analysisResults} />
-        )}
-      </div>
+          {/* Formulaire */}
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                📝 Titre de la vidéo *
+              </label>
+              <input
+                type="text"
+                placeholder="Entrez un titre accrocheur..."
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="w-full px-4 py-3 bg-white/90 backdrop-blur-sm border-2 border-gray-300 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-300"
+                disabled={uploading}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                📄 Description *
+              </label>
+              <textarea
+                placeholder="Décrivez votre vidéo en détail..."
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="w-full px-4 py-3 bg-white/90 backdrop-blur-sm border-2 border-gray-300 rounded-xl resize-none focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-300"
+                rows={4}
+                disabled={uploading}
+              />
+            </div>
+
+            {/* Upload de fichier */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                🎥 Fichier vidéo *
+              </label>
+              <label className="cursor-pointer">
+                <div className="w-full border-2 border-dashed border-blue-300 bg-white/50 backdrop-blur-sm rounded-xl p-6 text-center hover:border-blue-500 hover:bg-blue-50/50 transition-all duration-300 transform hover:scale-105">
+                  <div className="text-4xl mb-2">📁</div>
+                  <div className="font-semibold text-blue-600">
+                    {uploadedVideo ? "Changer la vidéo" : "Sélectionner une vidéo"}
+                  </div>
+                  <div className="text-sm text-gray-500 mt-1">
+                    MP4, MOV, AVI, etc. (Max 100MB)
+                  </div>
+                </div>
+                <input
+                  type="file"
+                  accept="video/*"
+                  className="hidden"
+                  disabled={uploading}
+                  onChange={handleFileChange}
+                />
+              </label>
+            </div>
+          </div>
+
+          {/* Aperçu vidéo */}
+          {uploadedVideo && (
+            <div className="space-y-4">
+              <div className="bg-white/80 backdrop-blur-sm p-4 rounded-xl border border-white/30 shadow-md">
+                <h4 className="font-semibold text-gray-700 mb-2">📹 Aperçu</h4>
+                <video
+                  src={URL.createObjectURL(uploadedVideo)}
+                  controls
+                  className="w-full rounded-lg border shadow-sm"
+                  style={{ maxHeight: 240 }}
+                />
+                <div className="mt-2 text-sm text-gray-600">
+                  {uploadedVideo.name} • {(uploadedVideo.size / 1024 / 1024).toFixed(2)} MB
+                </div>
+              </div>
+
+              <button
+                onClick={() => analyzeVideo(uploadedVideo)}
+                disabled={uploading || !isFormValid}
+                className={`w-full px-6 py-4 rounded-xl font-bold text-lg transition-all duration-300 transform ${
+                  !isFormValid 
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                    : uploading
+                    ? 'bg-blue-400 text-white cursor-wait'
+                    : 'bg-gradient-to-r from-pink-500 to-orange-400 text-white shadow-lg hover:shadow-xl hover:from-pink-600 hover:to-orange-500 hover:scale-105'
+                }`}
+              >
+                {uploading ? (
+                  <div className="flex items-center justify-center space-x-2">
+                    <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full"></div>
+                    <span>Analyse en cours...</span>
+                  </div>
+                ) : !isFormValid ? (
+                  "Veuillez remplir tous les champs"
+                ) : (
+                  "🚀 Lancer l'analyse"
+                )}
+              </button>
+            </div>
+          )}
+
+          {/* Barre de progression */}
+          {uploading && (
+            <div className="space-y-3">
+              <div className="w-full bg-gray-200/50 backdrop-blur-sm rounded-full h-3 shadow-inner">
+                <div
+                  className="bg-gradient-to-r from-blue-500 to-purple-500 h-3 rounded-full transition-all duration-500 shadow-sm"
+                  style={{ width: `${uploadProgress}%` }}
+                />
+              </div>
+              <div className="text-center text-sm text-gray-700 font-medium">
+                Analyse en cours... {uploadProgress}%
+              </div>
+            </div>
+          )}
+
+          {/* Erreur */}
+          {error && (
+            <div className="bg-red-50/90 backdrop-blur-sm border-2 border-red-200 text-red-700 p-4 rounded-xl text-center shadow-md">
+              <div className="flex items-center justify-center mb-2">
+                <span className="text-xl mr-2">⚠️</span>
+                <strong>Erreur</strong>
+              </div>
+              <div>{error}</div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {page === "results" && (
+        <AnalysisResults analysis={analysisResults} />
+      )}
     </div>
   );
 }
