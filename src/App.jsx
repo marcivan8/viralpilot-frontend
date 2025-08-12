@@ -1,757 +1,1102 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
+import { createClient } from '@supabase/supabase-js';
+import { Upload, Play, Star, TrendingUp, Target, Zap, CheckCircle, AlertCircle, Globe, Crown, Sparkles, Shield, Database, LogOut, User, ArrowLeft } from "lucide-react";
 
-// Dictionnaire de traductions complet avec toutes les plateformes et suggestions
+// Supabase Configuration
+const supabaseUrl = 'YOUR_SUPABASE_URL'; // Replace with your Supabase URL
+const supabaseAnonKey = 'YOUR_SUPABASE_ANON_KEY'; // Replace with your Supabase anon key
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+// Backend API Configuration (for analysis, assuming backend handles GCS storage)
+const API_CONFIG = {
+  baseURL: 'https://clean-vp-backend-production.up.railway.app',
+  endpoints: {
+    analyze: '/analyze',
+    subscription: '/subscription',
+    history: '/analyze/history'
+  }
+};
+
+// Auth Service using Supabase
+const AuthService = {
+  currentUser: null,
+  
+  async signIn(email, password) {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      this.currentUser = data.user;
+      localStorage.setItem('viral_pilot_session', JSON.stringify(data.session));
+      localStorage.setItem('viral_pilot_user', JSON.stringify(data.user));
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  },
+  
+  async signUp(email, password, fullName) {
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { full_name: fullName }
+        }
+      });
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  },
+  
+  async signOut() {
+    await supabase.auth.signOut();
+    this.currentUser = null;
+    localStorage.removeItem('viral_pilot_session');
+    localStorage.removeItem('viral_pilot_user');
+  },
+  
+  getCurrentUser() {
+    if (this.currentUser) return this.currentUser;
+    
+    const storedUser = localStorage.getItem('viral_pilot_user');
+    if (storedUser) {
+      this.currentUser = JSON.parse(storedUser);
+      return this.currentUser;
+    }
+    
+    return null;
+  },
+  
+  isAuthenticated() {
+    return !!this.getCurrentUser();
+  },
+  
+  async getSession() {
+    const { data } = await supabase.auth.getSession();
+    return data.session;
+  }
+};
+
+// Analysis Service (assuming backend handles GCS upload and Supabase DB integration)
+const AnalysisService = {
+  async analyzeVideo(file, formData, aiConsent) {
+    const session = await AuthService.getSession();
+    if (!session) throw new Error('Not authenticated');
+    
+    const uploadData = new FormData();
+    uploadData.append("video", file);
+    uploadData.append("title", formData.title);
+    uploadData.append("description", formData.description);
+    uploadData.append("language", formData.language || "en");
+    uploadData.append("ai_training_consent", aiConsent.toString());
+
+    const response = await fetch(`${API_CONFIG.baseURL}${API_CONFIG.endpoints.analyze}`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${session.access_token}`
+      },
+      body: uploadData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Analysis failed');
+    }
+
+    return response.json();
+  },
+  
+  async getHistory() {
+    const session = await AuthService.getSession();
+    if (!session) throw new Error('Not authenticated');
+    
+    const response = await fetch(`${API_CONFIG.baseURL}${API_CONFIG.endpoints.history}`, {
+      headers: { "Authorization": `Bearer ${session.access_token}` }
+    });
+    
+    if (!response.ok) throw new Error('Failed to fetch history');
+    return response.json();
+  }
+};
+
+// Translations (unchanged)
 const translations = {
   en: {
-    title: "📱 Video Analyzer",
-    subtitle: "Discover the viral potential of your content",
-    videoTitle: "📝 Video Title *",
+    title: "Viral Pilot",
+    subtitle: "AI-Powered Video Analysis for Maximum Virality",
+    tagline: "Turn any video into viral content with AI insights",
+    login: "Sign In",
+    signup: "Sign Up",
+    logout: "Sign Out",
+    email: "Email",
+    password: "Password",
+    forgotPassword: "Forgot Password?",
+    
+    freePlan: "Free",
+    proPlan: "Pro Creator",
+    premiumPlan: "Premium Studio",
+    enterprisePlan: "Enterprise",
+    
+    freeFeatures: "3 analyses/month • 2 platforms • Basic insights",
+    proFeatures: "30 short + 1 long/month • All platforms • Advanced analytics",
+    premiumFeatures: "Unlimited short + 5 long • Priority processing • Team collaboration",
+    enterpriseFeatures: "Unlimited everything • API access • Custom integrations",
+    
+    videoTitle: "Video Title",
     videoTitlePlaceholder: "Enter a catchy title...",
-    description: "📄 Description *",
-    descriptionPlaceholder: "Describe your video in detail...",
-    videoFile: "🎥 Video File *",
-    selectVideo: "Select a video",
-    changeVideo: "Change video",
-    fileInfo: "MP4, MOV, AVI, etc. (Max 100MB)",
-    preview: "📹 Preview",
-    fillAllFields: "Please fill in all fields",
-    launchAnalysis: "🚀 Launch Analysis",
-    analyzing: "Analyzing...",
-    analysisInProgress: "Analysis in progress...",
-    error: "Error",
-    fileTooLarge: "File must be less than 100MB",
-    invalidFileType: "Please select a valid video file",
-    analysisComplete: "🎉 Analysis Complete!",
-    recommendedPlatform: "🏆 Recommended Platform",
-    platformScores: "📊 Platform Scores",
-    recommended: "⭐ RECOMMENDED",
-    improvementTips: "💡 Tips to Improve Virality",
-    analysisDetails: "📈 Analysis Details",
-    words: "Words",
-    duration: "Duration",
-    analyzeAnother: "🎬 Analyze Another Video",
-    noDataAvailable: "No analysis data available",
-    noScoresAvailable: "No scores available",
-    noSpecificSuggestions: "No specific suggestions available",
-    serverError: "Server error",
-    unexpectedError: "Unexpected error during analysis",
-    back: "Back",
-    exceptionalViral: "Exceptional viral potential!",
-    excellentViral: "Excellent viral potential!",
-    goodViral: "Good viral potential",
-    correctViral: "Correct viral potential",
-    moderateViral: "Moderate viral potential",
-    improvementsNeeded: "Improvements needed",
-    // Traductions des plateformes (correspondant au backend)
+    description: "Description", 
+    descriptionPlaceholder: "Describe your video content...",
+    videoFile: "Video File",
+    selectVideo: "Select Video",
+    changeVideo: "Change Video",
+    analyzing: "Analyzing with AI...",
+    
+    aiConsentTitle: "🤖 Help improve our AI (Optional)",
+    aiConsentText: "I agree to allow Viral Pilot to store and use my uploaded video(s) for improving its AI algorithms. I confirm that I have the necessary rights to this content.",
+    aiConsentWith: "With consent: Videos stored securely for AI training",
+    aiConsentWithout: "Without consent: Videos automatically deleted after 30 days",
+    
+    viralScore: "Viral Potential Score",
+    bestPlatform: "Recommended Platform",
+    platformScores: "Platform Scores", 
+    insights: "AI Insights & Tips",
+    analyzeAnother: "Analyze Another Video",
+    
+    upgradeNow: "Upgrade Now",
+    startFree: "Start Free Trial",
+    launchAnalysis: "Analyze with AI",
+    
+    TikTok: "TikTok",
+    YouTube: "YouTube",
+    YouTubeShorts: "YouTube Shorts",
+    Instagram: "Instagram",
+    X: "X (Twitter)",
+    LinkedIn: "LinkedIn",
+    
+    exceptional: "🔥 Exceptional viral potential!",
+    excellent: "🚀 Excellent viral potential!",
+    good: "⭐ Good viral potential",
+    moderate: "👍 Moderate viral potential",
+    needsWork: "💪 Needs improvements",
+    
+    usageThisMonth: "Usage this month",
+    analysesLeft: "analyses left",
+    unlimited: "unlimited",
+    upgradeToUnlock: "Upgrade to unlock more",
+    
+    privacyPolicy: "Privacy Policy",
+    termsOfService: "Terms of Service",
+    gdprCompliant: "GDPR Compliant"
+  },
+  fr: {
+    title: "Viral Pilot",
+    subtitle: "Analyse Vidéo IA pour une Viralité Maximale",
+    tagline: "Transformez vos vidéos en contenu viral grâce à l'IA",
+    login: "Se connecter",
+    signup: "S'inscrire",
+    logout: "Se déconnecter",
+    email: "Email",
+    password: "Mot de passe",
+    forgotPassword: "Mot de passe oublié ?",
+    
+    freePlan: "Gratuit",
+    proPlan: "Pro Créateur", 
+    premiumPlan: "Premium Studio",
+    enterprisePlan: "Enterprise",
+    
+    freeFeatures: "3 analyses/mois • 2 plateformes • Insights de base",
+    proFeatures: "30 courtes + 1 longue/mois • Toutes plateformes • Analytics avancées",
+    premiumFeatures: "Courtes illimitées + 5 longues • Traitement prioritaire • Collaboration équipe",
+    enterpriseFeatures: "Tout illimité • Accès API • Intégrations sur mesure",
+    
+    videoTitle: "Titre de la vidéo",
+    videoTitlePlaceholder: "Entrez un titre accrocheur...",
+    description: "Description",
+    descriptionPlaceholder: "Décrivez le contenu de votre vidéo...",
+    videoFile: "Fichier vidéo",
+    selectVideo: "Sélectionner une vidéo",
+    changeVideo: "Changer la vidéo",
+    analyzing: "Analyse IA en cours...",
+    
+    aiConsentTitle: "🤖 Aider à améliorer notre IA (Optionnel)",
+    aiConsentText: "J'accepte que Viral Pilot stocke et utilise mes vidéos pour améliorer ses algorithmes IA. Je confirme avoir les droits nécessaires sur ce contenu.",
+    aiConsentWith: "Avec consentement : Vidéos stockées de manière sécurisée pour l'entraînement IA",
+    aiConsentWithout: "Sans consentement : Vidéos automatiquement supprimées après 30 jours",
+    
+    viralScore: "Score de Potentiel Viral",
+    bestPlatform: "Plateforme Recommandée",
+    platformScores: "Scores par Plateforme",
+    insights: "Insights IA & Conseils",
+    analyzeAnother: "Analyser une autre vidéo",
+    
+    upgradeNow: "Passer Pro",
+    startFree: "Essai Gratuit",
+    launchAnalysis: "Analyser avec l'IA",
+    
     TikTok: "TikTok",
     YouTube: "YouTube", 
     YouTubeShorts: "YouTube Shorts",
     Instagram: "Instagram",
     X: "X (Twitter)",
-    Facebook: "Facebook",
     LinkedIn: "LinkedIn",
-    Snapchat: "Snapchat",
-    "Instagram Reels": "Instagram Reels",
-    Unknown: "Unknown",
-    undetermined: "Undetermined",
-    // Mots-clés pour la détection et traduction des insights
-    insightKeywords: {
-      duration: "⏱️ Video duration",
-      hook: "🎯 Hook",
-      trending: "📈 Trending elements", 
-      engagement: "💬 Engagement",
-      aesthetic: "📸 Visual appeal",
-      professional: "💼 Professional tone",
-      structure: "🎬 Video structure",
-      cta: "🔚 Call to action",
-      seo: "🔍 SEO optimization",
-      multiplatform: "🎯 Multi-platform potential"
-    }
-  },
-  fr: {
-    title: "📱 Analyseur Vidéo",
-    subtitle: "Découvrez le potentiel viral de votre contenu",
-    videoTitle: "📝 Titre de la vidéo *",
-    videoTitlePlaceholder: "Entrez un titre accrocheur...",
-    description: "📄 Description *",
-    descriptionPlaceholder: "Décrivez votre vidéo en détail...",
-    videoFile: "🎥 Fichier vidéo *",
-    selectVideo: "Sélectionner une vidéo",
-    changeVideo: "Changer la vidéo",
-    fileInfo: "MP4, MOV, AVI, etc. (Max 100Mo)",
-    preview: "📹 Aperçu",
-    fillAllFields: "Veuillez remplir tous les champs",
-    launchAnalysis: "🚀 Lancer l'analyse",
-    analyzing: "Analyse en cours...",
-    analysisInProgress: "Analyse en cours...",
-    error: "Erreur",
-    fileTooLarge: "Le fichier doit faire moins de 100Mo",
-    invalidFileType: "Veuillez sélectionner un fichier vidéo valide",
-    analysisComplete: "🎉 Analyse Terminée !",
-    recommendedPlatform: "🏆 Plateforme Recommandée",
-    platformScores: "📊 Scores par Plateforme",
-    recommended: "⭐ RECOMMANDÉ",
-    improvementTips: "💡 Conseils pour Améliorer la Viralité",
-    analysisDetails: "📈 Détails de l'analyse",
-    words: "Mots",
-    duration: "Durée",
-    analyzeAnother: "🎬 Analyser une autre vidéo",
-    noDataAvailable: "Aucune donnée d'analyse disponible",
-    noScoresAvailable: "Aucun score disponible",
-    noSpecificSuggestions: "Aucune suggestion spécifique disponible",
-    serverError: "Erreur serveur",
-    unexpectedError: "Erreur inattendue lors de l'analyse",
-    back: "Retour",
-    exceptionalViral: "Potentiel viral exceptionnel !",
-    excellentViral: "Excellent potentiel viral !",
-    goodViral: "Bon potentiel viral",
-    correctViral: "Potentiel viral correct",
-    moderateViral: "Potentiel viral modéré",
-    improvementsNeeded: "Améliorations nécessaires",
-    // Traductions des plateformes
-    TikTok: "TikTok",
-    YouTube: "YouTube",
-    YouTubeShorts: "YouTube Shorts",
-    Instagram: "Instagram", 
-    X: "X (Twitter)",
-    Facebook: "Facebook",
-    LinkedIn: "LinkedIn",
-    Snapchat: "Snapchat",
-    "Instagram Reels": "Instagram Reels",
-    Unknown: "Inconnu",
-    undetermined: "Non déterminé",
-    // Mots-clés pour la traduction des insights
-    insightKeywords: {
-      duration: "⏱️ Durée de la vidéo",
-      hook: "🎯 Accroche", 
-      trending: "📈 Éléments tendance",
-      engagement: "💬 Engagement",
-      aesthetic: "📸 Attrait visuel",
-      professional: "💼 Ton professionnel",
-      structure: "🎬 Structure vidéo",
-      cta: "🔚 Appel à l'action",
-      seo: "🔍 Optimisation SEO",
-      multiplatform: "🎯 Potentiel multi-plateforme"
-    }
-  },
-  tr: {
-    title: "📱 Video Analizörü",
-    subtitle: "İçeriğinizin viral potansiyelini keşfedin",
-    videoTitle: "📝 Video Başlığı *",
-    videoTitlePlaceholder: "Dikkat çekici bir başlık girin...",
-    description: "📄 Açıklama *",
-    descriptionPlaceholder: "Videonuzu detaylı olarak açıklayın...",
-    videoFile: "🎥 Video Dosyası *",
-    selectVideo: "Bir video seçin",
-    changeVideo: "Video değiştir",
-    fileInfo: "MP4, MOV, AVI, vb. (Maks 100MB)",
-    preview: "📹 Önizleme",
-    fillAllFields: "Lütfen tüm alanları doldurun",
-    launchAnalysis: "🚀 Analizi Başlat",
-    analyzing: "Analiz ediliyor...",
-    analysisInProgress: "Analiz devam ediyor...",
-    error: "Hata",
-    fileTooLarge: "Dosya 100MB'dan küçük olmalı",
-    invalidFileType: "Lütfen geçerli bir video dosyası seçin",
-    analysisComplete: "🎉 Analiz Tamamlandı!",
-    recommendedPlatform: "🏆 Önerilen Platform",
-    platformScores: "📊 Platform Puanları",
-    recommended: "⭐ ÖNERİLEN",
-    improvementTips: "💡 Viral Potansiyeli Artırma İpuçları",
-    analysisDetails: "📈 Analiz Detayları",
-    words: "Kelimeler",
-    duration: "Süre",
-    analyzeAnother: "🎬 Başka Video Analiz Et",
-    noDataAvailable: "Analiz verisi mevcut değil",
-    noScoresAvailable: "Puan mevcut değil",
-    noSpecificSuggestions: "Özel öneri mevcut değil",
-    serverError: "Sunucu hatası",
-    unexpectedError: "Analiz sırasında beklenmeyen hata",
-    back: "Geri",
-    exceptionalViral: "Olağanüstü viral potansiyel!",
-    excellentViral: "Mükemmel viral potansiyel!",
-    goodViral: "İyi viral potansiyel",
-    correctViral: "Doğru viral potansiyel",
-    moderateViral: "Orta viral potansiyel",
-    improvementsNeeded: "İyileştirmeler gerekli",
-    // Traductions des plateformes
-    TikTok: "TikTok",
-    YouTube: "YouTube",
-    YouTubeShorts: "YouTube Shorts",
-    Instagram: "Instagram",
-    X: "X (Twitter)", 
-    Facebook: "Facebook",
-    LinkedIn: "LinkedIn",
-    Snapchat: "Snapchat",
-    "Instagram Reels": "Instagram Reels",
-    Unknown: "Bilinmeyen",
-    undetermined: "Belirsiz",
-    // Mots-clés pour la traduction des insights
-    insightKeywords: {
-      duration: "⏱️ Video süresi",
-      hook: "🎯 Çekicilik",
-      trending: "📈 Trend öğeler",
-      engagement: "💬 Etkileşim",
-      aesthetic: "📸 Görsel çekicilik",
-      professional: "💼 Profesyonel ton",
-      structure: "🎬 Video yapısı", 
-      cta: "🔚 Harekete geçirici çağrı",
-      seo: "🔍 SEO optimizasyonu",
-      multiplatform: "🎯 Multi-platform potansiyeli"
-    }
+    
+    exceptional: "🔥 Potentiel viral exceptionnel !",
+    excellent: "🚀 Excellent potentiel viral !",
+    good: "⭐ Bon potentiel viral",
+    moderate: "👍 Potentiel viral modéré",
+    needsWork: "💪 Améliorations nécessaires",
+    
+    usageThisMonth: "Utilisation ce mois-ci",
+    analysesLeft: "analyses restantes",
+    unlimited: "illimité",
+    upgradeToUnlock: "Passer Pro pour débloquer",
+    
+    privacyPolicy: "Politique de Confidentialité",
+    termsOfService: "Conditions d'Utilisation",
+    gdprCompliant: "Conforme RGPD"
   }
 };
 
-export default function App() {
-  const [page, setPage] = useState("upload");
-  const [uploadedVideo, setUploadedVideo] = useState(null);
-  const [uploading, setUploading] = useState(false);
-  const [analysisResults, setAnalysisResults] = useState(null);
-  const [error, setError] = useState(null);
-  const [uploadProgress, setUploadProgress] = useState(0);
+const PRICING_PLANS = {
+  free: { 
+    name: "Free", 
+    price: 0, 
+    monthly_analyses: 3, 
+    platforms: 2,
+    features: ["Basic AI scoring", "Platform recommendations", "Mobile app"],
+    cta: "Start Free"
+  },
+  pro: { 
+    name: "Pro Creator", 
+    price: 29, 
+    monthly_analyses: 30,
+    long_form: 1,
+    platforms: "all",
+    features: ["Advanced AI analytics", "Competitor benchmarking", "Export reports", "Optimal timing", "A/B testing suggestions", "Email support"],
+    cta: "Upgrade to Pro",
+    popular: true
+  },
+  premium: { 
+    name: "Premium Studio", 
+    price: 79,
+    monthly_analyses: "unlimited",
+    long_form: 5, 
+    platforms: "all",
+    features: ["All Pro features", "Priority processing (<30s)", "Team collaboration (3 users)", "Custom integrations", "Phone support", "Advanced trend insights"],
+    cta: "Go Premium"
+  }
+};
+
+// Composant de consentement IA (modernisé)
+const AITrainingConsent = ({ consent, setConsent, language }) => {
+  const t = (key) => translations[language][key] || translations.en[key] || key;
+  
+  return (
+    <div className="bg-gray-100 border border-gray-300 p-4 rounded-md mb-4">
+      <div className="flex items-start gap-3">
+        <input
+          id="ai-training-consent"
+          type="checkbox"
+          checked={consent}
+          onChange={(e) => setConsent(e.target.checked)}
+          className="mt-1 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+        />
+        <div>
+          <label htmlFor="ai-training-consent" className="font-medium text-gray-900 cursor-pointer">
+            {t('aiConsentTitle')}
+          </label>
+          <p className="text-sm text-gray-600 mt-1">
+            {t('aiConsentText')}
+          </p>
+          <div className="text-xs text-gray-500 mt-2">
+            <div className="flex items-center gap-1 mb-1">
+              <Shield className="w-3 h-3 text-gray-500" />
+              <span>{t('aiConsentWith')}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Database className="w-3 h-3 text-gray-500" />
+              <span>{t('aiConsentWithout')}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Composant d'usage et limites (modernisé)
+const UsageDisplay = ({ user, language }) => {
+  const t = (key) => translations[language][key] || translations.en[key] || key;
+  
+  if (!user) return null;
+  
+  const usage = user.monthly_usage || { analyses: 0, long_form: 0 };
+  const tier = user.user_metadata?.subscription_tier || 'free'; // Adapted for Supabase user metadata
+  const limits = {
+    free: { monthly_analyses: 3, long_form: 0 },
+    pro: { monthly_analyses: 30, long_form: 1 },
+    premium: { monthly_analyses: 999999, long_form: 5 }
+  };
+  
+  const userLimits = limits[tier] || limits.free;
+  const analysesLeft = Math.max(0, userLimits.monthly_analyses - usage.analyses);
+  
+  return (
+    <div className="bg-white border border-gray-200 rounded-md p-3 mb-4 shadow-sm">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Target className="w-4 h-4 text-indigo-500" />
+          <span className="text-sm font-medium text-gray-700">
+            {t('usageThisMonth')}
+          </span>
+        </div>
+        <div className="text-right">
+          <div className="text-sm font-semibold text-gray-900">
+            {usage.analyses}/{userLimits.monthly_analyses === 999999 ? t('unlimited') : userLimits.monthly_analyses}
+          </div>
+          <div className="text-xs text-gray-500">
+            {analysesLeft} {t('analysesLeft')}
+          </div>
+        </div>
+      </div>
+      
+      {tier === 'free' && analysesLeft <= 1 && (
+        <div className="mt-2 text-xs text-orange-600 bg-orange-50 p-2 rounded">
+          {t('upgradeToUnlock')}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Composant d'authentification (modernisé)
+const AuthModal = ({ show, isLogin, setIsLogin, authData, setAuthData, onSubmit, loading, error, onClose, language }) => {
+  const t = (key) => translations[language][key] || translations.en[key] || key;
+  
+  if (!show) return null;
+  
+  return (
+    <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg p-6 max-w-md w-full shadow-xl">
+        <div className="text-center mb-6">
+          <h2 className="text-xl font-semibold text-gray-900">
+            {isLogin ? t('login') : t('signup')}
+          </h2>
+        </div>
+        
+        <form onSubmit={onSubmit} className="space-y-4">
+          {!isLogin && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Full Name
+              </label>
+              <input
+                type="text"
+                value={authData.fullName}
+                onChange={(e) => setAuthData({...authData, fullName: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                required={!isLogin}
+              />
+            </div>
+          )}
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {t('email')}
+            </label>
+            <input
+              type="email"
+              value={authData.email}
+              onChange={(e) => setAuthData({...authData, email: e.target.value})}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+              required
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {t('password')}
+            </label>
+            <input
+              type="password"
+              value={authData.password}
+              onChange={(e) => setAuthData({...authData, password: e.target.value})}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+              required
+              minLength={6}
+            />
+          </div>
+          
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 p-2 rounded-md text-sm">
+              {error.message || error}
+            </div>
+          )}
+          
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md transition-all font-medium disabled:opacity-50"
+          >
+            {loading ? 'Loading...' : (isLogin ? t('login') : t('signup'))}
+          </button>
+          
+          <div className="text-center">
+            <button
+              type="button"
+              onClick={() => setIsLogin(!isLogin)}
+              className="text-indigo-600 hover:text-indigo-800 text-sm"
+            >
+              {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
+            </button>
+          </div>
+          
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-full mt-2 text-gray-500 hover:text-gray-700 text-sm"
+          >
+            Cancel
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default function ViralPilotApp() {
+  // États principaux
+  const [currentPage, setCurrentPage] = useState("landing");
   const [language, setLanguage] = useState("en");
+  const [user, setUser] = useState(null);
+  const [selectedPlan, setSelectedPlan] = useState("free");
+  
+  // États d'authentification
+  const [showAuth, setShowAuth] = useState(false);
+  const [isLogin, setIsLogin] = useState(true);
+  const [authData, setAuthData] = useState({ email: "", password: "", fullName: "" });
+  const [authLoading, setAuthLoading] = useState(false);
+  const [authError, setAuthError] = useState(null);
+  
+  // États d'analyse
+  const [uploadedVideo, setUploadedVideo] = useState(null);
+  const [analysisResults, setAnalysisResults] = useState(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [formData, setFormData] = useState({ title: "", description: "" });
+  const [aiConsent, setAiConsent] = useState(false);
+  const [error, setError] = useState(null);
+  const [analysisProgress, setAnalysisProgress] = useState(0);
 
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-
-  const BACKEND_URL = "https://clean-vp-backend-production.up.railway.app";
-
-  // Fonction pour obtenir les traductions
   const t = (key) => translations[language][key] || translations.en[key] || key;
 
-  // Validation des entrées
-  const isFormValid = title.trim() && description.trim() && uploadedVideo;
+  // Initialisation avec Supabase
+  useEffect(() => {
+    const currentUser = AuthService.getCurrentUser();
+    if (currentUser) {
+      setUser(currentUser);
+    }
 
-  // Fonction pour traduire les insights depuis le backend
-  const translateInsight = (insight) => {
-    if (!insight) return insight;
-    
-    // Dictionnaire de traduction des insights depuis le backend
-    const insightTranslations = {
-      en: {
-        "⏱️ Vidéo très courte": "⏱️ Very short video - perfect for TikTok/Instagram, but expand for YouTube",
-        "⏱️ Vidéo longue": "⏱️ Long video - excellent for YouTube, but create short clips for other platforms",
-        "🎯 TikTok: Commencez par un hook": "🎯 TikTok: Start with a strong hook in the first 3 seconds ('Did you know...', 'Attention!', etc.)",
-        "📈 TikTok: Intégrez des éléments trending": "📈 TikTok: Integrate trending elements (challenges, popular sounds, trending hashtags)",
-        "💬 TikTok: Ajoutez un 'comment bait'": "💬 TikTok: Add comment bait ('Tell me in comments if...', 'Tag someone who...')",
-        "📱 TikTok: Format vertical": "📱 TikTok: Vertical 9:16 format required + eye-catching text/visual effects",
-        "📸 Instagram: Soignez l'esthétique": "📸 Instagram: Polish visual aesthetics - harmonious colors, good lighting, composition",
-        "💫 Instagram: Ajoutez une touche personnelle": "💫 Instagram: Add a personal touch ('My experience with...', 'Today I...')",
-        "🏷️ Instagram: Utilisez 7-12 hashtags": "🏷️ Instagram: Use 7-12 relevant hashtags (mix popular + niche)",
-        "⏱️ Instagram: Coupez en carrousel": "⏱️ Instagram: Cut into carousel slides or stories to maximize engagement",
-        "🎬 YouTube: Ajoutez une intro claire": "🎬 YouTube: Add clear intro (15-30s) presenting video value",
-        "🔚 YouTube: Terminez par un CTA": "🔚 YouTube: End with strong CTA (like, subscribe, next video)",
-        "📚 YouTube: Ajoutez de la valeur éducative": "📚 YouTube: Add educational value - people come to learn",
-        "🔍 YouTube: Optimisez titre pour SEO": "🔍 YouTube: Optimize title for SEO (keywords people search for)",
-        "⏰ YouTube: Développez le contenu": "⏰ YouTube: Develop content (8-15min ideal) for better monetization",
-        "💼 LinkedIn: Ajoutez un angle business": "💼 LinkedIn: Add clear business/professional angle",
-        "👤 LinkedIn: Partagez votre expérience": "👤 LinkedIn: Share personal experience - human stories perform well",
-        "📊 LinkedIn: Incluez des données": "📊 LinkedIn: Include data, metrics or concrete results",
-        "🤝 LinkedIn: Terminez par une question": "🤝 LinkedIn: End with question to encourage discussions",
-        "⚡ X: Liez votre contenu": "⚡ X: Link content to current news or trends",
-        "💭 X: Prenez position": "💭 X: Take a stance or share strong viewpoint to create engagement",
-        "✂️ X: Coupez en thread": "✂️ X: Cut into thread or create 30s max highlights",
-        "🔥 X: Utilisez un langage direct": "🔥 X: Use direct, punchy language to cut through the feed",
-        "📝 Titre trop court": "📝 Title too short - expand with keywords for better discoverability",
-        "📋 Description insuffisante": "📋 Insufficient description - add context, hashtags and relevant keywords"
-      },
-      fr: {
-        // Français - pas de traduction nécessaire pour les insights FR du backend
-      },
-      tr: {
-        "⏱️ Vidéo très courte": "⏱️ Çok kısa video - TikTok/Instagram için mükemmel, YouTube için genişletin",
-        "⏱️ Vidéo longue": "⏱️ Uzun video - YouTube için mükemmel, diğer platformlar için kısa klipler oluşturun",
-        "🎯 TikTok: Commencez par un hook": "🎯 TikTok: İlk 3 saniyede güçlü bir hook ile başlayın ('Biliyor muydun...', 'Dikkat!', vb.)",
-        "📈 TikTok: Intégrez des éléments trending": "📈 TikTok: Trend öğeleri entegre edin (challenge'lar, popüler sesler, trend hashtagler)",
-        "💬 TikTok: Ajoutez un 'comment bait'": "💬 TikTok: Yorum tuzağı ekleyin ('Yorumlarda söyleyin eğer...', 'Birini etiketleyin...')",
-        "📱 TikTok: Format vertical": "📱 TikTok: Dikey 9:16 format gerekli + dikkat çekici metin/görsel efektler",
-        "📸 Instagram: Soignez l'esthétique": "📸 Instagram: Görsel estetiği geliştirin - uyumlu renkler, iyi aydınlatma, kompozisyon",
-        "💫 Instagram: Ajoutez une touche personnelle": "💫 Instagram: Kişisel dokunuş ekleyin ('Bu konudaki deneyimim...', 'Bugün...')",
-        "🏷️ Instagram: Utilisez 7-12 hashtags": "🏷️ Instagram: 7-12 alakalı hashtag kullanın (popüler + niş karışımı)",
-        "⏱️ Instagram: Coupez en carrousel": "⏱️ Instagram: Etkileşimi maksimize etmek için carousel slaytlara veya hikayelere bölün",
-        "🎬 YouTube: Ajoutez une intro claire": "🎬 YouTube: Net intro ekleyin (15-30s) video değerini sunan",
-        "🔚 YouTube: Terminez par un CTA": "🔚 YouTube: Güçlü CTA ile bitirin (beğeni, abone, sonraki video)",
-        "📚 YouTube: Ajoutez de la valeur éducative": "📚 YouTube: Eğitici değer ekleyin - insanlar öğrenmek için gelir",
-        "🔍 YouTube: Optimisez titre pour SEO": "🔍 YouTube: SEO için başlığı optimize edin (insanların aradığı anahtar kelimeler)",
-        "⏰ YouTube: Développez le contenu": "⏰ YouTube: İçeriği geliştirin (8-15dk ideal) daha iyi para kazanma için",
-        "💼 LinkedIn: Ajoutez un angle business": "💼 LinkedIn: Net iş/profesyonel açı ekleyin",
-        "👤 LinkedIn: Partagez votre expérience": "👤 LinkedIn: Kişisel deneyiminizi paylaşın - insan hikayeleri iyi performans gösterir",
-        "📊 LinkedIn: Incluez des données": "📊 LinkedIn: Veri, metrik veya somut sonuçlar dahil edin",
-        "🤝 LinkedIn: Terminez par une question": "🤝 LinkedIn: Tartışmaları teşvik etmek için soru ile bitirin",
-        "⚡ X: Liez votre contenu": "⚡ X: İçeriğinizi güncel haberler veya trendlerle bağlayın",
-        "💭 X: Prenez position": "💭 X: Etkileşim yaratmak için pozisyon alın veya güçlü görüş paylaşın",
-        "✂️ X: Coupez en thread": "✂️ X: Thread'e bölün veya maksimum 30s öne çıkanlar oluşturun",
-        "🔥 X: Utilisez un langage direct": "🔥 X: Feed'de öne çıkmak için doğrudan, etkili dil kullanın",
-        "📝 Titre trop court": "📝 Başlık çok kısa - daha iyi keşfedilebilirlik için anahtar kelimelerle genişletin",
-        "📋 Description insuffisante": "📋 Yetersiz açıklama - bağlam, hashtag ve alakalı anahtar kelimeler ekleyin"
+    // Écouter les changements d'auth Supabase
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session) {
+        setUser(session.user);
+        localStorage.setItem('viral_pilot_session', JSON.stringify(session));
+        localStorage.setItem('viral_pilot_user', JSON.stringify(session.user));
+      } else {
+        setUser(null);
+        localStorage.removeItem('viral_pilot_session');
+        localStorage.removeItem('viral_pilot_user');
       }
+    });
+
+    return () => {
+      authListener.subscription.unsubscribe();
     };
-
-    // Traduire les insights si disponibles
-    if (insightTranslations[language] && insightTranslations[language][insight]) {
-      return insightTranslations[language][insight];
-    }
-
-    // Si pas de traduction exacte, chercher des mots-clés partiels pour traduire
-    const lowerInsight = insight.toLowerCase();
-    
-    if (language === 'en') {
-      if (lowerInsight.includes('très courte') || lowerInsight.includes('très court')) {
-        return "⏱️ Very short video - perfect for TikTok/Instagram, but expand for YouTube";
-      }
-      if (lowerInsight.includes('vidéo longue') || lowerInsight.includes('video longue')) {
-        return "⏱️ Long video - excellent for YouTube, but create short clips for other platforms";
-      }
-      if (lowerInsight.includes('tiktok') && lowerInsight.includes('hook')) {
-        return "🎯 TikTok: Start with a strong hook in the first 3 seconds";
-      }
-      if (lowerInsight.includes('instagram') && lowerInsight.includes('esthétique')) {
-        return "📸 Instagram: Polish visual aesthetics - focus on quality and composition";
-      }
-      if (lowerInsight.includes('youtube') && lowerInsight.includes('intro')) {
-        return "🎬 YouTube: Add clear intro presenting video value";
-      }
-      if (lowerInsight.includes('linkedin') && lowerInsight.includes('business')) {
-        return "💼 LinkedIn: Add clear business/professional angle";
-      }
-    }
-    
-    if (language === 'tr') {
-      if (lowerInsight.includes('très courte') || lowerInsight.includes('très court')) {
-        return "⏱️ Çok kısa video - TikTok/Instagram için mükemmel, YouTube için genişletin";
-      }
-      if (lowerInsight.includes('vidéo longue') || lowerInsight.includes('video longue')) {
-        return "⏱️ Uzun video - YouTube için mükemmel, diğer platformlar için kısa klipler oluşturun";
-      }
-      if (lowerInsight.includes('tiktok') && lowerInsight.includes('hook')) {
-        return "🎯 TikTok: İlk 3 saniyede güçlü bir hook ile başlayın";
-      }
-      if (lowerInsight.includes('instagram') && lowerInsight.includes('esthétique')) {
-        return "📸 Instagram: Görsel estetiği geliştirin - kalite ve kompozisyona odaklanın";
-      }
-      if (lowerInsight.includes('youtube') && lowerInsight.includes('intro')) {
-        return "🎬 YouTube: Video değerini sunan net intro ekleyin";
-      }
-      if (lowerInsight.includes('linkedin') && lowerInsight.includes('business')) {
-        return "💼 LinkedIn: Net iş/profesyonel açı ekleyin";
-      }
-    }
-
-    return insight; // Retourne l'original si aucune traduction trouvée
-  };
-
-  const analyzeVideo = useCallback(async (file) => {
-    if (!file || !isFormValid) return;
-
-    console.log("🚀 Début analyse - fichier:", file.name);
-    setUploading(true);
-    setError(null);
-    setAnalysisResults(null);
-    setUploadProgress(0);
-
-    try {
-      const formData = new FormData();
-      formData.append("video", file);
-      formData.append("title", title);
-      formData.append("description", description);
-      formData.append("language", language); // Envoyer la langue au backend
-
-      console.log("📤 Envoi requête vers:", `${BACKEND_URL}/analyze`);
-
-      // Simulation du progrès
-      const progressInterval = setInterval(() => {
-        setUploadProgress(prev => Math.min(prev + 8, 85));
-      }, 300);
-
-      const response = await fetch(`${BACKEND_URL}/analyze`, {
-        method: "POST",
-        body: formData,
-      });
-
-      clearInterval(progressInterval);
-      setUploadProgress(100);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("❌ Server error:", errorText);
-        throw new Error(`${t('serverError')}: ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      if (!data || typeof data !== 'object') {
-        throw new Error(t('unexpectedError'));
-      }
-
-      // Traduire les insights reçus du backend
-      if (data.insights && Array.isArray(data.insights)) {
-        data.insights = data.insights.map(insight => translateInsight(insight));
-      }
-
-      setAnalysisResults(data);
-      setPage("results");
-      
-    } catch (err) {
-      console.error("❌ Erreur analyse:", err);
-      setError(err.message || t('unexpectedError'));
-    } finally {
-      setUploading(false);
-      setUploadProgress(0);
-    }
-  }, [title, description, isFormValid, language]);
-
-  const handleFileChange = useCallback((e) => {
-    const file = e.target.files[0];
-    if (file) {
-      if (file.size > 100 * 1024 * 1024) {
-        setError(t('fileTooLarge'));
-        return;
-      }
-      
-      if (!file.type.startsWith('video/')) {
-        setError(t('invalidFileType'));
-        return;
-      }
-
-      setUploadedVideo(file);
-      setError(null);
-    }
-  }, [language]);
-
-  const reset = useCallback(() => {
-    setPage("upload");
-    setUploadedVideo(null);
-    setAnalysisResults(null);
-    setError(null);
-    setTitle("");
-    setDescription("");
-    setUploadProgress(0);
   }, []);
 
-  const getScoreEmoji = (score) => {
-    if (score >= 90) return "🔥";
-    if (score >= 80) return "🚀";
-    if (score >= 70) return "⭐";
-    if (score >= 60) return "👍";
-    if (score >= 50) return "👌";
-    return "💪";
+  // Gestion de l'authentification avec Supabase
+  const handleAuth = async (e) => {
+    e.preventDefault();
+    setAuthLoading(true);
+    setAuthError(null);
+    
+    try {
+      if (isLogin) {
+        const result = await AuthService.signIn(authData.email, authData.password);
+        setUser(result.user);
+        setShowAuth(false);
+        setCurrentPage("upload");
+      } else {
+        const result = await AuthService.signUp(authData.email, authData.password, authData.fullName);
+        if (result.user) {
+          alert("Account created! Please check your email to confirm, then sign in.");
+          setIsLogin(true);
+        }
+      }
+    } catch (error) {
+      setAuthError(error);
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const handleSignOut = async () => {
+    await AuthService.signOut();
+    setUser(null);
+    setCurrentPage("landing");
+    setUploadedVideo(null);
+    setAnalysisResults(null);
+  };
+
+  // Analyse vidéo
+  const analyzeVideo = useCallback(async () => {
+    if (!user) {
+      setShowAuth(true);
+      return;
+    }
+    
+    if (!uploadedVideo || !formData.title || !formData.description) return;
+    
+    setIsAnalyzing(true);
+    setError(null);
+    setAnalysisProgress(0);
+
+    const progressInterval = setInterval(() => {
+      setAnalysisProgress(prev => Math.min(prev + 12, 85));
+    }, 500);
+
+    try {
+      const results = await AnalysisService.analyzeVideo(uploadedVideo, formData, aiConsent);
+      clearInterval(progressInterval);
+      setAnalysisProgress(100);
+      setAnalysisResults(results);
+      setCurrentPage("results");
+    } catch (err) {
+      console.error('Analysis error:', err);
+      setError(err.message || "Analysis failed. Please try again.");
+    } finally {
+      setIsAnalyzing(false);
+      setAnalysisProgress(0);
+    }
+  }, [uploadedVideo, formData, aiConsent, user]);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type.startsWith('video/')) {
+      if (file.size > 100 * 1024 * 1024) {
+        setError("File too large. Maximum size: 100MB");
+        return;
+      }
+      setUploadedVideo(file);
+      setError(null);
+    } else {
+      setError("Please select a valid video file");
+    }
+  };
+
+  const getScoreColor = (score) => {
+    if (score >= 85) return "text-green-600";
+    if (score >= 70) return "text-blue-600"; 
+    if (score >= 55) return "text-yellow-600";
+    return "text-red-600";
   };
 
   const getScoreMessage = (score) => {
-    if (score >= 90) return t('exceptionalViral');
-    if (score >= 80) return t('excellentViral');
-    if (score >= 70) return t('goodViral');
-    if (score >= 60) return t('correctViral');
-    if (score >= 50) return t('moderateViral');
-    return t('improvementsNeeded');
+    if (score >= 85) return t('exceptional');
+    if (score >= 70) return t('excellent');
+    if (score >= 55) return t('good');
+    if (score >= 40) return t('moderate');
+    return t('needsWork');
   };
 
-  // Fonction pour traduire les noms de plateformes
-  const translatePlatform = (platform) => {
-    return t(platform) || platform;
-  };
-
-  function AnalysisResults({ analysis }) {
-    if (!analysis) {
-      return (
-        <div className="text-center py-8">
-          <div className="text-red-500 text-lg">⚠️ {t('noDataAvailable')}</div>
-          <button
-            onClick={reset}
-            className="mt-4 px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-          >
-            {t('back')}
-          </button>
-        </div>
-      );
-    }
-
-    const ScoreBar = ({ score, platform, isSelected = false }) => (
-      <div className={`flex items-center justify-between p-3 rounded-xl transition-all duration-500 ${
-        isSelected 
-          ? 'bg-green-100 border-2 border-green-500 shadow-lg transform scale-105' 
-          : 'bg-white backdrop-blur-sm hover:bg-gray-50 border border-gray-200 hover:shadow-md'
-      }`}>
+  // Landing Page (design modernisé: plus clean, tons neutres avec accents indigo)
+  const LandingPage = () => (
+    <div className="min-h-screen bg-gray-50 text-gray-900">
+      {/* Header */}
+      <header className="container mx-auto px-6 py-4 flex justify-between items-center border-b border-gray-200">
         <div className="flex items-center space-x-2">
-          <span className={`font-semibold text-base ${isSelected ? 'text-green-700' : 'text-gray-700'}`}>
-            {translatePlatform(platform)}
-          </span>
-          {isSelected && (
-            <span className="text-xs bg-green-500 text-white px-2 py-1 rounded-full font-bold">
-              {t('recommended')}
-            </span>
-          )}
-        </div>
-        <div className="flex items-center space-x-2">
-          <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden shadow-inner">
-            <div 
-              className={`h-full transition-all duration-1000 ease-out ${
-                score >= 80 ? 'bg-gradient-to-r from-green-400 to-green-600' : 
-                score >= 60 ? 'bg-gradient-to-r from-yellow-400 to-yellow-600' : 
-                score >= 40 ? 'bg-gradient-to-r from-orange-400 to-orange-600' : 'bg-gradient-to-r from-red-400 to-red-600'
-              }`}
-              style={{ width: `${score}%` }}
-            />
+          <div className="w-8 h-8 bg-indigo-600 rounded-md flex items-center justify-center">
+            <Zap className="w-5 h-5 text-white" />
           </div>
-          <span className={`font-bold text-lg min-w-[2.5rem] text-right ${
-            score >= 80 ? 'text-green-600' : 
-            score >= 60 ? 'text-yellow-600' : 
-            score >= 40 ? 'text-orange-600' : 'text-red-600'
-          }`}>
-            {score}
-          </span>
+          <h1 className="text-2xl font-semibold">{t('title')}</h1>
         </div>
-      </div>
-    );
-
-    const viralityScore = analysis.viralityScore ?? 0;
-
-    return (
-      <div className="space-y-4 w-full">
-        {/* Score principal */}
-        <div className="text-center bg-gradient-to-br from-blue-50 to-purple-50 p-6 rounded-2xl border border-blue-200 shadow-lg">
-          <h2 className="text-xl font-bold text-gray-800 mb-3">
-            {t('analysisComplete')}
-          </h2>
-          <div className="flex items-center justify-center space-x-3 mb-3">
-            <span className="text-3xl">{getScoreEmoji(viralityScore)}</span>
-            <div className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              {viralityScore}
-              <span className="text-lg text-gray-500">/100</span>
-            </div>
-          </div>
-          <p className="text-base font-medium text-gray-700">
-            {getScoreMessage(viralityScore)}
-          </p>
-        </div>
-
-        {/* Meilleure plateforme */}
-        <div className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 p-1 rounded-xl shadow-lg">
-          <div className="bg-white p-4 rounded-lg">
-            <h3 className="font-bold text-base text-center text-gray-800">
-              {t('recommendedPlatform')}
-            </h3>
-            <p className="text-center text-lg font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mt-2">
-              {translatePlatform(analysis.bestPlatform) || t('undetermined')}
-            </p>
-          </div>
-        </div>
-
-        {/* Scores par plateforme */}
-        <div className="space-y-3">
-          <h3 className="font-bold text-base text-gray-800">
-            {t('platformScores')}
-          </h3>
-          <div className="space-y-2 max-h-48 overflow-y-auto">
-            {analysis.platformScores && Object.keys(analysis.platformScores).length > 0 ? (
-              Object.entries(analysis.platformScores)
-                .sort(([,a], [,b]) => b - a)
-                .map(([platform, score]) => (
-                  <ScoreBar 
-                    key={platform} 
-                    platform={platform} 
-                    score={score} 
-                    isSelected={platform === analysis.bestPlatform}
-                  />
-                ))
-            ) : (
-              <div className="bg-gray-100 p-3 rounded-lg text-center text-gray-600 text-sm">
-                {t('noScoresAvailable')}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Suggestions */}
-        <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-300 p-4 rounded-xl shadow-md">
-          <h3 className="font-bold text-base text-yellow-800 mb-3 flex items-center">
-            <span className="mr-2 text-lg">💡</span>
-            {t('improvementTips')}
-          </h3>
-          {(analysis.insights || []).length > 0 ? (
-            <div className="space-y-2 max-h-32 overflow-y-auto">
-              {analysis.insights.slice(0, 4).map((tip, idx) => (
-                <div key={idx} className="flex items-start bg-white p-2 rounded-lg border-l-4 border-yellow-400 shadow-sm">
-                  <span className="text-yellow-600 mr-2 font-bold text-sm">•</span>
-                  <span className="text-gray-700 text-xs leading-relaxed">{tip}</span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="bg-white p-3 rounded-lg text-center text-gray-500 text-sm">
-              {t('noSpecificSuggestions')}
-            </div>
-          )}
-        </div>
-
-        {/* Actions */}
-        <button
-          className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-6 py-3 rounded-xl transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
-          onClick={reset}
-        >
-          {t('analyzeAnother')}
-        </button>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-blue-100 via-purple-50 to-pink-100 flex items-start justify-center py-8 px-4">
-      <div className="w-full max-w-md bg-white backdrop-blur-sm rounded-3xl shadow-2xl p-6 border border-white mx-auto">
-        {/* Sélecteur de langue */}
-        <div className="flex justify-end mb-4">
+        
+        <div className="flex items-center space-x-4">
           <select 
             value={language} 
             onChange={(e) => setLanguage(e.target.value)}
-            className="px-3 py-1 border border-gray-300 rounded-md text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-200"
+            className="bg-white border border-gray-300 rounded-md px-3 py-1 text-sm"
           >
-            <option value="en">🇺🇸 English</option>
-            <option value="fr">🇫🇷 Français</option>
-            <option value="tr">🇹🇷 Türkçe</option>
+            <option value="en">🇺🇸 EN</option>
+            <option value="fr">🇫🇷 FR</option>
           </select>
+          
+          {user ? (
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 bg-gray-100 px-3 py-1 rounded-md">
+                <User className="w-4 h-4 text-gray-600" />
+                <span className="text-sm text-gray-700">{user.email}</span>
+              </div>
+              <button 
+                onClick={handleSignOut}
+                className="flex items-center gap-1 text-gray-600 hover:text-gray-900 text-sm"
+              >
+                <LogOut className="w-4 h-4" />
+                {t('logout')}
+              </button>
+            </div>
+          ) : (
+            <button 
+              onClick={() => setShowAuth(true)}
+              className="bg-indigo-600 text-white px-6 py-2 rounded-md font-medium hover:bg-indigo-700 transition-all"
+            >
+              {t('login')}
+            </button>
+          )}
         </div>
+      </header>
 
-        {page === "upload" && (
-          <div className="space-y-5">
-            {/* En-tête */}
-            <div className="text-center">
-              <h1 className="text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
-                {t('title')}
-              </h1>
-              <p className="text-gray-700 text-sm sm:text-base">
-                {t('subtitle')}
-              </p>
-            </div>
-
-            {/* Formulaire */}
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  {t('videoTitle')}
-                </label>
-                <input
-                  type="text"
-                  placeholder={t('videoTitlePlaceholder')}
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="w-full px-4 py-2 bg-white border-2 border-gray-300 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-300"
-                  disabled={uploading}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  {t('description')}
-                </label>
-                <textarea
-                  placeholder={t('descriptionPlaceholder')}
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  className="w-full px-4 py-2 bg-white border-2 border-gray-300 rounded-xl resize-none focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-300"
-                  rows={3}
-                  disabled={uploading}
-                />
-              </div>
-
-              {/* Upload de fichier */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  {t('videoFile')}
-                </label>
-                <label className="cursor-pointer">
-                  <div className="w-full border-2 border-dashed border-blue-300 bg-white rounded-xl p-4 text-center hover:border-blue-500 hover:bg-blue-50 transition-all duration-300">
-                    <div className="text-3xl mb-2">📁</div>
-                    <div className="font-semibold text-blue-600 text-sm">
-                      {uploadedVideo ? t('changeVideo') : t('selectVideo')}
-                    </div>
-                    <div className="text-xs text-gray-500 mt-1">
-                      {t('fileInfo')}
-                    </div>
-                  </div>
-                  <input
-                    type="file"
-                    accept="video/*"
-                    className="hidden"
-                    disabled={uploading}
-                    onChange={handleFileChange}
-                  />
-                </label>
-              </div>
-            </div>
-
-            {/* Aperçu vidéo */}
-            {uploadedVideo && (
-              <div className="space-y-4">
-                <div className="bg-gray-50 p-3 rounded-xl border">
-                  <h4 className="font-semibold text-gray-700 mb-2 text-sm">{t('preview')}</h4>
-                  <video
-                    src={URL.createObjectURL(uploadedVideo)}
-                    controls
-                    className="w-full rounded-lg border"
-                    style={{ maxHeight: 180 }}
-                  />
-                  <div className="mt-2 text-xs text-gray-600">
-                    {uploadedVideo.name} • {(uploadedVideo.size / 1024 / 1024).toFixed(2)} MB
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => analyzeVideo(uploadedVideo)}
-                  disabled={uploading || !isFormValid}
-                  className={`w-full px-6 py-3 rounded-xl font-bold text-base transition-all duration-300 transform ${
-                    !isFormValid 
-                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
-                      : uploading
-                      ? 'bg-blue-400 text-white cursor-wait'
-                      : 'bg-gradient-to-r from-pink-500 to-orange-400 text-white shadow-lg hover:shadow-xl hover:from-pink-600 hover:to-orange-500 hover:scale-105'
-                  }`}
-                >
-                  {uploading ? (
-                    <div className="flex items-center justify-center space-x-2">
-                      <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
-                      <span>{t('analyzing')}</span>
-                    </div>
-                  ) : !isFormValid ? (
-                    t('fillAllFields')
-                  ) : (
-                    t('launchAnalysis')
-                  )}
-                </button>
-              </div>
-            )}
-
-            {/* Barre de progression */}
-            {uploading && (
-              <div className="space-y-3">
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div
-                    className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-500"
-                    style={{ width: `${uploadProgress}%` }}
-                  />
-                </div>
-                <div className="text-center text-sm text-gray-700">
-                  {t('analysisInProgress')} {uploadProgress}%
-                </div>
-              </div>
-            )}
-
-            {/* Erreur */}
-            {error && (
-              <div className="bg-red-50 border-2 border-red-200 text-red-700 p-3 rounded-xl text-center">
-                <div className="flex items-center justify-center mb-1">
-                  <span className="text-lg mr-2">⚠️</span>
-                  <strong className="text-sm">{t('error')}</strong>
-                </div>
-                <div className="text-sm">{error}</div>
-              </div>
-            )}
+      {/* Hero Section */}
+      <section className="container mx-auto px-6 py-20 text-center">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gray-900">
+            {t('subtitle')}
+          </h2>
+          
+          <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+            {t('tagline')}. Analyze any video and get AI-powered recommendations for TikTok, YouTube, Instagram, and more.
+          </p>
+          
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
+            <button 
+              onClick={() => user ? setCurrentPage("upload") : setShowAuth(true)}
+              className="bg-indigo-600 text-white px-8 py-3 rounded-md font-medium hover:bg-indigo-700 transition-all shadow-md"
+            >
+              {user ? "Analyze Your Video" : "Start Free - No Credit Card"}
+            </button>
+            <button 
+              onClick={() => setCurrentPage("pricing")}
+              className="border border-indigo-600 text-indigo-600 px-8 py-3 rounded-md font-medium hover:bg-indigo-50 transition-all"
+            >
+              View Pricing
+            </button>
           </div>
-        )}
 
-        {page === "results" && (
-          <AnalysisResults analysis={analysisResults} />
-        )}
-      </div>
+          {/* Feature Highlights */}
+          <div className="grid md:grid-cols-3 gap-8 mb-20">
+            <div className="bg-white p-6 rounded-md border border-gray-200 shadow-sm">
+              <Target className="w-10 h-10 text-indigo-600 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-3">AI-Powered Analysis</h3>
+              <p className="text-gray-600 text-sm">Advanced algorithms analyze your content across multiple platforms simultaneously</p>
+            </div>
+            
+            <div className="bg-white p-6 rounded-md border border-gray-200 shadow-sm">
+              <TrendingUp className="w-10 h-10 text-indigo-600 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-3">Viral Insights</h3>
+              <p className="text-gray-600 text-sm">Get specific, actionable recommendations to maximize your viral potential</p>
+            </div>
+            
+            <div className="bg-white p-6 rounded-md border border-gray-200 shadow-sm">
+              <Sparkles className="w-10 h-10 text-indigo-600 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-3">Multi-Platform</h3>
+              <p className="text-gray-600 text-sm">Optimize for TikTok, YouTube, Instagram, LinkedIn, and X simultaneously</p>
+            </div>
+          </div>
+          
+          {/* Trust Indicators */}
+          <div className="grid md:grid-cols-4 gap-6 max-w-3xl mx-auto mb-20">
+            <div className="flex flex-col items-center text-center">
+              <Shield className="w-6 h-6 text-indigo-600 mb-2" />
+              <span className="text-xs text-gray-600">{t('gdprCompliant')}</span>
+            </div>
+            <div className="flex flex-col items-center text-center">
+              <Globe className="w-6 h-6 text-indigo-600 mb-2" />
+              <span className="text-xs text-gray-600">EU-Hosted Servers</span>
+            </div>
+            <div className="flex flex-col items-center text-center">
+              <Database className="w-6 h-6 text-indigo-600 mb-2" />
+              <span className="text-xs text-gray-600">Secure Data</span>
+            </div>
+            <div className="flex flex-col items-center text-center">
+              <Crown className="w-6 h-6 text-indigo-600 mb-2" />
+              <span className="text-xs text-gray-600">Premium AI</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="container mx-auto px-6 py-8 border-t border-gray-200 text-center text-gray-500 text-sm">
+        <div className="flex justify-center space-x-4 mb-4">
+          <a href="/privacy" className="hover:text-gray-900">{t('privacyPolicy')}</a>
+          <a href="/terms" className="hover:text-gray-900">{t('termsOfService')}</a>
+        </div>
+        <p>© 2025 Viral Pilot. All rights reserved.</p>
+      </footer>
     </div>
+  );
+
+  // Pricing Page (modernisé)
+  const PricingPage = () => (
+    <div className="min-h-screen bg-gray-50 text-gray-900">
+      {/* Header */}
+      <header className="container mx-auto px-6 py-4 flex justify-between items-center border-b border-gray-200">
+        <div className="flex items-center space-x-2">
+          <div className="w-8 h-8 bg-indigo-600 rounded-md flex items-center justify-center">
+            <Zap className="w-5 h-5 text-white" />
+          </div>
+          <h1 className="text-2xl font-semibold">{t('title')}</h1>
+        </div>
+        
+        <div className="flex items-center space-x-4">
+          <select 
+            value={language} 
+            onChange={(e) => setLanguage(e.target.value)}
+            className="bg-white border border-gray-300 rounded-md px-3 py-1 text-sm"
+          >
+            <option value="en">🇺🇸 EN</option>
+            <option value="fr">🇫🇷 FR</option>
+          </select>
+          
+          {user ? (
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 bg-gray-100 px-3 py-1 rounded-md">
+                <User className="w-4 h-4 text-gray-600" />
+                <span className="text-sm text-gray-700">{user.email}</span>
+              </div>
+              <button 
+                onClick={handleSignOut}
+                className="flex items-center gap-1 text-gray-600 hover:text-gray-900 text-sm"
+              >
+                <LogOut className="w-4 h-4" />
+                {t('logout')}
+              </button>
+            </div>
+          ) : (
+            <button 
+              onClick={() => setShowAuth(true)}
+              className="bg-indigo-600 text-white px-6 py-2 rounded-md font-medium hover:bg-indigo-700 transition-all"
+            >
+              {t('login')}
+            </button>
+          )}
+        </div>
+      </header>
+
+      {/* Pricing Section */}
+      <section className="container mx-auto px-6 py-20">
+        <h2 className="text-3xl font-bold text-center mb-12">Choose Your Plan</h2>
+        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          {Object.entries(PRICING_PLANS).map(([key, plan]) => (
+            <div 
+              key={key}
+              className={`bg-white p-8 rounded-md border ${plan.popular ? 'border-indigo-500 shadow-md' : 'border-gray-200'} relative`}
+            >
+              {plan.popular && (
+                <span className="absolute top-0 right-4 bg-indigo-500 text-white px-3 py-1 rounded-b-md text-sm font-medium">Popular</span>
+              )}
+              <h3 className="text-xl font-semibold mb-4">{plan.name}</h3>
+              <div className="text-3xl font-bold mb-2">${plan.price}<span className="text-lg text-gray-500">/mo</span></div>
+              <p className="text-gray-600 mb-6">{plan.monthly_analyses} analyses/month</p>
+              <ul className="space-y-3 mb-8">
+                {plan.features.map((feature, i) => (
+                  <li key={i} className="flex items-center gap-2 text-gray-700 text-sm">
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+              <button 
+                onClick={() => {
+                  setSelectedPlan(key);
+                  // TODO: Integrate payment (e.g., Paddle or Stripe via backend)
+                  alert(`Upgrading to ${plan.name} plan! (Integration pending)`);
+                }}
+                className="w-full bg-indigo-600 text-white px-4 py-2 rounded-md font-medium hover:bg-indigo-700 transition-all"
+              >
+                {plan.cta}
+              </button>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="container mx-auto px-6 py-8 border-t border-gray-200 text-center text-gray-500 text-sm">
+        <div className="flex justify-center space-x-4 mb-4">
+          <a href="/privacy" className="hover:text-gray-900">{t('privacyPolicy')}</a>
+          <a href="/terms" className="hover:text-gray-900">{t('termsOfService')}</a>
+        </div>
+        <p>© 2025 Viral Pilot. All rights reserved.</p>
+      </footer>
+    </div>
+  );
+
+  // Upload Page (modernisé)
+  const UploadPage = () => (
+    <div className="min-h-screen bg-gray-50 text-gray-900">
+      {/* Header */}
+      <header className="container mx-auto px-6 py-4 flex justify-between items-center border-b border-gray-200">
+        <div className="flex items-center space-x-2">
+          <div className="w-8 h-8 bg-indigo-600 rounded-md flex items-center justify-center">
+            <Zap className="w-5 h-5 text-white" />
+          </div>
+          <h1 className="text-2xl font-semibold">{t('title')}</h1>
+        </div>
+        
+        <div className="flex items-center space-x-4">
+          <select 
+            value={language} 
+            onChange={(e) => setLanguage(e.target.value)}
+            className="bg-white border border-gray-300 rounded-md px-3 py-1 text-sm"
+          >
+            <option value="en">🇺🇸 EN</option>
+            <option value="fr">🇫🇷 FR</option>
+          </select>
+          
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 bg-gray-100 px-3 py-1 rounded-md">
+              <User className="w-4 h-4 text-gray-600" />
+              <span className="text-sm text-gray-700">{user?.email}</span>
+            </div>
+            <button 
+              onClick={handleSignOut}
+              className="flex items-center gap-1 text-gray-600 hover:text-gray-900 text-sm"
+            >
+              <LogOut className="w-4 h-4" />
+              {t('logout')}
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Upload Section */}
+      <section className="container mx-auto px-6 py-20 max-w-2xl">
+        <h2 className="text-2xl font-semibold text-center mb-8">Upload Your Video</h2>
+        
+        <UsageDisplay user={user} language={language} />
+        
+        <div className="bg-white p-6 rounded-md border border-gray-200 shadow-sm">
+          <form className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-1 text-gray-700">{t('videoTitle')}</label>
+              <input
+                type="text"
+                value={formData.title}
+                onChange={(e) => setFormData({...formData, title: e.target.value})}
+                placeholder={t('videoTitlePlaceholder')}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium mb-1 text-gray-700">{t('description')}</label>
+              <textarea
+                value={formData.description}
+                onChange={(e) => setFormData({...formData, description: e.target.value})}
+                placeholder={t('descriptionPlaceholder')}
+                rows={4}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium mb-1 text-gray-700">{t('videoFile')}</label>
+              <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center">
+                <Upload className="w-10 h-10 mx-auto mb-4 text-gray-400" />
+                <input
+                  type="file"
+                  accept="video/*"
+                  onChange={handleFileChange}
+                  className="hidden"
+                  id="video-upload"
+                />
+                <label htmlFor="video-upload" className="cursor-pointer">
+                  <span className="text-indigo-600 hover:text-indigo-500">
+                    {uploadedVideo ? uploadedVideo.name : t('selectVideo')}
+                  </span>
+                </label>
+              </div>
+            </div>
+            
+            <AITrainingConsent consent={aiConsent} setConsent={setAiConsent} language={language} />
+            
+            {error && (
+              <div className="bg-red-50 text-red-700 p-3 rounded-md flex items-center gap-2">
+                <AlertCircle className="w-5 h-5" />
+                {error}
+              </div>
+            )}
+            
+            <button 
+              type="button"
+              onClick={analyzeVideo}
+              disabled={isAnalyzing || !uploadedVideo || !formData.title || !formData.description}
+              className="w-full bg-indigo-600 text-white px-4 py-3 rounded-md font-medium hover:bg-indigo-700 transition-all disabled:opacity-50"
+            >
+              {isAnalyzing ? `${t('analyzing')} (${analysisProgress}%)` : t('launchAnalysis')}
+            </button>
+          </form>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="container mx-auto px-6 py-8 border-t border-gray-200 text-center text-gray-500 text-sm">
+        <div className="flex justify-center space-x-4 mb-4">
+          <a href="/privacy" className="hover:text-gray-900">{t('privacyPolicy')}</a>
+          <a href="/terms" className="hover:text-gray-900">{t('termsOfService')}</a>
+        </div>
+        <p>© 2025 Viral Pilot. All rights reserved.</p>
+      </footer>
+    </div>
+  );
+
+  // Results Page (modernisé)
+  const ResultsPage = () => {
+    if (!analysisResults) return null;
+
+    return (
+      <div className="min-h-screen bg-gray-50 text-gray-900">
+        {/* Header */}
+        <header className="container mx-auto px-6 py-4 flex justify-between items-center border-b border-gray-200">
+          <div className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-indigo-600 rounded-md flex items-center justify-center">
+              <Zap className="w-5 h-5 text-white" />
+            </div>
+            <h1 className="text-2xl font-semibold">{t('title')}</h1>
+          </div>
+          
+          <div className="flex items-center space-x-4">
+            <select 
+              value={language} 
+              onChange={(e) => setLanguage(e.target.value)}
+              className="bg-white border border-gray-300 rounded-md px-3 py-1 text-sm"
+            >
+              <option value="en">🇺🇸 EN</option>
+              <option value="fr">🇫🇷 FR</option>
+            </select>
+            
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 bg-gray-100 px-3 py-1 rounded-md">
+                <User className="w-4 h-4 text-gray-600" />
+                <span className="text-sm text-gray-700">{user?.email}</span>
+              </div>
+              <button 
+                onClick={handleSignOut}
+                className="flex items-center gap-1 text-gray-600 hover:text-gray-900 text-sm"
+              >
+                <LogOut className="w-4 h-4" />
+                {t('logout')}
+              </button>
+            </div>
+          </div>
+        </header>
+
+        {/* Results Section */}
+        <section className="container mx-auto px-6 py-20 max-w-4xl">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-2xl font-semibold">Analysis Results</h2>
+            <button 
+              onClick={() => setCurrentPage("upload")}
+              className="flex items-center gap-2 text-indigo-600 hover:text-indigo-700"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to Upload
+            </button>
+          </div>
+          
+          <div className="grid md:grid-cols-2 gap-6 mb-8">
+            {/* Viral Score */}
+            <div className="bg-white p-6 rounded-md border border-gray-200 shadow-sm text-center">
+              <h3 className="text-lg font-semibold mb-4">{t('viralScore')}</h3>
+              <div className={`text-5xl font-bold ${getScoreColor(analysisResults.viralityScore)}`}>
+                {analysisResults.viralityScore}
+              </div>
+              <p className="text-base mt-2 text-gray-600">{getScoreMessage(analysisResults.viralityScore)}</p>
+            </div>
+            
+            {/* Best Platform */}
+            <div className="bg-white p-6 rounded-md border border-gray-200 shadow-sm text-center">
+              <h3 className="text-lg font-semibold mb-4">{t('bestPlatform')}</h3>
+              <div className="text-3xl font-semibold text-indigo-600">{t(analysisResults.bestPlatform)}</div>
+              <p className="text-gray-600 mt-2 text-sm">Highest viral potential here</p>
+            </div>
+          </div>
+          
+          {/* Platform Scores */}
+          <div className="bg-white p-6 rounded-md border border-gray-200 shadow-sm mb-8">
+            <h3 className="text-lg font-semibold mb-4">{t('platformScores')}</h3>
+            <div className="grid md:grid-cols-3 gap-4">
+              {Object.entries(analysisResults.platformScores).map(([platform, score]) => (
+                <div key={platform} className="flex items-center justify-between bg-gray-50 p-3 rounded-md">
+                  <span className="font-medium text-gray-700">{t(platform)}</span>
+                  <span className={`font-bold ${getScoreColor(score)}`}>
+                    {score}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          {/* Insights */}
+          <div className="bg-white p-6 rounded-md border border-gray-200 shadow-sm mb-8">
+            <h3 className="text-lg font-semibold mb-4">{t('insights')}</h3>
+            <ul className="space-y-3">
+              {analysisResults.insights.map((insight, i) => (
+                <li key={i} className="flex items-start gap-3 text-gray-700 text-sm">
+                  <Star className="w-4 h-4 text-yellow-500 mt-1 flex-shrink-0" />
+                  {insight}
+                </li>
+              ))}
+            </ul>
+          </div>
+          
+          <button 
+            onClick={() => {
+              setCurrentPage("upload");
+              setUploadedVideo(null);
+              setFormData({ title: "", description: "" });
+              setAiConsent(false);
+            }}
+            className="w-full bg-indigo-600 text-white px-4 py-3 rounded-md font-medium hover:bg-indigo-700 transition-all"
+          >
+            {t('analyzeAnother')}
+          </button>
+        </section>
+
+        {/* Footer */}
+        <footer className="container mx-auto px-6 py-8 border-t border-gray-200 text-center text-gray-500 text-sm">
+          <div className="flex justify-center space-x-4 mb-4">
+            <a href="/privacy" className="hover:text-gray-900">{t('privacyPolicy')}</a>
+            <a href="/terms" className="hover:text-gray-900">{t('termsOfService')}</a>
+          </div>
+          <p>© 2025 Viral Pilot. All rights reserved.</p>
+        </footer>
+      </div>
+    );
+  };
+
+  return (
+    <>
+      {currentPage === "landing" && <LandingPage />}
+      {currentPage === "pricing" && <PricingPage />}
+      {currentPage === "upload" && <UploadPage />}
+      {currentPage === "results" && <ResultsPage />}
+      
+      <AuthModal 
+        show={showAuth}
+        isLogin={isLogin}
+        setIsLogin={setIsLogin}
+        authData={authData}
+        setAuthData={setAuthData}
+        onSubmit={handleAuth}
+        loading={authLoading}
+        error={authError}
+        onClose={() => setShowAuth(false)}
+        language={language}
+      />
+    </>
   );
 }
