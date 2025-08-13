@@ -1,179 +1,494 @@
+/* ===== src/index.css ===== */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Font and base styles */
-body {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-  color: #333;
-  background-color: transparent;
+/* Reset et base styles */
+* {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
-  /* Permettre le scroll vertical, limiter horizontal */
-  overflow-x: hidden;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+html, body {
+  height: 100%;
+  overflow-x: hidden; /* Empêcher scroll horizontal */
+  overflow-y: auto;   /* Permettre scroll vertical */
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  line-height: 1.6;
+  font-weight: 400;
+  color: #1f2937; /* gray-800 */
+  background-color: #f9fafb; /* gray-50 */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100vh;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Background animé - Version fixée */
+.animated-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  background: linear-gradient(-45deg, #e0f2fe, #f0f9ff, #dbeafe, #e0e7ff);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+  pointer-events: none;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Conteneurs principaux */
+.app-container {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.content-container {
+  flex: 1;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 0 1rem;
+}
+
+/* Scrollbars personnalisées */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+  transition: background 0.2s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Firefox scrollbars */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+}
+
+/* Focus states améliorés */
+*:focus-visible {
+  outline: 2px solid #4f46e5;
+  outline-offset: 2px;
+}
+
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid #4f46e5;
+  outline-offset: 2px;
+}
+
+/* Animations et transitions */
+.transition-all {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.transition-colors {
+  transition: color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Loading spinner */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Cards et composants */
+.card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.card:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border-color: #d1d5db;
+}
+
+/* Buttons améliorés */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: 1px solid transparent;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background-color: #4f46e5;
+  color: white;
+  border-color: #4f46e5;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: #4338ca;
+  border-color: #4338ca;
+}
+
+.btn-secondary {
+  background-color: white;
+  color: #374151;
+  border-color: #d1d5db;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.btn-ghost {
+  background-color: transparent;
+  color: #6b7280;
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+/* Forms améliorés */
+.form-input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  background-color: white;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.form-input::placeholder {
+  color: #9ca3af;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.25rem;
+}
+
+/* Upload zone */
+.upload-zone {
+  border: 2px dashed #d1d5db;
+  border-radius: 0.5rem;
+  padding: 2rem;
+  text-align: center;
+  transition: all 0.2s ease;
+  background-color: #fafafa;
+  cursor: pointer;
+}
+
+.upload-zone:hover {
+  border-color: #9ca3af;
+  background-color: #f5f5f5;
+}
+
+.upload-zone.drag-over {
+  border-color: #4f46e5;
+  background-color: #eef2ff;
+}
+
+/* Progress bar */
+.progress-bar {
+  width: 100%;
+  height: 0.5rem;
+  background-color: #e5e7eb;
+  border-radius: 0.25rem;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: #4f46e5;
+  transition: width 0.3s ease;
+  background-image: linear-gradient(45deg, rgba(255,255,255,0.2) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.2) 75%, transparent 75%, transparent);
+  background-size: 1rem 1rem;
+  animation: progressStripes 1s linear infinite;
+}
+
+@keyframes progressStripes {
+  0% { background-position: 0 0; }
+  100% { background-position: 1rem 0; }
+}
+
+/* Alert styles */
+.alert {
+  padding: 0.75rem 1rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.alert-error {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+}
+
+.alert-success {
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+}
+
+.alert-warning {
+  background-color: #fffbeb;
+  border: 1px solid #fed7aa;
+  color: #92400e;
+}
+
+.alert-info {
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1e40af;
+}
+
+/* Modals */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.modal-content {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 28rem;
+  max-height: 90vh;
   overflow-y: auto;
 }
 
-html,
-body,
-#root {
-  /* Changer de height: 100% à min-height pour permettre le scroll */
-  min-height: 100vh;
-}
-
-/* Background gradient animation */
-@keyframes gradient {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-.animate-gradient {
-  background: linear-gradient(-45deg, #c1e3ff, #a3d8f4, #91cfff, #b5e3ff);
-  background-size: 400% 400%;
-  animation: gradient 20s ease infinite;
-}
-
-/* Cloud animation - ajustée pour ne pas bloquer le scroll */
-@keyframes moveClouds {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
-}
-
-.cloud {
-  position: fixed; /* Changé de absolute à fixed */
-  top: 0;
-  left: 0;
-  width: 200%;
-  height: 100vh; /* Changé de 200% à 100vh */
-  background: url('/clouds.svg') repeat-x;
-  background-size: contain;
-  animation: moveClouds 120s linear infinite;
-  pointer-events: none;
-  z-index: 0;
-  opacity: 0.25;
-}
-
-/* Button styling */
-button,
-.upload-button {
-  cursor: pointer;
-  border: 2px solid #0ea5e9; /* sky-500 */
-  background-color: #e0f7ff;
-  color: #0c4a6e;
-  padding: 0.6em 1.2em;
-  border-radius: 8px;
-  font-weight: 600;
-  font-family: inherit;
-  transition: all 0.3s ease;
-  display: inline-block;
-  text-align: center;
-}
-
-button:hover,
-.upload-button:hover {
-  background-color: #bae6fd;
-  border-color: #0284c7;
-}
-
-button:focus,
-.upload-button:focus,
-.upload-button:focus-visible {
-  outline: 3px solid #38bdf8;
-}
-
-/* Hide input inside label */
-.upload-button input[type="file"] {
-  display: none;
-}
-
-/* Utility overrides for backdrop if needed */
-.backdrop {
-  backdrop-filter: blur(8px);
-  background-color: rgba(255, 255, 255, 0.7);
-}
-
-/* App container layering above background */
-.app-content {
-  position: relative;
-  z-index: 10;
-}
-
-/* Classes pour gérer le scroll dans votre structure App.jsx */
-.min-h-screen {
-  /* S'assurer que le container principal peut s'étendre */
-  min-height: 100vh !important;
-}
-
-/* Ajustements pour les conteneurs qui pourraient couper le contenu */
-.max-w-md {
-  /* Ajouter une marge pour éviter que le contenu soit coupé */
-  margin: 2rem auto !important;
-}
-
-/* Responsive - ajustements pour mobile */
-@media (max-width: 768px) {
-  .max-w-md {
-    margin: 1rem auto !important;
-    max-width: calc(100% - 2rem) !important;
+/* Responsive design */
+@media (max-width: 640px) {
+  .content-container {
+    padding: 0 0.5rem;
   }
   
-  /* S'assurer que sur mobile le contenu est visible */
-  body {
-    padding: 0.5rem 0;
+  .btn {
+    font-size: 0.875rem;
+    padding: 0.5rem 0.875rem;
+  }
+  
+  .upload-zone {
+    padding: 1.5rem;
+  }
+  
+  .modal-content {
+    margin: 0.5rem;
+    max-width: calc(100% - 1rem);
   }
 }
 
-/* Pour les divs avec espace-y qui pourraient être coupées */
-.space-y-4 > *:last-child,
-.space-y-5 > *:last-child {
-  margin-bottom: 2rem !important;
+@media (max-width: 768px) {
+  .grid-responsive {
+    grid-template-columns: 1fr;
+  }
+  
+  .flex-responsive {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .text-responsive {
+    font-size: 1.5rem;
+  }
 }
 
-/* Ajustements spécifiques pour la structure de votre app */
-.bg-gradient-to-br.from-blue-100 {
-  min-height: 100vh;
-  padding: 2rem 1rem;
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  body {
+    background: white !important;
+  }
+  
+  .animated-bg {
+    display: none !important;
+  }
 }
 
-/* Assurer que les contenus avec max-height puissent scroller */
-.max-h-48.overflow-y-auto,
-.max-h-32.overflow-y-auto {
-  scrollbar-width: thin;
-  scrollbar-color: #cbd5e0 #f7fafc;
+/* Dark mode support (pour usage futur) */
+@media (prefers-color-scheme: dark) {
+  .dark-mode-auto {
+    /* Variables CSS pour dark mode */
+    --bg-primary: #1f2937;
+    --bg-secondary: #374151;
+    --text-primary: #f9fafb;
+    --text-secondary: #d1d5db;
+    --border-color: #4b5563;
+  }
 }
 
-/* Style des scrollbars sur webkit */
-.max-h-48.overflow-y-auto::-webkit-scrollbar,
-.max-h-32.overflow-y-auto::-webkit-scrollbar {
-  width: 4px;
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .animated-bg {
+    animation: none !important;
+  }
 }
 
-.max-h-48.overflow-y-auto::-webkit-scrollbar-track,
-.max-h-32.overflow-y-auto::-webkit-scrollbar-track {
-  background: #f7fafc;
-  border-radius: 4px;
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .btn-primary {
+    background-color: #000;
+    border-color: #000;
+    color: #fff;
+  }
+  
+  .form-input {
+    border-width: 2px;
+    border-color: #000;
+  }
+  
+  .card {
+    border-width: 2px;
+    border-color: #000;
+  }
 }
 
-.max-h-48.overflow-y-auto::-webkit-scrollbar-thumb,
-.max-h-32.overflow-y-auto::-webkit-scrollbar-thumb {
-  background: #cbd5e0;
-  border-radius: 4px;
+/* Utilities personnalisées */
+.text-balance {
+  text-wrap: balance;
 }
 
-.max-h-48.overflow-y-auto::-webkit-scrollbar-thumb:hover,
-.max-h-32.overflow-y-auto::-webkit-scrollbar-thumb:hover {
-  background: #a0aec0;
+.container-responsive {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
 }
+
+@media (min-width: 640px) {
+  .container-responsive {
+    max-width: 640px;
+  }
+}
+
+@media (min-width: 768px) {
+  .container-responsive {
+    max-width: 768px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container-responsive {
+    max-width: 1024px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .container-responsive {
+    max-width: 1280px;
+  }
+}
+
+/* Performance optimizations */
+.gpu-accelerated {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.smooth-scroll {
+  scroll-behavior: smooth;
+}
+
+/* Fix pour les éléments qui pourraient déborder */
+.overflow-wrap {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  hyphens: auto;
+}
+
+/* Ensure proper stacking contexts */
+.z-modal { z-index: 1000; }
+.z-dropdown { z-index: 100; }
+.z-sticky { z-index: 10; }
+.z-background { z-index: -1; }
