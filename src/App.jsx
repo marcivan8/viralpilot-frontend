@@ -168,7 +168,7 @@ const PRICING_PLANS = {
 // Composants
 
 const AITrainingConsent = ({ consent, setConsent, language }) => {
-  const t = (key) => translations[language][key] || translations.en[key] || key;
+  const t = (key) => translations[language]?.[key] || translations.en[key] || key;
   
   return (
     <div className="bg-gray-50 border border-gray-200 p-4 rounded-lg mb-4">
@@ -205,7 +205,7 @@ const AITrainingConsent = ({ consent, setConsent, language }) => {
 
 const UsageDisplay = ({ language }) => {
   const { user } = useAuth();
-  const t = (key) => translations[language][key] || translations.en[key] || key;
+  const t = (key) => translations[language]?.[key] || translations.en[key] || key;
   
   if (!user) return null;
   

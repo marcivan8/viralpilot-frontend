@@ -10,6 +10,7 @@
     "deploy:github": "npm run build && gh-pages -d dist"
   },
   "dependencies": {
+    "@paddle/paddle-js": "^1.4.2",
     "@supabase/supabase-js": "^2.55.0",
     "lucide-react": "^0.539.0",
     "react": "^18.2.0",
