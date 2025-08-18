@@ -1,4 +1,3 @@
-// ===== src/App.jsx =====
 import React, { useState, useEffect } from "react";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { useAnalysis } from "./hooks/useAnalysis";
@@ -166,7 +165,6 @@ const PRICING_PLANS = {
 };
 
 // Composants
-
 const AITrainingConsent = ({ consent, setConsent, language }) => {
   const t = (key) => translations[language]?.[key] || translations.en[key] || key;
   
@@ -257,7 +255,7 @@ const AuthModal = ({ show, onClose, language }) => {
   const [error, setError] = useState(null);
   const { signIn, signUp } = useAuth();
   
-  const t = (key) => translations[language][key] || translations.en[key] || key;
+  const t = (key) => translations[language]?.[key] || translations.en[key] || key;
   
   if (!show) return null;
   
@@ -382,14 +380,12 @@ const AuthModal = ({ show, onClose, language }) => {
 };
 
 // Pages principales
-
 const LandingPage = ({ language, onShowAuth, onNavigate }) => {
   const { user } = useAuth();
-  const t = (key) => translations[language][key] || translations.en[key] || key;
+  const t = (key) => translations[language]?.[key] || translations.en[key] || key;
   
   return (
     <div className="bg-gray-50">
-      {/* Hero Section */}
       <section className="container mx-auto px-6 py-20 text-center">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gray-900">
@@ -415,7 +411,6 @@ const LandingPage = ({ language, onShowAuth, onNavigate }) => {
             </button>
           </div>
 
-          {/* Feature Highlights */}
           <div className="grid md:grid-cols-3 gap-8">
             <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
               <Target className="w-10 h-10 text-indigo-600 mx-auto mb-4" />
@@ -442,7 +437,7 @@ const LandingPage = ({ language, onShowAuth, onNavigate }) => {
 };
 
 const PricingPage = ({ language, onNavigate }) => {
-  const t = (key) => translations[language][key] || translations.en[key] || key;
+  const t = (key) => translations[language]?.[key] || translations.en[key] || key;
 
   return (
     <div className="bg-gray-50">
@@ -530,7 +525,7 @@ const UploadPage = ({ language, onNavigate }) => {
   const { analyzeVideo, isAnalyzing, progress, error } = useAnalysis();
   const { user } = useAuth();
   
-  const t = (key) => translations[language][key] || translations.en[key] || key;
+  const t = (key) => translations[language]?.[key] || translations.en[key] || key;
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -669,7 +664,7 @@ const UploadPage = ({ language, onNavigate }) => {
 };
 
 const ResultsPage = ({ language, onNavigate, results }) => {
-  const t = (key) => translations[language][key] || translations.en[key] || key;
+  const t = (key) => translations[language]?.[key] || translations.en[key] || key;
   
   if (!results) {
     return (
@@ -714,7 +709,6 @@ const ResultsPage = ({ language, onNavigate, results }) => {
           </button>
         </div>
         
-        {/* Score Cards */}
         <div className="grid md:grid-cols-2 gap-6 mb-8">
           <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm text-center">
             <h3 className="text-lg font-semibold mb-4">{t('viralScore')}</h3>
@@ -733,7 +727,6 @@ const ResultsPage = ({ language, onNavigate, results }) => {
           </div>
         </div>
         
-        {/* Platform Scores */}
         <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm mb-8">
           <h3 className="text-lg font-semibold mb-4">{t('platformScores')}</h3>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -748,7 +741,6 @@ const ResultsPage = ({ language, onNavigate, results }) => {
           </div>
         </div>
         
-        {/* Insights */}
         <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
           <h3 className="text-lg font-semibold mb-4">{t('insights')}</h3>
           <div className="space-y-3">
@@ -766,7 +758,6 @@ const ResultsPage = ({ language, onNavigate, results }) => {
 };
 
 // App principal
-
 const AppContent = () => {
   const [currentPage, setCurrentPage] = useState("landing");
   const [language, setLanguage] = useState("en");

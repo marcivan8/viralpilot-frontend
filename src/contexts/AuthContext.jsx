@@ -7,8 +7,8 @@ if (!process.env.REACT_APP_SUPABASE_URL || !process.env.REACT_APP_SUPABASE_ANON_
 }
 
 const supabase = createClient(
-  process.env.REACT_APP_SUPABASE_URL,
-  process.env.REACT_APP_SUPABASE_ANON_KEY
+  process.env.REACT_APP_SUPABASE_URL || '',
+  process.env.REACT_APP_SUPABASE_ANON_KEY || ''
 );
 
 const AuthContext = createContext();
@@ -56,7 +56,7 @@ export const AuthProvider = ({ children }) => {
         
         // Optionnel: créer/mettre à jour le profil utilisateur
         if (event === 'SIGNED_IN' && session?.user) {
-          await createOrUpdateProfile(session.user);
+          await createOrUpdateProfile(session.user, session);
         }
       }
     );
@@ -64,13 +64,15 @@ export const AuthProvider = ({ children }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const createOrUpdateProfile = async (user) => {
+  const createOrUpdateProfile = async (user, currentSession) => {
     try {
+      if (!process.env.REACT_APP_API_BASE_URL) return;
+      
       const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/auth/profile`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session?.access_token}`
+          'Authorization': `Bearer ${currentSession?.access_token}`
         },
         body: JSON.stringify({
           userId: user.id,
