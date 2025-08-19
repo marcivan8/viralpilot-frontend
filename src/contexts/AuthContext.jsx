@@ -1,14 +1,15 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
-// Validation des variables d'environnement
-if (!process.env.REACT_APP_SUPABASE_URL || !process.env.REACT_APP_SUPABASE_ANON_KEY) {
+// Validation des variables d'environnement (utilise VITE_ au lieu de REACT_APP_)
+if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
   console.error('Missing Supabase environment variables');
+  console.error('Make sure you have VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your .env file');
 }
 
 const supabase = createClient(
-  process.env.REACT_APP_SUPABASE_URL || '',
-  process.env.REACT_APP_SUPABASE_ANON_KEY || ''
+  import.meta.env.VITE_SUPABASE_URL || '',
+  import.meta.env.VITE_SUPABASE_ANON_KEY || ''
 );
 
 const AuthContext = createContext();
@@ -66,9 +67,9 @@ export const AuthProvider = ({ children }) => {
 
   const createOrUpdateProfile = async (user, currentSession) => {
     try {
-      if (!process.env.REACT_APP_API_BASE_URL) return;
+      if (!import.meta.env.VITE_API_BASE_URL) return;
       
-      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/auth/profile`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/profile`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
