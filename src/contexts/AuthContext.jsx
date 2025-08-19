@@ -99,7 +99,9 @@ export const AuthProvider = ({ children }) => {
       });
       
       if (error) throw error;
-      return data;
+      
+      // Return both user and session for immediate use
+      return { user: data.user, session: data.session };
     } catch (error) {
       console.error('Sign in error:', error);
       throw error;
