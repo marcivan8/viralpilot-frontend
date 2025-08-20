@@ -3,12 +3,13 @@ import { useAuth } from '../contexts/AuthContext';
 import Logo from './Logo';
 import { User, LogOut, Globe } from 'lucide-react';
 
-const Header = ({ language, setLanguage, onAuthClick }) => {
+const Header = ({ language, setLanguage, onAuthClick, onNavigate }) => {
   const { user, signOut, loading } = useAuth();
 
   const handleSignOut = async () => {
     try {
       await signOut();
+      onNavigate('landing');
     } catch (error) {
       console.error('Sign out error:', error);
     }
@@ -17,7 +18,12 @@ const Header = ({ language, setLanguage, onAuthClick }) => {
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
       <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-        <Logo size="md" />
+        <div 
+          onClick={() => onNavigate('landing')} 
+          className="cursor-pointer"
+        >
+          <Logo size="md" />
+        </div>
         
         <div className="flex items-center space-x-4">
           {/* Language Selector */}
@@ -65,7 +71,7 @@ const Header = ({ language, setLanguage, onAuthClick }) => {
   );
 };
 
-const Footer = ({ language }) => {
+const Footer = ({ language, onNavigate }) => {
   const translations = {
     en: {
       privacy: "Privacy Policy",
@@ -85,12 +91,18 @@ const Footer = ({ language }) => {
     <footer className="bg-white border-t border-gray-200 mt-auto">
       <div className="container mx-auto px-6 py-8 text-center text-gray-500 text-sm">
         <div className="flex justify-center space-x-4 mb-4">
-          <a href="/privacy" className="hover:text-gray-900 transition-colors">
+          <button 
+            onClick={() => onNavigate('privacy')}
+            className="hover:text-gray-900 transition-colors"
+          >
             {t('privacy')}
-          </a>
-          <a href="/terms" className="hover:text-gray-900 transition-colors">
+          </button>
+          <button 
+            onClick={() => onNavigate('terms')}
+            className="hover:text-gray-900 transition-colors"
+          >
             {t('terms')}
-          </a>
+          </button>
         </div>
         <p>© 2025 Viral Pilot. {t('rights')}.</p>
       </div>
@@ -98,18 +110,22 @@ const Footer = ({ language }) => {
   );
 };
 
-const Layout = ({ children, language, setLanguage, onAuthClick }) => {
+const Layout = ({ children, language, setLanguage, onAuthClick, onNavigate }) => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Header 
         language={language} 
         setLanguage={setLanguage} 
-        onAuthClick={onAuthClick} 
+        onAuthClick={onAuthClick}
+        onNavigate={onNavigate}
       />
       <main className="flex-1">
         {children}
       </main>
-      <Footer language={language} />
+      <Footer 
+        language={language}
+        onNavigate={onNavigate}
+      />
     </div>
   );
 };

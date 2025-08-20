@@ -266,19 +266,36 @@ const AuthModal = ({ show, onClose, language }) => {
     
     try {
       if (isLogin) {
-        await signIn(formData.email, formData.password);
-        onClose();
+        const { user, session } = await signIn(formData.email, formData.password);
+        if (user && session) {
+          console.log('Sign in successful:', user.email);
+          onClose();
+        } else {
+          setError('Sign in failed. Please check your credentials.');
+        }
       } else {
         const result = await signUp(formData.email, formData.password, formData.fullName);
-        if (result.user && !result.user.email_confirmed_at) {
-          alert("Account created! Please check your email to confirm, then sign in.");
+        console.log('Sign up result:', result);
+        
+        if (result.user) {
+          // Check if email confirmation is required
+          if (result.user.email_confirmed_at) {
+            // Email already confirmed (or not required)
+            alert("Account created successfully! You can now sign in.");
+          } else {
+            // Email confirmation required
+            alert("Account created! Please check your email to confirm your account, then sign in.");
+          }
+          
+          // Switch to login form
           setIsLogin(true);
           setFormData({ email: formData.email, password: "", fullName: "" });
         } else {
-          onClose();
+          setError('Sign up failed. Please try again.');
         }
       }
     } catch (err) {
+      console.error('Auth error:', err);
       setError(err.message || (isLogin ? 'Sign in failed' : 'Sign up failed'));
     } finally {
       setLoading(false);
@@ -357,7 +374,10 @@ const AuthModal = ({ show, onClose, language }) => {
         <div className="text-center mt-4">
           <button
             type="button"
-            onClick={() => setIsLogin(!isLogin)}
+            onClick={() => {
+              setIsLogin(!isLogin);
+              setError(null);
+            }}
             className="text-indigo-600 hover:text-indigo-800 text-sm"
           >
             {isLogin ? t('noAccount') : t('haveAccount')} {' '}
@@ -757,6 +777,75 @@ const ResultsPage = ({ language, onNavigate, results }) => {
   );
 };
 
+// Terms and Privacy Pages
+const TermsPage = ({ language, onNavigate }) => {
+  return (
+    <div className="bg-gray-50">
+      <section className="container mx-auto px-6 py-20 max-w-4xl">
+        <h1 className="text-3xl font-bold mb-8">Terms of Service</h1>
+        <div className="bg-white p-8 rounded-lg border border-gray-200 shadow-sm prose max-w-none">
+          <h2>1. Acceptance of Terms</h2>
+          <p>By accessing and using Viral Pilot, you accept and agree to be bound by the terms and provision of this agreement.</p>
+          
+          <h2>2. Use License</h2>
+          <p>Permission is granted to temporarily use Viral Pilot for personal, non-commercial transitory viewing only.</p>
+          
+          <h2>3. Video Content</h2>
+          <p>You retain all rights to your video content. By uploading videos, you grant us permission to analyze them using AI.</p>
+          
+          <h2>4. Privacy</h2>
+          <p>Your use of our service is also governed by our Privacy Policy.</p>
+          
+          <h2>5. Limitations</h2>
+          <p>In no event shall Viral Pilot or its suppliers be liable for any damages arising out of the use or inability to use the materials on Viral Pilot.</p>
+        </div>
+        <div className="text-center mt-8">
+          <button 
+            onClick={() => onNavigate('landing')}
+            className="text-indigo-600 hover:text-indigo-800 font-medium"
+          >
+            ← Back to Home
+          </button>
+        </div>
+      </section>
+    </div>
+  );
+};
+
+const PrivacyPage = ({ language, onNavigate }) => {
+  return (
+    <div className="bg-gray-50">
+      <section className="container mx-auto px-6 py-20 max-w-4xl">
+        <h1 className="text-3xl font-bold mb-8">Privacy Policy</h1>
+        <div className="bg-white p-8 rounded-lg border border-gray-200 shadow-sm prose max-w-none">
+          <h2>1. Information We Collect</h2>
+          <p>We collect information you provide directly to us, such as when you create an account or upload a video.</p>
+          
+          <h2>2. How We Use Your Information</h2>
+          <p>We use the information to provide, maintain, and improve our services, including AI analysis of your videos.</p>
+          
+          <h2>3. Data Storage</h2>
+          <p>Videos are stored securely. Without AI training consent, videos are automatically deleted after 30 days.</p>
+          
+          <h2>4. Data Security</h2>
+          <p>We implement appropriate technical and organizational measures to protect your personal information.</p>
+          
+          <h2>5. Your Rights</h2>
+          <p>You have the right to access, update, or delete your personal information at any time.</p>
+        </div>
+        <div className="text-center mt-8">
+          <button 
+            onClick={() => onNavigate('landing')}
+            className="text-indigo-600 hover:text-indigo-800 font-medium"
+          >
+            ← Back to Home
+          </button>
+        </div>
+      </section>
+    </div>
+  );
+};
+
 // App principal
 const AppContent = () => {
   const [currentPage, setCurrentPage] = useState("landing");
@@ -796,6 +885,7 @@ const AppContent = () => {
       language={language} 
       setLanguage={setLanguage} 
       onAuthClick={handleShowAuth}
+      onNavigate={handleNavigate}
     >
       {currentPage === "landing" && (
         <LandingPage 
@@ -821,6 +911,18 @@ const AppContent = () => {
           language={language} 
           onNavigate={handleNavigate}
           results={analysisResults}
+        />
+      )}
+      {currentPage === "terms" && (
+        <TermsPage 
+          language={language} 
+          onNavigate={handleNavigate}
+        />
+      )}
+      {currentPage === "privacy" && (
+        <PrivacyPage 
+          language={language} 
+          onNavigate={handleNavigate}
         />
       )}
       
