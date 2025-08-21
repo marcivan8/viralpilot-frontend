@@ -1,10 +1,10 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
+import ApiService from './apiService'; // ✅ import your ApiService
 
-// Validation des variables d'environnement (utilise VITE_ au lieu de REACT_APP_)
+// Validation des variables d'environnement
 if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
   console.error('Missing Supabase environment variables');
-  console.error('Make sure you have VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your .env file');
 }
 
 const supabase = createClient(
@@ -28,7 +28,6 @@ export const AuthProvider = ({ children }) => {
   const [session, setSession] = useState(null);
 
   useEffect(() => {
-    // Récupérer session actuelle
     const getSession = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
@@ -47,15 +46,13 @@ export const AuthProvider = ({ children }) => {
 
     getSession();
 
-    // Écouter changements d'auth
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('Auth state changed:', event);
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
-        
-        // Optionnel: créer/mettre à jour le profil utilisateur
+
         if (event === 'SIGNED_IN' && session?.user) {
           await createOrUpdateProfile(session.user, session);
         }
@@ -65,26 +62,18 @@ export const AuthProvider = ({ children }) => {
     return () => subscription.unsubscribe();
   }, []);
 
+  // ✅ Use ApiService instead of raw fetch
   const createOrUpdateProfile = async (user, currentSession) => {
     try {
-      if (!import.meta.env.VITE_API_BASE_URL) return;
-      
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/profile`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${currentSession?.access_token}`
-        },
-        body: JSON.stringify({
-          userId: user.id,
-          email: user.email,
-          fullName: user.user_metadata?.full_name || user.user_metadata?.name
-        })
-      });
-      
-      if (!response.ok) {
-        console.warn('Profile creation/update failed:', response.status);
-      }
+      if (!currentSession?.access_token) return;
+
+      await ApiService.createProfile(
+        user.id,
+        user.email,
+        user.user_metadata?.full_name || user.user_metadata?.name,
+        currentSession.access_token
+      );
+
     } catch (error) {
       console.error('Profile error:', error);
     }
@@ -97,10 +86,7 @@ export const AuthProvider = ({ children }) => {
         email: email.trim(),
         password
       });
-      
       if (error) throw error;
-      
-      // Return both user and session for immediate use
       return { user: data.user, session: data.session };
     } catch (error) {
       console.error('Sign in error:', error);
@@ -123,7 +109,6 @@ export const AuthProvider = ({ children }) => {
           }
         }
       });
-      
       if (error) throw error;
       return data;
     } catch (error) {
@@ -160,9 +145,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const getAccessToken = () => {
-    return session?.access_token || null;
-  };
+  const getAccessToken = () => session?.access_token || null;
 
   const value = {
     user,
