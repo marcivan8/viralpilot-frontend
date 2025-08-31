@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import ApiService from './services/apiService'; // ✅ import your ApiService
+import ApiService from '../services/apiService'; // ✅ FIXED PATH - was './apiService'
 
 // Validation des variables d'environnement
 if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
@@ -62,7 +62,7 @@ export const AuthProvider = ({ children }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  // ✅ Use ApiService instead of raw fetch
+  // ✅ Use ApiService with correct import
   const createOrUpdateProfile = async (user, currentSession) => {
     try {
       if (!currentSession?.access_token) return;
