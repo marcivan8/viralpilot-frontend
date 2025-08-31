@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import ApiService from './apiService'; // ✅ import your ApiService
+import ApiService from './services/apiService'; // ✅ import your ApiService
 
 // Validation des variables d'environnement
 if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
