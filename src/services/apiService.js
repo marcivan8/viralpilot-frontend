@@ -9,8 +9,8 @@ const getApiUrl = () => {
   const hostname = window.location.hostname;
   
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
-    // IMPORTANT: Backend runs on port 3001, not 3000!
-    return 'http://localhost:3001';
+    // IMPORTANT: Backend runs on port 3000
+    return 'http://localhost:3000';
   }
   
   // Production URL - UPDATE THIS WITH YOUR ACTUAL BACKEND URL
@@ -132,7 +132,7 @@ class ApiService {
       return true;
     } catch (error) {
       console.error('❌ Backend is NOT reachable:', error);
-      console.error('Make sure your backend is running on port 3001');
+      console.error('Make sure your backend is running on port 3000');
       return false;
     }
   }
