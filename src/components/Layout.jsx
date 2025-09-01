@@ -36,6 +36,7 @@ const Header = ({ language, setLanguage, onAuthClick, onNavigate }) => {
             >
               <option value="en">🇺🇸 English</option>
               <option value="fr">🇫🇷 Français</option>
+              <option value="tr">🇹🇷 Türkçe</option>
             </select>
           </div>
           
@@ -82,6 +83,11 @@ const Footer = ({ language, onNavigate }) => {
       privacy: "Politique de Confidentialité", 
       terms: "Conditions d'Utilisation",
       rights: "Tous droits réservés"
+    },
+    tr: {
+      privacy: "Gizlilik Politikası",
+      terms: "Kullanım Koşulları",
+      rights: "Tüm hakları saklıdır"
     }
   };
 

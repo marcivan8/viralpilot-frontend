@@ -5,10 +5,13 @@ import Layout from "./components/Layout";
 import Logo from "./components/Logo";
 import { 
   Upload, Star, TrendingUp, Target, CheckCircle, AlertCircle, 
-  Shield, Database, ArrowLeft, Crown, Sparkles 
+  Shield, Database, ArrowLeft, Sparkles 
 } from "lucide-react";
 
-// Traductions
+// API URL configuration
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+
+// Complete translations with Turkish
 const translations = {
   en: {
     title: "Viral Pilot",
@@ -43,8 +46,8 @@ const translations = {
     analyzeAnother: "Analyze Another Video",
     
     launchAnalysis: "Analyze with AI",
-    startFree: "Start Free - No Credit Card",
-    viewPricing: "View Pricing",
+    startFree: "Start Free",
+    getStarted: "Get Started",
     
     TikTok: "TikTok",
     YouTube: "YouTube",
@@ -61,16 +64,21 @@ const translations = {
     
     usageThisMonth: "Usage this month",
     analysesLeft: "analyses left",
-    unlimited: "unlimited",
+    monthlyLimit: "Monthly limit",
+    limitReached: "Monthly limit reached. Your limit will reset next month.",
     
     noAccount: "Don't have an account?",
     haveAccount: "Already have an account?",
     createAccount: "Create your account",
     welcomeBack: "Welcome back",
     
-    freePlan: "Free",
-    proPlan: "Pro Creator",
-    premiumPlan: "Premium Studio"
+    features: "Features",
+    allUsersGet: "All users get:",
+    analysesPerMonth: "video analyses per month",
+    aiScoring: "AI-powered viral scoring",
+    platformRecommendations: "Platform-specific recommendations",
+    insights: "Actionable insights & tips",
+    multiLanguage: "Multi-language support"
   },
   fr: {
     title: "Viral Pilot",
@@ -106,7 +114,7 @@ const translations = {
     
     launchAnalysis: "Analyser avec l'IA",
     startFree: "Commencer Gratuitement",
-    viewPricing: "Voir les Tarifs",
+    getStarted: "Commencer",
     
     TikTok: "TikTok",
     YouTube: "YouTube", 
@@ -123,48 +131,92 @@ const translations = {
     
     usageThisMonth: "Utilisation ce mois-ci",
     analysesLeft: "analyses restantes",
-    unlimited: "illimité",
+    monthlyLimit: "Limite mensuelle",
+    limitReached: "Limite mensuelle atteinte. Votre limite sera réinitialisée le mois prochain.",
     
     noAccount: "Pas de compte ?",
     haveAccount: "Vous avez déjà un compte ?",
     createAccount: "Créez votre compte",
     welcomeBack: "Bon retour",
     
-    freePlan: "Gratuit",
-    proPlan: "Pro Créateur", 
-    premiumPlan: "Premium Studio"
+    features: "Fonctionnalités",
+    allUsersGet: "Tous les utilisateurs obtiennent :",
+    analysesPerMonth: "analyses vidéo par mois",
+    aiScoring: "Score de viralité par IA",
+    platformRecommendations: "Recommandations par plateforme",
+    insights: "Conseils et astuces pratiques",
+    multiLanguage: "Support multilingue"
+  },
+  tr: {
+    title: "Viral Pilot",
+    subtitle: "Maksimum Virallik için AI Destekli Video Analizi",
+    tagline: "Herhangi bir videoyu AI içgörüleriyle viral içeriğe dönüştürün",
+    login: "Giriş Yap",
+    signup: "Kayıt Ol",
+    logout: "Çıkış Yap",
+    email: "E-posta",
+    password: "Şifre",
+    fullName: "Tam Ad",
+    forgotPassword: "Şifremi Unuttum?",
+    
+    videoTitle: "Video Başlığı",
+    videoTitlePlaceholder: "Dikkat çekici bir başlık girin...",
+    description: "Açıklama",
+    descriptionPlaceholder: "Video içeriğinizi açıklayın...",
+    videoFile: "Video Dosyası",
+    selectVideo: "Video Seç",
+    changeVideo: "Videoyu Değiştir",
+    analyzing: "AI ile analiz ediliyor...",
+    
+    aiConsentTitle: "🤖 AI'mızı geliştirmeye yardımcı olun (İsteğe Bağlı)",
+    aiConsentText: "Viral Pilot'un AI algoritmalarını geliştirmek için yüklediğim videoları saklamasına ve kullanmasına izin veriyorum. Bu içerik üzerinde gerekli haklara sahip olduğumu onaylıyorum.",
+    aiConsentWith: "Onay ile: Videolar AI eğitimi için güvenli şekilde saklanır",
+    aiConsentWithout: "Onay olmadan: Videolar 30 gün sonra otomatik olarak silinir",
+    
+    viralScore: "Viral Potansiyel Puanı",
+    bestPlatform: "Önerilen Platform",
+    platformScores: "Platform Puanları",
+    insights: "AI İçgörüleri ve İpuçları",
+    analyzeAnother: "Başka Bir Video Analiz Et",
+    
+    launchAnalysis: "AI ile Analiz Et",
+    startFree: "Ücretsiz Başla",
+    getStarted: "Başla",
+    
+    TikTok: "TikTok",
+    YouTube: "YouTube",
+    YouTubeShorts: "YouTube Shorts",
+    Instagram: "Instagram",
+    X: "X (Twitter)",
+    LinkedIn: "LinkedIn",
+    
+    exceptional: "🔥 Olağanüstü viral potansiyel!",
+    excellent: "🚀 Mükemmel viral potansiyel!",
+    good: "⭐ İyi viral potansiyel",
+    moderate: "👍 Orta düzey viral potansiyel",
+    needsWork: "💪 İyileştirme gerekiyor",
+    
+    usageThisMonth: "Bu ayki kullanım",
+    analysesLeft: "analiz hakkı kaldı",
+    monthlyLimit: "Aylık limit",
+    limitReached: "Aylık limit doldu. Limitiniz gelecek ay sıfırlanacak.",
+    
+    noAccount: "Hesabınız yok mu?",
+    haveAccount: "Zaten hesabınız var mı?",
+    createAccount: "Hesabınızı oluşturun",
+    welcomeBack: "Tekrar hoş geldiniz",
+    
+    features: "Özellikler",
+    allUsersGet: "Tüm kullanıcılar şunları alır:",
+    analysesPerMonth: "aylık video analizi",
+    aiScoring: "AI destekli viral puanlama",
+    platformRecommendations: "Platforma özel öneriler",
+    insights: "Uygulanabilir içgörüler ve ipuçları",
+    multiLanguage: "Çoklu dil desteği"
   }
 };
 
-// Plans de pricing
-const PRICING_PLANS = {
-  free: { 
-    name: "Free", 
-    price: 0, 
-    monthly_analyses: 3, 
-    features: ["Basic AI scoring", "Platform recommendations", "Mobile friendly"],
-    cta: "Start Free"
-  },
-  pro: { 
-    name: "Pro Creator", 
-    price: 29, 
-    monthly_analyses: 30,
-    long_form: 1,
-    features: ["Advanced AI analytics", "Competitor insights", "Export reports", "Priority support"],
-    cta: "Upgrade to Pro",
-    popular: true
-  },
-  premium: { 
-    name: "Premium Studio", 
-    price: 79,
-    monthly_analyses: "unlimited",
-    long_form: 5, 
-    features: ["All Pro features", "Priority processing", "Team collaboration", "Custom integrations"],
-    cta: "Go Premium"
-  }
-};
-
-// Composants
+// Components
 const AITrainingConsent = ({ consent, setConsent, language }) => {
   const t = (key) => translations[language]?.[key] || translations.en[key] || key;
   
@@ -202,22 +254,47 @@ const AITrainingConsent = ({ consent, setConsent, language }) => {
 };
 
 const UsageDisplay = ({ language }) => {
-  const { user } = useAuth();
+  const { user, getAccessToken } = useAuth();
+  const [usage, setUsage] = useState(null);
+  const [loading, setLoading] = useState(true);
   const t = (key) => translations[language]?.[key] || translations.en[key] || key;
   
-  if (!user) return null;
+  useEffect(() => {
+    if (user) {
+      fetchUsage();
+    }
+  }, [user]);
   
-  // Mock data - remplacez par les vraies données depuis votre API
-  const usage = { analyses: 1, long_form: 0 };
-  const tier = 'free';
-  const limits = {
-    free: { monthly_analyses: 3, long_form: 0 },
-    pro: { monthly_analyses: 30, long_form: 1 },
-    premium: { monthly_analyses: 999999, long_form: 5 }
+  const fetchUsage = async () => {
+    try {
+      const token = getAccessToken();
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+      
+      const response = await fetch(`${API_BASE_URL}/api/auth/usage`, {
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setUsage(data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch usage:', error);
+    } finally {
+      setLoading(false);
+    }
   };
   
-  const userLimits = limits[tier] || limits.free;
-  const analysesLeft = Math.max(0, userLimits.monthly_analyses - usage.analyses);
+  if (!user || loading) return null;
+  
+  const currentUsage = usage?.analyses || 0;
+  const remaining = usage?.remaining || (20 - currentUsage);
   
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-4 mb-4 shadow-sm">
@@ -230,18 +307,23 @@ const UsageDisplay = ({ language }) => {
         </div>
         <div className="text-right">
           <div className="text-sm font-semibold text-gray-900">
-            {usage.analyses}/{userLimits.monthly_analyses === 999999 ? t('unlimited') : userLimits.monthly_analyses}
+            {currentUsage}/20
           </div>
           <div className="text-xs text-gray-500">
-            {analysesLeft} {t('analysesLeft')}
+            {remaining} {t('analysesLeft')}
           </div>
         </div>
       </div>
       
-      {tier === 'free' && analysesLeft <= 1 && (
+      {remaining === 0 && (
+        <div className="mt-3 text-xs text-red-700 bg-red-50 border border-red-200 p-2 rounded">
+          {t('limitReached')}
+        </div>
+      )}
+      
+      {remaining > 0 && remaining <= 3 && (
         <div className="mt-3 text-xs text-amber-700 bg-amber-50 border border-amber-200 p-2 rounded">
-          <Crown className="w-4 h-4 inline mr-1" />
-          Upgrade to Pro for unlimited analyses
+          {remaining} {t('analysesLeft')} {t('monthlyLimit')}
         </div>
       )}
     </div>
@@ -278,16 +360,12 @@ const AuthModal = ({ show, onClose, language }) => {
         console.log('Sign up result:', result);
         
         if (result.user) {
-          // Check if email confirmation is required
           if (result.user.email_confirmed_at) {
-            // Email already confirmed (or not required)
             alert("Account created successfully! You can now sign in.");
           } else {
-            // Email confirmation required
             alert("Account created! Please check your email to confirm your account, then sign in.");
           }
           
-          // Switch to login form
           setIsLogin(true);
           setFormData({ email: formData.email, password: "", fullName: "" });
         } else {
@@ -399,7 +477,7 @@ const AuthModal = ({ show, onClose, language }) => {
   );
 };
 
-// Pages principales
+// Main Pages
 const LandingPage = ({ language, onShowAuth, onNavigate }) => {
   const { user } = useAuth();
   const t = (key) => translations[language]?.[key] || translations.en[key] || key;
@@ -413,7 +491,7 @@ const LandingPage = ({ language, onShowAuth, onNavigate }) => {
           </h2>
           
           <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-            {t('tagline')}. Analyze any video and get AI-powered recommendations for TikTok, YouTube, Instagram, and more.
+            {t('tagline')}
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
@@ -423,12 +501,33 @@ const LandingPage = ({ language, onShowAuth, onNavigate }) => {
             >
               {user ? "Analyze Your Video" : t('startFree')}
             </button>
-            <button 
-              onClick={() => onNavigate('pricing')}
-              className="border border-indigo-600 text-indigo-600 px-8 py-3 rounded-md font-medium hover:bg-indigo-50 transition-all"
-            >
-              {t('viewPricing')}
-            </button>
+          </div>
+
+          {/* Features Section */}
+          <div className="bg-white rounded-lg border border-gray-200 p-8 mb-12 shadow-sm">
+            <h3 className="text-xl font-semibold mb-6">{t('allUsersGet')}</h3>
+            <div className="grid md:grid-cols-2 gap-4 text-left">
+              <div className="flex items-start gap-3">
+                <CheckCircle className="w-5 h-5 text-green-500 mt-1 flex-shrink-0" />
+                <span className="text-gray-700">20 {t('analysesPerMonth')}</span>
+              </div>
+              <div className="flex items-start gap-3">
+                <CheckCircle className="w-5 h-5 text-green-500 mt-1 flex-shrink-0" />
+                <span className="text-gray-700">{t('aiScoring')}</span>
+              </div>
+              <div className="flex items-start gap-3">
+                <CheckCircle className="w-5 h-5 text-green-500 mt-1 flex-shrink-0" />
+                <span className="text-gray-700">{t('platformRecommendations')}</span>
+              </div>
+              <div className="flex items-start gap-3">
+                <CheckCircle className="w-5 h-5 text-green-500 mt-1 flex-shrink-0" />
+                <span className="text-gray-700">{t('insights')}</span>
+              </div>
+              <div className="flex items-start gap-3">
+                <CheckCircle className="w-5 h-5 text-green-500 mt-1 flex-shrink-0" />
+                <span className="text-gray-700">{t('multiLanguage')}</span>
+              </div>
+            </div>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -450,88 +549,6 @@ const LandingPage = ({ language, onShowAuth, onNavigate }) => {
               <p className="text-gray-600 text-sm">Optimize for TikTok, YouTube, Instagram, LinkedIn, and X simultaneously</p>
             </div>
           </div>
-        </div>
-      </section>
-    </div>
-  );
-};
-
-const PricingPage = ({ language, onNavigate }) => {
-  const t = (key) => translations[language]?.[key] || translations.en[key] || key;
-
-  return (
-    <div className="bg-gray-50">
-      <section className="container mx-auto px-6 py-20">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-4">Choose Your Plan</h2>
-          <p className="text-gray-600">Start free, upgrade when you need more power</p>
-        </div>
-        
-        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-          {Object.entries(PRICING_PLANS).map(([key, plan]) => (
-            <div 
-              key={key}
-              className={`bg-white p-8 rounded-lg border ${
-                plan.popular ? 'border-indigo-500 shadow-lg relative' : 'border-gray-200'
-              }`}
-            >
-              {plan.popular && (
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-indigo-500 text-white px-3 py-1 rounded-full text-sm font-medium">
-                    Most Popular
-                  </span>
-                </div>
-              )}
-              
-              <div className="text-center mb-6">
-                <h3 className="text-xl font-semibold mb-2">{plan.name}</h3>
-                <div className="text-3xl font-bold mb-2">
-                  ${plan.price}<span className="text-lg text-gray-500">/mo</span>
-                </div>
-                <p className="text-gray-600">
-                  {typeof plan.monthly_analyses === 'number' 
-                    ? `${plan.monthly_analyses} analyses/month`
-                    : `${plan.monthly_analyses} analyses`
-                  }
-                </p>
-              </div>
-              
-              <ul className="space-y-3 mb-8">
-                {plan.features.map((feature, i) => (
-                  <li key={i} className="flex items-center gap-2 text-gray-700 text-sm">
-                    <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-              
-              <button 
-                onClick={() => {
-                  if (key === 'free') {
-                    onNavigate('upload');
-                  } else {
-                    alert(`Upgrading to ${plan.name} plan! (Payment integration coming soon)`);
-                  }
-                }}
-                className={`w-full px-4 py-2 rounded-md font-medium transition-all ${
-                  plan.popular 
-                    ? 'bg-indigo-600 text-white hover:bg-indigo-700' 
-                    : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
-                }`}
-              >
-                {plan.cta}
-              </button>
-            </div>
-          ))}
-        </div>
-        
-        <div className="text-center mt-12">
-          <button 
-            onClick={() => onNavigate('landing')}
-            className="text-indigo-600 hover:text-indigo-800 font-medium"
-          >
-            ← Back to Home
-          </button>
         </div>
       </section>
     </div>
@@ -725,7 +742,7 @@ const ResultsPage = ({ language, onNavigate, results }) => {
             className="flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-medium"
           >
             <ArrowLeft className="w-4 h-4" />
-            Analyze Another
+            {t('analyzeAnother')}
           </button>
         </div>
         
@@ -788,7 +805,7 @@ const TermsPage = ({ language, onNavigate }) => {
           <p>By accessing and using Viral Pilot, you accept and agree to be bound by the terms and provision of this agreement.</p>
           
           <h2>2. Use License</h2>
-          <p>Permission is granted to temporarily use Viral Pilot for personal, non-commercial transitory viewing only.</p>
+          <p>All users receive 20 video analyses per month. This limit resets monthly.</p>
           
           <h2>3. Video Content</h2>
           <p>You retain all rights to your video content. By uploading videos, you grant us permission to analyze them using AI.</p>
@@ -846,7 +863,7 @@ const PrivacyPage = ({ language, onNavigate }) => {
   );
 };
 
-// App principal
+// Main App Component
 const AppContent = () => {
   const [currentPage, setCurrentPage] = useState("landing");
   const [language, setLanguage] = useState("en");
@@ -891,12 +908,6 @@ const AppContent = () => {
         <LandingPage 
           language={language} 
           onShowAuth={handleShowAuth} 
-          onNavigate={handleNavigate}
-        />
-      )}
-      {currentPage === "pricing" && (
-        <PricingPage 
-          language={language} 
           onNavigate={handleNavigate}
         />
       )}
