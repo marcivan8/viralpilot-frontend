@@ -1,19 +1,17 @@
-// Detect environment and use correct port
+// Dynamically detect backend API URL
 const getApiUrl = () => {
-  // Check if we have an explicit URL set
+  // ✅ 1. Explicit environment variable takes priority
   if (import.meta.env.VITE_API_BASE_URL) {
     return import.meta.env.VITE_API_BASE_URL;
   }
-  
-  // Auto-detect based on current location
+
+  // ✅ 2. Local development
   const hostname = window.location.hostname;
-  
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
-    // IMPORTANT: Backend runs on port 3000
-    return 'http://localhost:3000';
+    return 'http://localhost:3000'; // backend port
   }
-  
-  // Production URL - UPDATE THIS WITH YOUR ACTUAL BACKEND URL
+
+  // ✅ 3. Default production fallback
   return 'https://clean-vp-backend-production.up.railway.app';
 };
 
@@ -21,6 +19,23 @@ const API_BASE_URL = getApiUrl();
 console.log('🔧 API Base URL:', API_BASE_URL);
 
 class ApiService {
+  static getAccessToken() {
+    // Try both possible Supabase storage keys
+    const session =
+      localStorage.getItem('sb-cvlecctifgctrghlvnes-auth-token') ||
+      localStorage.getItem('supabase.auth.token');
+
+    if (!session) return null;
+
+    try {
+      const data = JSON.parse(session);
+      return data?.access_token || data?.currentSession?.access_token || null;
+    } catch (err) {
+      console.error('❌ Failed to parse stored session:', err);
+      return null;
+    }
+  }
+
   static async makeRequest(endpoint, options = {}) {
     const url = `${API_BASE_URL}${endpoint}`;
     console.log('📡 Making request to:', url);
@@ -31,19 +46,7 @@ class ApiService {
       },
     };
 
-    // Get token from session storage (Supabase stores it there)
-    const session = localStorage.getItem('sb-cvlecctifgctrghlvnes-auth-token');
-    let token = null;
-    
-    if (session) {
-      try {
-        const sessionData = JSON.parse(session);
-        token = sessionData?.access_token;
-      } catch (e) {
-        console.error('Failed to parse session:', e);
-      }
-    }
-
+    const token = this.getAccessToken();
     if (token) {
       defaultOptions.headers.Authorization = `Bearer ${token}`;
     }
@@ -81,8 +84,8 @@ class ApiService {
       const response = await fetch(url, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          // Don't set Content-Type for FormData - browser will set it with boundary
+          Authorization: `Bearer ${accessToken}`,
+          // Note: Don't set Content-Type for FormData
         },
         body: formData,
       });
@@ -122,23 +125,22 @@ class ApiService {
     });
   }
 
-  // Test connection function
   static async testConnection() {
     try {
       console.log('🧪 Testing backend connection...');
       const response = await fetch(`${API_BASE_URL}/health`);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
       console.log('✅ Backend is reachable:', data);
       return true;
     } catch (error) {
       console.error('❌ Backend is NOT reachable:', error);
-      console.error('Make sure your backend is running on port 3000');
       return false;
     }
   }
 }
 
-// Test connection on load
+// Run health check on load
 ApiService.testConnection();
 
 export default ApiService;
