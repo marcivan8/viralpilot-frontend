@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import Logo from '../assets/logo.png';
+import Logo from './Logo'; // Fixed import - was importing from wrong path
 import { User, LogOut, Globe } from 'lucide-react';
 
 const Header = ({ language, setLanguage, onAuthClick, onNavigate }) => {

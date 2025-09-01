@@ -1,26 +1,49 @@
-// Detect environment
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ||
-  (window.location.hostname === "localhost"
-    ? "http://localhost:3000"
-    : "https://clean-vp-backend-production.up.railway.app");
+// Detect environment and use correct port
+const getApiUrl = () => {
+  // Check if we have an explicit URL set
+  if (import.meta.env.VITE_API_BASE_URL) {
+    return import.meta.env.VITE_API_BASE_URL;
+  }
+  
+  // Auto-detect based on current location
+  const hostname = window.location.hostname;
+  
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    // IMPORTANT: Backend runs on port 3001, not 3000!
+    return 'http://localhost:3001';
+  }
+  
+  // Production URL - UPDATE THIS WITH YOUR ACTUAL BACKEND URL
+  return 'https://clean-vp-backend-production.up.railway.app';
+};
 
-// Debug log
-console.log("🔧 API Base URL:", API_BASE_URL);
+const API_BASE_URL = getApiUrl();
+console.log('🔧 API Base URL:', API_BASE_URL);
 
 class ApiService {
   static async makeRequest(endpoint, options = {}) {
     const url = `${API_BASE_URL}${endpoint}`;
-    console.log("📡 Making request to:", url);
+    console.log('📡 Making request to:', url);
 
     const defaultOptions = {
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
     };
 
-    // Ajouter le token d'authentification si disponible
-    const token = localStorage.getItem("sb-access-token");
+    // Get token from session storage (Supabase stores it there)
+    const session = localStorage.getItem('sb-cvlecctifgctrghlvnes-auth-token');
+    let token = null;
+    
+    if (session) {
+      try {
+        const sessionData = JSON.parse(session);
+        token = sessionData?.access_token;
+      } catch (e) {
+        console.error('Failed to parse session:', e);
+      }
+    }
+
     if (token) {
       defaultOptions.headers.Authorization = `Bearer ${token}`;
     }
@@ -51,72 +74,47 @@ class ApiService {
 
   static async analyzeVideo(formData, accessToken) {
     const url = `${API_BASE_URL}/api/analyze`;
-    console.log("🎥 Uploading video to:", url);
-    console.log("🔑 Using access token:", accessToken ? "Yes" : "No");
+    console.log('🎥 Uploading video to:', url);
+    console.log('🔑 Using access token:', accessToken ? 'Yes' : 'No');
 
     try {
       const response = await fetch(url, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          Authorization: `Bearer ${accessToken}`,
+          'Authorization': `Bearer ${accessToken}`,
+          // Don't set Content-Type for FormData - browser will set it with boundary
         },
-        body: formData, // FormData, pas JSON
+        body: formData,
       });
 
-      console.log("📊 Response status:", response.status);
+      console.log('📊 Response status:', response.status);
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        console.error("❌ Backend error:", errorData);
-        throw new Error(errorData.error || "Analysis failed");
+        console.error('❌ Backend error:', errorData);
+        throw new Error(errorData.error || 'Analysis failed');
       }
 
       const data = await response.json();
-      console.log("✅ Analysis successful:", data);
+      console.log('✅ Analysis successful:', data);
       return data;
     } catch (error) {
-      console.error("❌ analyzeVideo failed:", error);
-      console.error("Full error details:", {
-        message: error.message,
-        stack: error.stack,
-        url: url,
-      });
+      console.error('❌ analyzeVideo failed:', error);
       throw error;
     }
   }
 
-  static async getAnalysisHistory(accessToken, limit = 10, offset = 0) {
-    return this.makeRequest(
-      `/api/analyze/history?limit=${limit}&offset=${offset}`,
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }
-    );
-  }
-
-  static async getSubscriptionStatus(accessToken) {
-    return this.makeRequest(`/api/subscription/status`, {
+  static async getUsage(accessToken) {
+    return this.makeRequest('/api/auth/usage', {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
-    });
-  }
-
-  static async createCheckout(planKey, accessToken) {
-    return this.makeRequest(`/api/subscription/checkout`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-      body: JSON.stringify({ plan: planKey }),
     });
   }
 
   static async createProfile(userId, email, fullName, accessToken) {
-    return this.makeRequest("/api/auth/profile", {
-      method: "POST",
+    return this.makeRequest('/api/auth/profile', {
+      method: 'POST',
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
@@ -127,13 +125,14 @@ class ApiService {
   // Test connection function
   static async testConnection() {
     try {
-      console.log("🧪 Testing backend connection...");
+      console.log('🧪 Testing backend connection...');
       const response = await fetch(`${API_BASE_URL}/health`);
       const data = await response.json();
-      console.log("✅ Backend is reachable:", data);
+      console.log('✅ Backend is reachable:', data);
       return true;
     } catch (error) {
-      console.error("❌ Backend is NOT reachable:", error);
+      console.error('❌ Backend is NOT reachable:', error);
+      console.error('Make sure your backend is running on port 3001');
       return false;
     }
   }
