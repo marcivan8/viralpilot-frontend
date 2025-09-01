@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import Logo from './Logo';
+import Logo from '../assets/logo.png';
 import { User, LogOut, Globe } from 'lucide-react';
 
 const Header = ({ language, setLanguage, onAuthClick, onNavigate }) => {
