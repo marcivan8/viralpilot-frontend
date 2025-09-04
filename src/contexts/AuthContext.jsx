@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import ApiService from '../services/apiService'; // ✅ FIXED PATH - was './apiService'
+import apiService from '../services/apiService'; // ✅ FIXED PATH - was './apiService'
 
 // Validation des variables d'environnement
 if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
