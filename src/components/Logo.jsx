@@ -1,13 +1,12 @@
 import React from 'react';
-import { Zap } from 'lucide-react';
 
-// Simple logo component using Lucide icon
+// Logo component using logo.png
 const Logo = ({ size = 'md', className = '', showText = true }) => {
   const sizes = {
     sm: 'w-6 h-6',
     md: 'w-8 h-8', 
     lg: 'w-12 h-12',
-    xl: 'w-16 h-16'
+    xl: 'w-32 h-32'
   };
 
   const textSizes = {
@@ -19,9 +18,11 @@ const Logo = ({ size = 'md', className = '', showText = true }) => {
 
   return (
     <div className={`flex items-center space-x-2 ${className}`}>
-      <div className={`bg-indigo-600 rounded-md flex items-center justify-center ${sizes[size]}`}>
-        <Zap className={`text-white ${size === 'sm' ? 'w-4 h-4' : size === 'md' ? 'w-5 h-5' : 'w-6 h-6'}`} />
-      </div>
+      <img 
+        src="/logo.png" 
+        alt="Viral Pilot Logo" 
+        className={`object-contain ${sizes[size]}`}
+      />
       {showText && (
         <span className={`font-bold text-gray-900 ${textSizes[size]}`}>
           Viral Pilot

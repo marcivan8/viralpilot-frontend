@@ -1,7 +1,8 @@
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import Logo from './Logo'; // Fixed import - was importing from wrong path
-import { User, LogOut, Globe } from 'lucide-react';
+import ScrollToTop from './ScrollToTop';
+import { User, LogOut, Globe, Target } from 'lucide-react';
 
 const Header = ({ language, setLanguage, onAuthClick, onNavigate }) => {
   const { user, signOut, loading } = useAuth();
@@ -16,7 +17,7 @@ const Header = ({ language, setLanguage, onAuthClick, onNavigate }) => {
   };
 
   return (
-    <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+    <header className="bg-white/90 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50 shadow-sm">
       <div className="container mx-auto px-6 py-4 flex justify-between items-center">
         <div 
           onClick={() => onNavigate('landing')} 
@@ -43,25 +44,31 @@ const Header = ({ language, setLanguage, onAuthClick, onNavigate }) => {
           {/* User Section */}
           {user ? (
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 bg-gray-100 px-3 py-1 rounded-md">
-                <User className="w-4 h-4 text-gray-600" />
-                <span className="text-sm text-gray-700 max-w-32 truncate">
-                  {user.email}
+              <button
+                onClick={() => onNavigate('dashboard')}
+                className="btn-liquid-glass-secondary flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all"
+              >
+                <Target className="w-4 h-4 text-gray-700" />
+                <span className="text-sm text-gray-700 font-medium">Dashboard</span>
+              </button>
+              <div className="flex items-center gap-2 bg-white/80 backdrop-blur-md border border-gray-200 px-3 py-1.5 rounded-lg shadow-sm">
+                <User className="w-4 h-4 text-indigo-600" />
+                <span className="text-sm text-gray-700 font-medium max-w-32 truncate">
+                  {user.user_metadata?.full_name || user.email?.split('@')[0] || 'User'}
                 </span>
               </div>
               <button 
                 onClick={handleSignOut}
                 disabled={loading}
-                className="flex items-center gap-1 text-gray-600 hover:text-gray-900 text-sm transition-colors disabled:opacity-50"
+                className="flex items-center gap-1 text-gray-600 hover:text-gray-900 text-sm transition-colors disabled:opacity-50 p-2 rounded-lg hover:bg-gray-100"
               >
                 <LogOut className="w-4 h-4" />
-                Sign Out
               </button>
             </div>
           ) : (
             <button 
               onClick={onAuthClick}
-              className="bg-indigo-600 text-white px-6 py-2 rounded-md font-medium hover:bg-indigo-700 transition-all"
+              className="btn-liquid-glass px-6 py-2 rounded-lg font-medium transition-all"
             >
               Sign In
             </button>
@@ -94,7 +101,7 @@ const Footer = ({ language, onNavigate }) => {
   const t = (key) => translations[language]?.[key] || translations.en[key];
 
   return (
-    <footer className="bg-white border-t border-gray-200 mt-auto">
+    <footer className="bg-white/80 backdrop-blur-sm border-t border-gray-100 mt-auto">
       <div className="container mx-auto px-6 py-8 text-center text-gray-500 text-sm">
         <div className="flex justify-center space-x-4 mb-4">
           <button 
@@ -118,7 +125,7 @@ const Footer = ({ language, onNavigate }) => {
 
 const Layout = ({ children, language, setLanguage, onAuthClick, onNavigate }) => {
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen w-full bg-gradient-to-br from-white via-slate-50 to-gray-50 flex flex-col overflow-x-hidden">
       <Header 
         language={language} 
         setLanguage={setLanguage} 
@@ -132,6 +139,8 @@ const Layout = ({ children, language, setLanguage, onAuthClick, onNavigate }) =>
         language={language}
         onNavigate={onNavigate}
       />
+      {/* Scroll To Top Button - Available on all pages */}
+      <ScrollToTop />
     </div>
   );
 };

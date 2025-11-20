@@ -3,6 +3,9 @@ import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { useAnalysis } from "./hooks/useAnalysis";
 import Layout from "./components/Layout";
 import Logo from "./components/Logo";
+import UsageDashboard from "./components/UsageDashboard";
+import LandingPage from "./components/LandingPage";
+import { SessionWarning, useSessionManager } from "./services/SessionManager";
 import { 
   Upload, Star, TrendingUp, Target, CheckCircle, AlertCircle, 
   Shield, Database, ArrowLeft, Sparkles 
@@ -34,10 +37,10 @@ const translations = {
     changeVideo: "Change Video",
     analyzing: "Analyzing with AI...",
     
-    aiConsentTitle: "🤖 Help improve our AI (Optional)",
-    aiConsentText: "I agree to allow Viral Pilot to store and use my uploaded video(s) for improving its AI algorithms. I confirm that I have the necessary rights to this content.",
-    aiConsentWith: "With consent: Videos stored securely for AI training",
-    aiConsentWithout: "Without consent: Videos automatically deleted after 30 days",
+    aiConsentTitle: "AI Learning (Optional)",
+    aiConsentText: "Allow Viral Pilot to use aggregated analysis data from your videos to improve AI recommendations. Your videos are not stored - only anonymized metrics and insights are used for model enhancement.",
+    aiConsentWith: "With consent: Analysis data used for AI improvement",
+    aiConsentWithout: "Without consent: Analysis data not used for training",
     
     viralScore: "Viral Potential Score",
     bestPlatform: "Recommended Platform",
@@ -77,7 +80,6 @@ const translations = {
     analysesPerMonth: "video analyses per month",
     aiScoring: "AI-powered viral scoring",
     platformRecommendations: "Platform-specific recommendations",
-    insights: "Actionable insights & tips",
     multiLanguage: "Multi-language support"
   },
   fr: {
@@ -101,10 +103,10 @@ const translations = {
     changeVideo: "Changer la vidéo",
     analyzing: "Analyse IA en cours...",
     
-    aiConsentTitle: "🤖 Aider à améliorer notre IA (Optionnel)",
-    aiConsentText: "J'accepte que Viral Pilot stocke et utilise mes vidéos pour améliorer ses algorithmes IA. Je confirme avoir les droits nécessaires sur ce contenu.",
-    aiConsentWith: "Avec consentement : Vidéos stockées de manière sécurisée pour l'entraînement IA",
-    aiConsentWithout: "Sans consentement : Vidéos automatiquement supprimées après 30 jours",
+    aiConsentTitle: "Apprentissage IA (Optionnel)",
+    aiConsentText: "Permettre à Viral Pilot d'utiliser les données d'analyse agrégées de vos vidéos pour améliorer les recommandations IA. Vos vidéos ne sont pas stockées - seules les métriques et insights anonymisés sont utilisés pour l'amélioration du modèle.",
+    aiConsentWith: "Avec consentement : Données d'analyse utilisées pour l'amélioration IA",
+    aiConsentWithout: "Sans consentement : Données d'analyse non utilisées pour l'entraînement",
     
     viralScore: "Score de Potentiel Viral",
     bestPlatform: "Plateforme Recommandée",
@@ -144,7 +146,6 @@ const translations = {
     analysesPerMonth: "analyses vidéo par mois",
     aiScoring: "Score de viralité par IA",
     platformRecommendations: "Recommandations par plateforme",
-    insights: "Conseils et astuces pratiques",
     multiLanguage: "Support multilingue"
   },
   tr: {
@@ -168,10 +169,10 @@ const translations = {
     changeVideo: "Videoyu Değiştir",
     analyzing: "AI ile analiz ediliyor...",
     
-    aiConsentTitle: "🤖 AI'mızı geliştirmeye yardımcı olun (İsteğe Bağlı)",
-    aiConsentText: "Viral Pilot'un AI algoritmalarını geliştirmek için yüklediğim videoları saklamasına ve kullanmasına izin veriyorum. Bu içerik üzerinde gerekli haklara sahip olduğumu onaylıyorum.",
-    aiConsentWith: "Onay ile: Videolar AI eğitimi için güvenli şekilde saklanır",
-    aiConsentWithout: "Onay olmadan: Videolar 30 gün sonra otomatik olarak silinir",
+    aiConsentTitle: "AI Öğrenme (İsteğe Bağlı)",
+    aiConsentText: "Viral Pilot'un AI önerilerini geliştirmek için videolarınızdan toplanan analiz verilerini kullanmasına izin verin. Videolarınız saklanmaz - yalnızca anonimleştirilmiş metrikler ve içgörüler model iyileştirmesi için kullanılır.",
+    aiConsentWith: "Onay ile: Analiz verileri AI iyileştirmesi için kullanılır",
+    aiConsentWithout: "Onay olmadan: Analiz verileri eğitim için kullanılmaz",
     
     viralScore: "Viral Potansiyel Puanı",
     bestPlatform: "Önerilen Platform",
@@ -211,7 +212,6 @@ const translations = {
     analysesPerMonth: "aylık video analizi",
     aiScoring: "AI destekli viral puanlama",
     platformRecommendations: "Platforma özel öneriler",
-    insights: "Uygulanabilir içgörüler ve ipuçları",
     multiLanguage: "Çoklu dil desteği"
   }
 };
@@ -221,7 +221,7 @@ const AITrainingConsent = ({ consent, setConsent, language }) => {
   const t = (key) => translations[language]?.[key] || translations.en[key] || key;
   
   return (
-    <div className="bg-gray-50 border border-gray-200 p-4 rounded-lg mb-4">
+    <div className="bg-white/60 backdrop-blur-sm border border-gray-200 p-4 rounded-lg mb-4 opacity-90">
       <div className="flex items-start gap-3">
         <input
           id="ai-training-consent"
@@ -231,19 +231,19 @@ const AITrainingConsent = ({ consent, setConsent, language }) => {
           className="mt-1 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
         />
         <div>
-          <label htmlFor="ai-training-consent" className="font-medium text-gray-900 cursor-pointer">
+          <label htmlFor="ai-training-consent" className="text-sm font-medium text-gray-700 cursor-pointer">
             {t('aiConsentTitle')}
           </label>
-          <p className="text-sm text-gray-600 mt-1">
+          <p className="text-xs text-gray-600 mt-1 leading-relaxed">
             {t('aiConsentText')}
           </p>
-          <div className="text-xs text-gray-500 mt-2">
-            <div className="flex items-center gap-1 mb-1">
-              <Shield className="w-3 h-3 text-green-500" />
+          <div className="text-xs text-gray-500 mt-2 space-y-1">
+            <div className="flex items-center gap-1">
+              <Shield className="w-3 h-3 text-green-600 opacity-70" />
               <span>{t('aiConsentWith')}</span>
             </div>
             <div className="flex items-center gap-1">
-              <Database className="w-3 h-3 text-blue-500" />
+              <Database className="w-3 h-3 text-blue-600 opacity-70" />
               <span>{t('aiConsentWithout')}</span>
             </div>
           </div>
@@ -297,7 +297,7 @@ const UsageDisplay = ({ language }) => {
   const remaining = usage?.remaining || (20 - currentUsage);
   
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-4 mb-4 shadow-sm">
+    <div className="bg-white/80 backdrop-blur-sm border border-gray-100 rounded-lg p-4 mb-4 shadow-sm">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Target className="w-5 h-5 text-indigo-500" />
@@ -443,7 +443,7 @@ const AuthModal = ({ show, onClose, language }) => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md transition-all font-medium disabled:opacity-50"
+            className="btn-liquid-glass w-full px-4 py-2 rounded-lg transition-all font-medium disabled:opacity-50 disabled:hover:translate-y-0"
           >
             {loading ? 'Loading...' : (isLogin ? t('login') : t('signup'))}
           </button>
@@ -477,83 +477,7 @@ const AuthModal = ({ show, onClose, language }) => {
   );
 };
 
-// Main Pages
-const LandingPage = ({ language, onShowAuth, onNavigate }) => {
-  const { user } = useAuth();
-  const t = (key) => translations[language]?.[key] || translations.en[key] || key;
-  
-  return (
-    <div className="bg-gray-50">
-      <section className="container mx-auto px-6 py-20 text-center">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gray-900">
-            {t('subtitle')}
-          </h2>
-          
-          <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-            {t('tagline')}
-          </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
-            <button 
-              onClick={() => user ? onNavigate('upload') : onShowAuth()}
-              className="bg-indigo-600 text-white px-8 py-3 rounded-md font-medium hover:bg-indigo-700 transition-all shadow-md"
-            >
-              {user ? "Analyze Your Video" : t('startFree')}
-            </button>
-          </div>
-
-          {/* Features Section */}
-          <div className="bg-white rounded-lg border border-gray-200 p-8 mb-12 shadow-sm">
-            <h3 className="text-xl font-semibold mb-6">{t('allUsersGet')}</h3>
-            <div className="grid md:grid-cols-2 gap-4 text-left">
-              <div className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-green-500 mt-1 flex-shrink-0" />
-                <span className="text-gray-700">20 {t('analysesPerMonth')}</span>
-              </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-green-500 mt-1 flex-shrink-0" />
-                <span className="text-gray-700">{t('aiScoring')}</span>
-              </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-green-500 mt-1 flex-shrink-0" />
-                <span className="text-gray-700">{t('platformRecommendations')}</span>
-              </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-green-500 mt-1 flex-shrink-0" />
-                <span className="text-gray-700">{t('insights')}</span>
-              </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-green-500 mt-1 flex-shrink-0" />
-                <span className="text-gray-700">{t('multiLanguage')}</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-              <Target className="w-10 h-10 text-indigo-600 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-3">AI-Powered Analysis</h3>
-              <p className="text-gray-600 text-sm">Advanced algorithms analyze your content across multiple platforms simultaneously</p>
-            </div>
-            
-            <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-              <TrendingUp className="w-10 h-10 text-indigo-600 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-3">Viral Insights</h3>
-              <p className="text-gray-600 text-sm">Get specific, actionable recommendations to maximize your viral potential</p>
-            </div>
-            
-            <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-              <Sparkles className="w-10 h-10 text-indigo-600 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-3">Multi-Platform</h3>
-              <p className="text-gray-600 text-sm">Optimize for TikTok, YouTube, Instagram, LinkedIn, and X simultaneously</p>
-            </div>
-          </div>
-        </div>
-      </section>
-    </div>
-  );
-};
+// LandingPage is now imported from components
 
 const UploadPage = ({ language, onNavigate }) => {
   const [formData, setFormData] = useState({ title: "", description: "", language: language });
@@ -601,16 +525,16 @@ const UploadPage = ({ language, onNavigate }) => {
   }
 
   return (
-    <div className="bg-gray-50">
+    <div className="bg-gradient-to-br from-white via-slate-50 to-gray-50">
       <section className="container mx-auto px-6 py-20 max-w-2xl">
         <div className="text-center mb-8">
-          <h2 className="text-2xl font-semibold mb-2">Upload Your Video</h2>
+          <h2 className="text-3xl font-artistic mb-2">Upload Your Video</h2>
           <p className="text-gray-600">Get AI-powered insights to maximize your viral potential</p>
         </div>
         
         <UsageDisplay language={language} />
         
-        <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+        <div className="bg-white/80 backdrop-blur-sm p-6 rounded-lg border border-gray-100 shadow-sm">
           <form className="space-y-6">
             <div>
               <label className="block text-sm font-medium mb-2 text-gray-700">
@@ -676,8 +600,8 @@ const UploadPage = ({ language, onNavigate }) => {
             <button 
               type="button"
               onClick={handleAnalyze}
-              disabled={isAnalyzing || !uploadedVideo || !formData.title || !formData.description}
-              className="w-full bg-indigo-600 text-white px-4 py-3 rounded-md font-medium hover:bg-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="btn-liquid-glass w-full px-4 py-3 rounded-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+              disabled={isAnalyzing}
             >
               {isAnalyzing 
                 ? `${t('analyzing')} ${progress > 0 ? `(${progress}%)` : ''}` 
@@ -709,7 +633,7 @@ const ResultsPage = ({ language, onNavigate, results }) => {
         <h2 className="text-2xl font-semibold mb-4">No results available</h2>
         <button 
           onClick={() => onNavigate('upload')}
-          className="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700"
+          className="btn-liquid-glass px-6 py-2 rounded-lg transition-all"
         >
           Analyze a Video
         </button>
@@ -733,10 +657,10 @@ const ResultsPage = ({ language, onNavigate, results }) => {
   };
 
   return (
-    <div className="bg-gray-50">
+    <div className="bg-gradient-to-br from-white via-slate-50 to-gray-50">
       <section className="container mx-auto px-6 py-20 max-w-4xl">
         <div className="flex items-center justify-between mb-8">
-          <h2 className="text-2xl font-semibold">Analysis Results</h2>
+          <h2 className="text-3xl font-artistic">Analysis Results</h2>
           <button 
             onClick={() => onNavigate('upload')}
             className="flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-medium"
@@ -747,7 +671,7 @@ const ResultsPage = ({ language, onNavigate, results }) => {
         </div>
         
         <div className="grid md:grid-cols-2 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm text-center">
+          <div className="bg-white/80 backdrop-blur-sm p-6 rounded-lg border border-gray-100 shadow-sm text-center hover:shadow-md transition-shadow">
             <h3 className="text-lg font-semibold mb-4">{t('viralScore')}</h3>
             <div className={`text-5xl font-bold mb-2 ${getScoreColor(results.viralityScore)}`}>
               {results.viralityScore}
@@ -755,7 +679,7 @@ const ResultsPage = ({ language, onNavigate, results }) => {
             <p className="text-sm text-gray-600">{getScoreMessage(results.viralityScore)}</p>
           </div>
           
-          <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm text-center">
+          <div className="bg-white/80 backdrop-blur-sm p-6 rounded-lg border border-gray-100 shadow-sm text-center hover:shadow-md transition-shadow">
             <h3 className="text-lg font-semibold mb-4">{t('bestPlatform')}</h3>
             <div className="text-2xl font-semibold text-indigo-600 mb-2">
               {t(results.bestPlatform)}
@@ -764,7 +688,7 @@ const ResultsPage = ({ language, onNavigate, results }) => {
           </div>
         </div>
         
-        <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm mb-8">
+        <div className="bg-white/80 backdrop-blur-sm p-6 rounded-lg border border-gray-100 shadow-sm mb-8">
           <h3 className="text-lg font-semibold mb-4">{t('platformScores')}</h3>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {Object.entries(results.platformScores || {}).map(([platform, score]) => (
@@ -778,7 +702,7 @@ const ResultsPage = ({ language, onNavigate, results }) => {
           </div>
         </div>
         
-        <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+        <div className="bg-white/80 backdrop-blur-sm p-6 rounded-lg border border-gray-100 shadow-sm">
           <h3 className="text-lg font-semibold mb-4">{t('insights')}</h3>
           <div className="space-y-3">
             {(results.insights || []).map((insight, i) => (
@@ -797,10 +721,10 @@ const ResultsPage = ({ language, onNavigate, results }) => {
 // Terms and Privacy Pages
 const TermsPage = ({ language, onNavigate }) => {
   return (
-    <div className="bg-gray-50">
+    <div className="bg-gradient-to-br from-white via-slate-50 to-gray-50">
       <section className="container mx-auto px-6 py-20 max-w-4xl">
-        <h1 className="text-3xl font-bold mb-8">Terms of Service</h1>
-        <div className="bg-white p-8 rounded-lg border border-gray-200 shadow-sm prose max-w-none">
+        <h1 className="text-4xl font-artistic mb-8">Terms of Service</h1>
+        <div className="bg-white/80 backdrop-blur-sm p-8 rounded-lg border border-gray-100 shadow-sm prose max-w-none">
           <h2>1. Acceptance of Terms</h2>
           <p>By accessing and using Viral Pilot, you accept and agree to be bound by the terms and provision of this agreement.</p>
           
@@ -831,10 +755,10 @@ const TermsPage = ({ language, onNavigate }) => {
 
 const PrivacyPage = ({ language, onNavigate }) => {
   return (
-    <div className="bg-gray-50">
+    <div className="bg-gradient-to-br from-white via-slate-50 to-gray-50">
       <section className="container mx-auto px-6 py-20 max-w-4xl">
-        <h1 className="text-3xl font-bold mb-8">Privacy Policy</h1>
-        <div className="bg-white p-8 rounded-lg border border-gray-200 shadow-sm prose max-w-none">
+        <h1 className="text-4xl font-artistic mb-8">Privacy Policy</h1>
+        <div className="bg-white/80 backdrop-blur-sm p-8 rounded-lg border border-gray-100 shadow-sm prose max-w-none">
           <h2>1. Information We Collect</h2>
           <p>We collect information you provide directly to us, such as when you create an account or upload a video.</p>
           
@@ -869,7 +793,8 @@ const AppContent = () => {
   const [language, setLanguage] = useState("en");
   const [showAuth, setShowAuth] = useState(false);
   const [analysisResults, setAnalysisResults] = useState(null);
-  const { user, loading } = useAuth();
+  const { user, loading, signOut } = useAuth();
+  const { showWarning, extendSession, logout: sessionLogout } = useSessionManager();
 
   const handleNavigate = (page, data = null) => {
     if (page === 'results') {
@@ -888,7 +813,7 @@ const AppContent = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <Logo size="lg" className="justify-center mb-4" />
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div>
@@ -936,12 +861,40 @@ const AppContent = () => {
           onNavigate={handleNavigate}
         />
       )}
+      {currentPage === "dashboard" && user && (
+        <UsageDashboard 
+          userId={user.id}
+          language={language}
+          onNavigate={handleNavigate}
+        />
+      )}
       
       <AuthModal 
         show={showAuth}
         onClose={handleCloseAuth}
         language={language}
       />
+      
+      {/* Session Warning Modal - Only show for authenticated users */}
+      {user && (
+        <SessionWarning
+          onExtend={() => {
+            extendSession();
+          }}
+          onLogout={async () => {
+            try {
+              await signOut();
+              setCurrentPage('landing');
+              setShowAuth(false);
+              sessionLogout();
+            } catch (error) {
+              console.error('Logout error:', error);
+              // Force logout even if signOut fails
+              sessionLogout();
+            }
+          }}
+        />
+      )}
     </Layout>
   );
 };

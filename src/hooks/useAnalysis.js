@@ -1,6 +1,9 @@
 import { useState, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import ApiService from '../services/apiService';
+import EmotionService from '../services/emotionService';
+import VisionService from '../services/visionService';
+import AudioService from '../services/audioService';
 
 export const useAnalysis = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -37,7 +40,43 @@ export const useAnalysis = () => {
       uploadData.append('language', formData.language || 'en');
       uploadData.append('ai_training_consent', aiConsent.toString());
 
-      const results = await ApiService.analyzeVideo(uploadData, accessToken);
+      // Analyser avec les différents services en parallèle (si possible)
+      setProgress(20);
+      
+      // Lancer les analyses en parallèle
+      const [emotions, vision, audio, backendResults] = await Promise.allSettled([
+        EmotionService.analyzeEmotions(file).catch(err => {
+          console.warn('Emotion analysis failed:', err);
+          return null;
+        }),
+        VisionService.analyzeObjectsAndScenes(file, accessToken).catch(err => {
+          console.warn('Vision analysis failed:', err);
+          return null;
+        }),
+        AudioService.analyzeAudio(file).catch(err => {
+          console.warn('Audio analysis failed:', err);
+          return null;
+        }),
+        ApiService.analyzeVideo(uploadData, accessToken),
+      ]);
+
+      setProgress(90);
+
+      // Combiner les résultats
+      const results = backendResults.status === 'fulfilled' ? backendResults.value : {};
+      
+      // Ajouter les analyses additionnelles
+      if (emotions.status === 'fulfilled' && emotions.value) {
+        results.emotionAnalysis = emotions.value;
+      }
+      
+      if (vision.status === 'fulfilled' && vision.value) {
+        results.visionAnalysis = vision.value;
+      }
+      
+      if (audio.status === 'fulfilled' && audio.value) {
+        results.audioAnalysis = audio.value;
+      }
       
       clearInterval(progressInterval);
       setProgress(100);

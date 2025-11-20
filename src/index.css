@@ -12,10 +12,12 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden; /* Empêcher scroll horizontal */
+  overflow-y: auto;   /* Permettre scroll vertical */
 }
 
 html, body {
-  height: 100%;
+  width: 100%;
   overflow-x: hidden; /* Empêcher scroll horizontal */
   overflow-y: auto;   /* Permettre scroll vertical */
 }
@@ -28,16 +30,21 @@ body {
   background-color: #f9fafb; /* gray-50 */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
 }
 
 #root {
   min-height: 100vh;
+  width: 100%;
   position: relative;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
 }
 
-/* Background animé - Version fixée */
+/* Background animé - Version fixée - Dégradés blancs épurés */
 .animated-bg {
   position: fixed;
   top: 0;
@@ -45,9 +52,9 @@ body {
   width: 100vw;
   height: 100vh;
   z-index: -1;
-  background: linear-gradient(-45deg, #e0f2fe, #f0f9ff, #dbeafe, #e0e7ff);
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 25%, #f1f5f9 50%, #fafafa 75%, #ffffff 100%);
   background-size: 400% 400%;
-  animation: gradientShift 15s ease infinite;
+  animation: gradientShift 20s ease infinite;
   pointer-events: none;
 }
 
@@ -492,3 +499,180 @@ select:focus-visible {
 .z-dropdown { z-index: 100; }
 .z-sticky { z-index: 10; }
 .z-background { z-index: -1; }
+
+/* Session Warning Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+.animate-slideUp {
+  animation: slideUp 0.3s ease-out forwards;
+}
+
+/* Astron Boy Font - Fallback to Orbitron if not available locally */
+@font-face {
+  font-family: 'Astron Boy';
+  src: url('/fonts/AstronBoy.woff2') format('woff2'),
+       url('/fonts/AstronBoy.woff') format('woff'),
+       url('/fonts/AstronBoy.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Futuristic 3D Police-Style Text - Enhanced with Astron Boy */
+.futuristic-3d-text-enhanced {
+  font-family: 'Astron Boy', 'Orbitron', 'Arial Black', sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #43e97b 100%);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradient-shift 3s ease infinite;
+  text-shadow: 
+    0 1px 0 rgba(102, 126, 234, 0.3),
+    0 2px 5px rgba(102, 126, 234, 0.3),
+    0 3px 10px rgba(118, 75, 162, 0.25);
+  transform: perspective(800px) rotateX(8deg) translateZ(20px);
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+  position: relative;
+}
+
+.futuristic-3d-text-enhanced-small {
+  font-family: 'Astron Boy', 'Orbitron', 'Arial Black', sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradient-shift 4s ease infinite;
+  text-shadow: 
+    0 1px 0 rgba(102, 126, 234, 0.3),
+    0 2px 4px rgba(102, 126, 234, 0.3),
+    0 3px 8px rgba(118, 75, 162, 0.25);
+  transform: perspective(600px) rotateX(5deg) translateZ(10px);
+  letter-spacing: 0.01em;
+}
+
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Liquid Glass Effect Buttons */
+.btn-liquid-glass {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.9) 0%, rgba(118, 75, 162, 0.9) 100%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 
+    0 8px 32px rgba(102, 126, 234, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+  color: white;
+}
+
+.btn-liquid-glass::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s;
+}
+
+.btn-liquid-glass:hover::before {
+  left: 100%;
+}
+
+.btn-liquid-glass:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 12px 40px rgba(102, 126, 234, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+}
+
+.btn-liquid-glass:active {
+  transform: translateY(0);
+}
+
+.btn-liquid-glass-secondary {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-liquid-glass-secondary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+  transition: left 0.5s;
+}
+
+.btn-liquid-glass-secondary:hover::before {
+  left: 100%;
+}
+
+.btn-liquid-glass-secondary:hover {
+  background: rgba(255, 255, 255, 0.9);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+}
+
+.btn-liquid-glass-secondary:active {
+  transform: translateY(0);
+}
