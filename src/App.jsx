@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
-import { useAnalysis } from "./hooks/useAnalysis";
+import { AnalysisProvider, useAnalysisContext } from "./contexts/AnalysisContext";
 import Layout from "./components/Layout";
 import Logo from "./components/Logo";
 import UsageDashboard from "./components/UsageDashboard";
@@ -483,7 +483,7 @@ const UploadPage = ({ language, onNavigate }) => {
   const [formData, setFormData] = useState({ title: "", description: "", language: language });
   const [uploadedVideo, setUploadedVideo] = useState(null);
   const [aiConsent, setAiConsent] = useState(false);
-  const { analyzeVideo, isAnalyzing, progress, error } = useAnalysis();
+  const { analyzeVideo, isAnalyzing, progress, error } = useAnalysisContext();
   const { user } = useAuth();
   
   const t = (key) => translations[language]?.[key] || translations.en[key] || key;
@@ -508,8 +508,8 @@ const UploadPage = ({ language, onNavigate }) => {
     }
     
     try {
-      const results = await analyzeVideo(uploadedVideo, formData, aiConsent);
-      onNavigate('results', results);
+            await analyzeVideo(uploadedVideo, formData, aiConsent);
+      onNavigate('results');
     } catch (err) {
       console.error('Analysis failed:', err);
     }
@@ -624,7 +624,8 @@ const UploadPage = ({ language, onNavigate }) => {
   );
 };
 
-const ResultsPage = ({ language, onNavigate, results }) => {
+const ResultsPage = ({ language, onNavigate }) => {
+  const { analysisResults: results, resetAnalysis } = useAnalysisContext();
   const t = (key) => translations[language]?.[key] || translations.en[key] || key;
   
   if (!results) {
@@ -792,14 +793,10 @@ const AppContent = () => {
   const [currentPage, setCurrentPage] = useState("landing");
   const [language, setLanguage] = useState("en");
   const [showAuth, setShowAuth] = useState(false);
-  const [analysisResults, setAnalysisResults] = useState(null);
   const { user, loading, signOut } = useAuth();
   const { showWarning, extendSession, logout: sessionLogout } = useSessionManager();
 
-  const handleNavigate = (page, data = null) => {
-    if (page === 'results') {
-      setAnalysisResults(data);
-    }
+  const handleNavigate = (page) => {
     setCurrentPage(page);
   };
 
@@ -843,10 +840,9 @@ const AppContent = () => {
         />
       )}
       {currentPage === "results" && (
-        <ResultsPage 
+                <ResultsPage 
           language={language} 
           onNavigate={handleNavigate}
-          results={analysisResults}
         />
       )}
       {currentPage === "terms" && (
@@ -902,7 +898,9 @@ const AppContent = () => {
 export default function App() {
   return (
     <AuthProvider>
-      <AppContent />
+      <AnalysisProvider>
+        <AppContent />
+      </AnalysisProvider>
     </AuthProvider>
   );
 }

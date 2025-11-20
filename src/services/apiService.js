@@ -104,7 +104,7 @@ class ApiService {
   }
 
   static async analyzeVideo(formData, accessToken) {
-    const url = `${API_BASE_URL}/api/analyze`;
+    const url = `${API_BASE_URL}/analyze`;
     console.log('🎥 Uploading video to:', url);
     console.log('🔑 Using access token:', accessToken ? 'Yes' : 'No');
 
@@ -164,7 +164,7 @@ class ApiService {
 
   static async getUsage(accessToken) {
     console.log('📊 Fetching usage data...');
-    return this.makeRequest('/api/auth/usage', {
+    return this.makeRequest('/auth/usage', {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
@@ -173,7 +173,7 @@ class ApiService {
 
   static async createProfile(userId, email, fullName, accessToken) {
     console.log('👤 Creating user profile...');
-    return this.makeRequest('/api/auth/profile', {
+    return this.makeRequest('/auth/profile', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -185,7 +185,7 @@ class ApiService {
 
   static async getAnalysisHistory(accessToken, limit = 10, offset = 0) {
     console.log('📚 Fetching analysis history...');
-    return this.makeRequest(`/api/auth/history?limit=${limit}&offset=${offset}`, {
+    return this.makeRequest(`/auth/history?limit=${limit}&offset=${offset}`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
@@ -219,7 +219,7 @@ class ApiService {
   static async testAnalyzeEndpoint() {
     try {
       console.log('🧪 Testing analyze endpoint...');
-      const response = await fetch(`${API_BASE_URL}/api/analyze/health/check`, {
+      const response = await fetch(`${API_BASE_URL}/analyze/health/check`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

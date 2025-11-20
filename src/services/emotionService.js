@@ -20,36 +20,21 @@ class EmotionService {
 
     this.loadingPromise = (async () => {
       try {
-        console.log('📦 Loading face-api.js models...');
-        
-        const MODEL_URL = '/models'; // Les modèles doivent être dans public/models
+        console.log('📦 Loading face-api.js models from CDN...');
+        const MODEL_URL_CDN = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model';
         
         await Promise.all([
-          faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
-          faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
-          faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
-          faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL),
+          faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL_CDN),
+          faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL_CDN),
+          faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL_CDN),
+          faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL_CDN),
         ]);
 
         this.modelsLoaded = true;
-        console.log('✅ face-api.js models loaded successfully');
+        console.log('✅ face-api.js models loaded successfully from CDN');
       } catch (error) {
-        console.error('❌ Error loading face-api.js models:', error);
-        // Fallback: utiliser des modèles depuis CDN si les fichiers locaux ne sont pas disponibles
-        try {
-          const MODEL_URL_CDN = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model';
-          await Promise.all([
-            faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL_CDN),
-            faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL_CDN),
-            faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL_CDN),
-            faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL_CDN),
-          ]);
-          this.modelsLoaded = true;
-          console.log('✅ face-api.js models loaded from CDN');
-        } catch (cdnError) {
-          console.error('❌ Error loading models from CDN:', cdnError);
-          throw new Error('Could not load face-api.js models');
-        }
+        console.error('❌ Error loading models from CDN:', error);
+        throw new Error('Could not load face-api.js models');
       }
     })();
 

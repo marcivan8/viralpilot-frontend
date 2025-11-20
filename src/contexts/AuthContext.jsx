@@ -67,7 +67,7 @@ export const AuthProvider = ({ children }) => {
     try {
       if (!currentSession?.access_token) return;
 
-      await ApiService.createProfile(
+      await apiService.createProfile(
         user.id,
         user.email,
         user.user_metadata?.full_name || user.user_metadata?.name,

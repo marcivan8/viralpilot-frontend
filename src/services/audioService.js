@@ -114,7 +114,7 @@ class AudioService {
       
       // Analyser l'audio avec des techniques de base si le modèle speech-commands
       // n'est pas adapté pour l'analyse générale d'audio
-      const audioFeatures = await this.extractAudioFeatures(audioFile);
+      const audioFeatures = await this.extractAudioFeatures(videoFile);
       
       console.log('✅ Audio analysis completed:', audioFeatures);
       
