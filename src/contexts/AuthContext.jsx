@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import apiService from '../services/apiService'; // ✅ FIXED PATH - was './apiService'
+import ApiService from '../services/apiService';
 
 // Validation des variables d'environnement
 if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
@@ -67,7 +67,7 @@ export const AuthProvider = ({ children }) => {
     try {
       if (!currentSession?.access_token) return;
 
-      await apiService.createProfile(
+      await ApiService.createProfile(
         user.id,
         user.email,
         user.user_metadata?.full_name || user.user_metadata?.name,

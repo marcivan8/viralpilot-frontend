@@ -21,7 +21,7 @@ class EmotionService {
     this.loadingPromise = (async () => {
       try {
         console.log('📦 Loading face-api.js models from CDN...');
-        const MODEL_URL_CDN = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model';
+        const MODEL_URL_CDN = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
         
         await Promise.all([
           faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL_CDN),

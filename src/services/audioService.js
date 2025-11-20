@@ -29,68 +29,7 @@ class AudioService {
     }
   }
 
-  /**
-   * Extrait l'audio d'une vidéo
-   * @param {File} videoFile - Fichier vidéo
-   * @returns {Promise<AudioBuffer>} - Buffer audio extrait
-   */
-  static async extractAudioFromVideo(videoFile) {
-    return new Promise((resolve, reject) => {
-      const video = document.createElement('video');
-      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      
-      video.preload = 'metadata';
-      video.muted = false;
-      
-      video.onloadedmetadata = async () => {
-        try {
-          // Créer un élément audio source depuis la vidéo
-          const stream = video.captureStream ? video.captureStream() : null;
-          
-          if (!stream) {
-            // Alternative: utiliser MediaRecorder pour extraire l'audio
-            const mediaRecorder = new MediaRecorder(stream || await navigator.mediaDevices.getUserMedia({ audio: true }));
-            const chunks = [];
-            
-            mediaRecorder.ondataavailable = (event) => {
-              chunks.push(event.data);
-            };
-            
-            mediaRecorder.onstop = async () => {
-              const blob = new Blob(chunks, { type: 'audio/webm' });
-              const arrayBuffer = await blob.arrayBuffer();
-              const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-              resolve(audioBuffer);
-            };
-            
-            video.play();
-            mediaRecorder.start();
-            video.onended = () => {
-              mediaRecorder.stop();
-            };
-          } else {
-            // Méthode simple: utiliser l'audio de la vidéo directement
-            const source = audioContext.createMediaElementSource(video);
-            const analyser = audioContext.createAnalyser();
-            source.connect(analyser);
-            
-            // Pour une extraction complète, on peut utiliser un MediaRecorder
-            // Pour l'instant, on retourne l'audio context
-            video.play();
-            resolve(null); // Fallback si l'extraction directe ne fonctionne pas
-          }
-        } catch (error) {
-          reject(error);
-        }
-      };
-      
-      video.onerror = (error) => {
-        reject(error);
-      };
-      
-      video.src = URL.createObjectURL(videoFile);
-    });
-  }
+
 
   /**
    * Analyse l'audio d'une vidéo avec TensorFlow.js
@@ -103,14 +42,6 @@ class AudioService {
       
       // Charger le modèle si nécessaire
       await this.loadModel();
-      
-      // Extraire l'audio de la vidéo
-      const audioBuffer = await this.extractAudioFromVideo(videoFile);
-      
-      if (!audioBuffer) {
-        // On peut quand même analyser avec l'extraction de features basique
-        console.warn('Audio buffer extraction failed, using basic feature extraction');
-      }
       
       // Analyser l'audio avec des techniques de base si le modèle speech-commands
       // n'est pas adapté pour l'analyse générale d'audio
