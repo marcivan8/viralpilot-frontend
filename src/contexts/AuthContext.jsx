@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import ApiService from '../services/apiService';
 
 // Validation des variables d'environnement
 if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
@@ -52,32 +51,11 @@ export const AuthProvider = ({ children }) => {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
-
-        if (event === 'SIGNED_IN' && session?.user) {
-          await createOrUpdateProfile(session.user, session);
-        }
       }
     );
 
     return () => subscription.unsubscribe();
   }, []);
-
-  // ✅ Use ApiService with correct import
-  const createOrUpdateProfile = async (user, currentSession) => {
-    try {
-      if (!currentSession?.access_token) return;
-
-      await ApiService.createProfile(
-        user.id,
-        user.email,
-        user.user_metadata?.full_name || user.user_metadata?.name,
-        currentSession.access_token
-      );
-
-    } catch (error) {
-      console.error('Profile error:', error);
-    }
-  };
 
   const signIn = async (email, password) => {
     try {

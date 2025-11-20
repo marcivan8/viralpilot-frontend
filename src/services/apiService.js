@@ -164,28 +164,16 @@ class ApiService {
 
   static async getUsage(accessToken) {
     console.log('📊 Fetching usage data...');
-    return this.makeRequest('/auth/usage', {
+    return this.makeRequest('/api/auth/usage', {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
-    });
-  }
-
-  static async createProfile(userId, email, fullName, accessToken) {
-    console.log('👤 Creating user profile...');
-    return this.makeRequest('/auth/profile', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ userId, email, fullName }),
     });
   }
 
   static async getAnalysisHistory(accessToken, limit = 10, offset = 0) {
     console.log('📚 Fetching analysis history...');
-    return this.makeRequest(`/auth/history?limit=${limit}&offset=${offset}`, {
+    return this.makeRequest(`/api/auth/history?limit=${limit}&offset=${offset}`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
