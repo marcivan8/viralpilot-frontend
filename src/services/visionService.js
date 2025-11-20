@@ -30,7 +30,7 @@ class VisionService {
           ? 'http://localhost:3000' 
           : 'https://clean-vp-backend-production.up.railway.app');
       
-      const response = await fetch(`${API_BASE_URL}/analyze/vision`, {
+      const response = await fetch(`${API_BASE_URL}/api/analyze/vision`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${accessToken}`,
