@@ -104,7 +104,7 @@ class ApiService {
   }
 
   static async analyzeVideo(formData, accessToken) {
-    const url = `${API_BASE_URL}/analyze`;
+    const url = `${API_BASE_URL}/api/analyze`;
     console.log('🎥 Uploading video to:', url);
     console.log('🔑 Using access token:', accessToken ? 'Yes' : 'No');
 
@@ -219,7 +219,7 @@ class ApiService {
   static async testAnalyzeEndpoint() {
     try {
       console.log('🧪 Testing analyze endpoint...');
-      const response = await fetch(`${API_BASE_URL}/analyze/health/check`, {
+      const response = await fetch(`${API_BASE_URL}/api/analyze/health/check`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
