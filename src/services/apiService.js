@@ -149,7 +149,8 @@ class ApiService {
         } else if (response.status === 429) {
           throw new Error('Too many requests. Please try again later.');
         } else if (response.status >= 500) {
-          throw new Error('A server error occurred while analyzing the video. Please try again later.');
+          const serverError = errorData.error || errorData.message || 'Unknown server error';
+          throw new Error(`Server Error (${response.status}): ${serverError}`);
         }
 
         throw new Error(errorData.error || errorData.message || 'Analysis failed');

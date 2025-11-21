@@ -82,30 +82,14 @@ body {
 }
 
 /* Scrollbars personnalisées */
+/* Hide scrollbars globally but keep functionality */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  display: none;
 }
 
-::-webkit-scrollbar-track {
-  background: #f1f5f9;
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 3px;
-  transition: background 0.2s;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-
-/* Firefox scrollbars */
-html {
-  scrollbar-width: thin;
-  scrollbar-color: #cbd5e1 #f1f5f9;
+* {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
 }
 
 /* Focus states améliorés */

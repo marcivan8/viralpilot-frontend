@@ -164,8 +164,24 @@ const UsageDashboard = ({ userId, language = 'en', onNavigate }) => {
         throw new Error('Authentication required');
       }
 
-      const usage = await ApiService.getUsage(accessToken);
-      setUsageData(normalizeUsageResponse(usage));
+      const [usage, historyData] = await Promise.all([
+        ApiService.getUsage(accessToken),
+        ApiService.getAnalysisHistory(accessToken)
+      ]);
+
+      const normalizedUsage = normalizeUsageResponse(usage);
+
+      // Merge history data if available
+      if (historyData && historyData.items) {
+        normalizedUsage.recentAnalyses = historyData.items;
+
+        // Update metrics if available from history
+        if (historyData.total) {
+          normalizedUsage.metrics.totalAnalyses = historyData.total;
+        }
+      }
+
+      setUsageData(normalizedUsage);
     } catch (error) {
       console.error('Error fetching usage data:', error);
       setUsageData(normalizeUsageResponse());
@@ -186,8 +202,8 @@ const UsageDashboard = ({ userId, language = 'en', onNavigate }) => {
     <div className="bg-gradient-to-br from-white via-slate-50 to-gray-50">
       <div className="max-w-7xl mx-auto p-6 space-y-6">
         {/* Current Tier Card */}
-        <CurrentTierCard 
-          tier={usageData.tier} 
+        <CurrentTierCard
+          tier={usageData.tier}
           onUpgrade={() => setShowUpgradeModal(true)}
         />
 
@@ -213,7 +229,7 @@ const UsageDashboard = ({ userId, language = 'en', onNavigate }) => {
         <UsageHistoryChart history={usageData.history} />
 
         {/* Quick Actions */}
-        <QuickActions 
+        <QuickActions
           remaining={remainingAnalyses}
           unlimited={primaryQuota?.usage.limit === -1}
           disableAnalyze={disableAnalysis}
@@ -296,7 +312,7 @@ const CurrentTierCard = ({ tier, onUpgrade }) => {
       <div className="absolute top-0 right-0 opacity-10">
         <div className="w-64 h-64 rounded-full bg-white transform translate-x-20 -translate-y-20" />
       </div>
-      
+
       <div className="relative z-10">
         <div className="flex items-start justify-between">
           <div>
@@ -312,7 +328,7 @@ const CurrentTierCard = ({ tier, onUpgrade }) => {
               Resets {tier.period === 'monthly' ? 'monthly' : 'weekly'}
             </p>
           </div>
-          
+
           <button
             onClick={onUpgrade}
             className="btn-liquid-glass px-4 py-2 rounded-lg font-medium flex items-center gap-2"
@@ -365,7 +381,7 @@ const UsageCard = ({ title, icon, usage, color, unlimited = false, onLimit }) =>
             )}
           </div>
         </div>
-        
+
         {!unlimited && isNearLimit && (
           <div className={`p-1 rounded-full ${hasReachedLimit ? 'bg-red-100' : 'bg-amber-100'}`}>
             <AlertCircle className={`w-4 h-4 ${hasReachedLimit ? 'text-red-600' : 'text-amber-600'}`} />
@@ -384,13 +400,12 @@ const UsageCard = ({ title, icon, usage, color, unlimited = false, onLimit }) =>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
               <div
-                className={`h-full transition-all duration-500 ${
-                  hasReachedLimit 
-                    ? 'bg-red-500' 
-                    : isNearLimit 
-                    ? 'bg-amber-500' 
-                    : colorClasses[color]
-                }`}
+                className={`h-full transition-all duration-500 ${hasReachedLimit
+                    ? 'bg-red-500'
+                    : isNearLimit
+                      ? 'bg-amber-500'
+                      : colorClasses[color]
+                  }`}
                 style={{ width: `${Math.min(100, usage.percentage)}%` }}
               />
             </div>
@@ -428,21 +443,19 @@ const UsageHistoryChart = ({ history }) => {
         <div className="flex gap-2">
           <button
             onClick={() => setView('daily')}
-            className={`px-3 py-1 text-sm rounded-lg transition-colors ${
-              view === 'daily' 
-                ? 'bg-indigo-100 text-indigo-700' 
+            className={`px-3 py-1 text-sm rounded-lg transition-colors ${view === 'daily'
+                ? 'bg-indigo-100 text-indigo-700'
                 : 'text-gray-600 hover:bg-gray-100'
-            }`}
+              }`}
           >
             Daily
           </button>
           <button
             onClick={() => setView('weekly')}
-            className={`px-3 py-1 text-sm rounded-lg transition-colors ${
-              view === 'weekly' 
-                ? 'bg-indigo-100 text-indigo-700' 
+            className={`px-3 py-1 text-sm rounded-lg transition-colors ${view === 'weekly'
+                ? 'bg-indigo-100 text-indigo-700'
                 : 'text-gray-600 hover:bg-gray-100'
-            }`}
+              }`}
           >
             Weekly
           </button>
@@ -454,12 +467,12 @@ const UsageHistoryChart = ({ history }) => {
           {data.map((value, index) => (
             <div key={index} className="flex-1 flex flex-col items-center">
               <div className="text-xs text-gray-600 mb-1">{value}</div>
-              <div 
+              <div
                 className="w-full bg-indigo-500 rounded-t transition-all duration-500 hover:bg-indigo-600"
                 style={{ height: `${(value / maxValue) * 100}%` }}
               />
               <div className="text-xs text-gray-500 mt-2">
-                {view === 'daily' 
+                {view === 'daily'
                   ? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][index]
                   : `W${index + 1}`
                 }
@@ -492,7 +505,7 @@ const QuickActions = ({ remaining, onAnalyze, onUpgrade, unlimited = false, disa
           <button
             onClick={onAnalyze}
             className="bg-white text-indigo-600 px-6 py-3 rounded-lg font-semibold hover:bg-white/90 transition-transform hover:-translate-y-0.5 flex items-center gap-2"
-            
+
           >
             <Video className="w-5 h-5" />
             Analyze Video
@@ -656,7 +669,7 @@ const BadgeShowcase = ({ badges }) => {
 // Upgrade Modal
 const UpgradeModal = ({ currentTier, feature, onClose, onUpgrade }) => {
   const [selectedTier, setSelectedTier] = useState('professional');
-  
+
   const tiers = [
     {
       id: 'creator',
@@ -725,7 +738,7 @@ const UpgradeModal = ({ currentTier, feature, onClose, onUpgrade }) => {
   const getComparisonValue = (tierId, feature) => {
     const tier = tiers.find(t => t.id === tierId);
     if (!tier) return '-';
-    
+
     const value = tier.limits[feature];
     if (value === -1) return '∞';
     if (value === true) return '✓';
@@ -886,9 +899,8 @@ const TierCard = ({ tier, isSelected, isCurrent, onSelect }) => {
 
   return (
     <div
-      className={`relative bg-white/80 backdrop-blur-sm rounded-xl border-2 p-6 cursor-pointer transition-all ${
-        borderColors[tier.color]
-      } ${isSelected ? 'shadow-lg scale-105' : 'hover:shadow-md'}`}
+      className={`relative bg-white/80 backdrop-blur-sm rounded-xl border-2 p-6 cursor-pointer transition-all ${borderColors[tier.color]
+        } ${isSelected ? 'shadow-lg scale-105' : 'hover:shadow-md'}`}
       onClick={onSelect}
     >
       {tier.popular && (
