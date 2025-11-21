@@ -176,10 +176,39 @@ const UsageDashboard = ({ userId, language = 'en', onNavigate }) => {
         normalizedUsage.recentAnalyses = historyData.items;
 
         // Update metrics if available from history
-        if (historyData.total) {
+        if (historyData.total !== undefined) {
           normalizedUsage.metrics.totalAnalyses = historyData.total;
+
+          // Also update the video analyses quota card
+          const videoQuotaIndex = normalizedUsage.usageCards.findIndex(
+            card => card.key === 'videoAnalyses' || card.key === 'videoanalyses'
+          );
+
+          if (videoQuotaIndex !== -1) {
+            const card = normalizedUsage.usageCards[videoQuotaIndex];
+            const limit = card.usage.limit;
+            const used = historyData.total;
+            const remaining = limit > -1 ? Math.max(0, limit - used) : -1;
+            const percentage = limit && limit > 0 ? (used / limit) * 100 : 0;
+
+            normalizedUsage.usageCards[videoQuotaIndex] = {
+              ...card,
+              usage: {
+                ...card.usage,
+                used,
+                remaining,
+                percentage: Math.min(100, Math.max(0, percentage))
+              }
+            };
+
+            // Update primary quota reference if it was this card
+            if (normalizedUsage.primaryQuota.key === card.key) {
+              normalizedUsage.primaryQuota = normalizedUsage.usageCards[videoQuotaIndex];
+            }
+          }
         }
       }
+
 
       setUsageData(normalizedUsage);
     } catch (error) {
@@ -401,10 +430,10 @@ const UsageCard = ({ title, icon, usage, color, unlimited = false, onLimit }) =>
             <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
               <div
                 className={`h-full transition-all duration-500 ${hasReachedLimit
-                    ? 'bg-red-500'
-                    : isNearLimit
-                      ? 'bg-amber-500'
-                      : colorClasses[color]
+                  ? 'bg-red-500'
+                  : isNearLimit
+                    ? 'bg-amber-500'
+                    : colorClasses[color]
                   }`}
                 style={{ width: `${Math.min(100, usage.percentage)}%` }}
               />
@@ -444,8 +473,8 @@ const UsageHistoryChart = ({ history }) => {
           <button
             onClick={() => setView('daily')}
             className={`px-3 py-1 text-sm rounded-lg transition-colors ${view === 'daily'
-                ? 'bg-indigo-100 text-indigo-700'
-                : 'text-gray-600 hover:bg-gray-100'
+              ? 'bg-indigo-100 text-indigo-700'
+              : 'text-gray-600 hover:bg-gray-100'
               }`}
           >
             Daily
@@ -453,8 +482,8 @@ const UsageHistoryChart = ({ history }) => {
           <button
             onClick={() => setView('weekly')}
             className={`px-3 py-1 text-sm rounded-lg transition-colors ${view === 'weekly'
-                ? 'bg-indigo-100 text-indigo-700'
-                : 'text-gray-600 hover:bg-gray-100'
+              ? 'bg-indigo-100 text-indigo-700'
+              : 'text-gray-600 hover:bg-gray-100'
               }`}
           >
             Weekly
