@@ -508,10 +508,14 @@ const UploadPage = ({ language, onNavigate }) => {
     }
     
     try {
-            await analyzeVideo(uploadedVideo, formData, aiConsent);
+      // ✅ Attendez que l'analyse soit complète
+      await analyzeVideo(uploadedVideo, formData, aiConsent);
+      
+      // ✅ Navigation APRÈS que l'analyse est terminée
       onNavigate('results');
     } catch (err) {
       console.error('Analysis failed:', err);
+      // Ne pas naviguer en cas d'erreur
     }
   };
 
@@ -627,6 +631,13 @@ const UploadPage = ({ language, onNavigate }) => {
 const ResultsPage = ({ language, onNavigate }) => {
   const { analysisResults: results, resetAnalysis } = useAnalysisContext();
   const t = (key) => translations[language]?.[key] || translations.en[key] || key;
+  
+  // ✅ Vérifier si les résultats existent au montage du composant
+  useEffect(() => {
+    if (!results) {
+      console.log('No results available');
+    }
+  }, [results]);
   
   if (!results) {
     return (

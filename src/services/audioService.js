@@ -75,7 +75,8 @@ class AudioService {
       const audioContext = new (window.AudioContext || window.webkitAudioContext)();
       
       video.preload = 'metadata';
-      video.muted = false;
+      video.muted = true;
+      video.volume = 0;
       
       video.onloadedmetadata = () => {
         const duration = video.duration;
