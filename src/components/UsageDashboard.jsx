@@ -166,7 +166,7 @@ const UsageDashboard = ({ userId, language = 'en', onNavigate }) => {
 
       const [usage, historyData] = await Promise.all([
         ApiService.getUsage(accessToken),
-        ApiService.getAnalysisHistory(accessToken)
+        ApiService.getAnalysisHistory(accessToken, 100)
       ]);
 
       const normalizedUsage = normalizeUsageResponse(usage);
@@ -206,6 +206,41 @@ const UsageDashboard = ({ userId, language = 'en', onNavigate }) => {
               normalizedUsage.primaryQuota = normalizedUsage.usageCards[videoQuotaIndex];
             }
           }
+          // Calculate daily history (Last 7 days)
+          const last7Days = [...Array(7)].map((_, i) => {
+            const d = new Date();
+            d.setDate(d.getDate() - (6 - i));
+            return d.toISOString().split('T')[0];
+          });
+
+          const dailyCounts = last7Days.map(date => {
+            return historyData.items.filter(item =>
+              item.created_at && item.created_at.startsWith(date)
+            ).length;
+          });
+
+          normalizedUsage.history.daily = dailyCounts;
+
+          // Calculate weekly history (Last 4 weeks)
+          const weeklyCounts = [...Array(4)].map((_, i) => {
+            // Index 0 = 4 weeks ago, Index 3 = Current week
+            const weekEnd = new Date();
+            weekEnd.setDate(weekEnd.getDate() - ((3 - i) * 7));
+            // Set to end of day
+            weekEnd.setHours(23, 59, 59, 999);
+
+            const weekStart = new Date(weekEnd);
+            weekStart.setDate(weekStart.getDate() - 7);
+            // Set to start of day (technically next ms after prev week end)
+
+            return historyData.items.filter(item => {
+              if (!item.created_at) return false;
+              const itemDate = new Date(item.created_at);
+              return itemDate > weekStart && itemDate <= weekEnd;
+            }).length;
+          });
+
+          normalizedUsage.history.weekly = weeklyCounts;
         }
       }
 
@@ -642,6 +677,7 @@ const RecentActivity = ({ items }) => {
   if (!limitedItems.length) return null;
 
   return (
+
     <div className="bg-white/80 backdrop-blur-sm border border-gray-100 rounded-xl p-6">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-3xl font-artistic text-gray-900">Recent Analyses</h3>
@@ -651,23 +687,55 @@ const RecentActivity = ({ items }) => {
         </div>
       </div>
       <div className="space-y-4">
-        {limitedItems.map((item, index) => (
-          <div key={`${item.id || item.title || index}-${index}`} className="flex items-center justify-between border border-gray-100 rounded-lg p-4">
-            <div>
-              <p className="font-semibold text-gray-900">{item.title || item.videoTitle || `Analysis ${index + 1}`}</p>
-              <p className="text-xs text-gray-500">
-                {item.platform ? `${item.platform} • ` : ''}
-                {item.createdAt ? new Date(item.createdAt).toLocaleString() : 'Recently'}
-              </p>
+        {limitedItems.map((item, index) => {
+          // Extract score and platform from item
+          // Handle different possible data structures
+          const score = item.score ||
+            (item.analysis_results?.score) ||
+            (item.result?.score) ||
+            0;
+
+          const platform = item.platform ||
+            (item.analysis_results?.platform) ||
+            (item.result?.platform) ||
+            'Unknown';
+
+          const insights = item.insights ||
+            (item.analysis_results?.insights) ||
+            (item.result?.insights) ||
+            [];
+
+          const bestPlatform = Array.isArray(insights) && insights.length > 0
+            ? insights[0].platform || platform
+            : platform;
+
+          return (
+            <div key={`${item.id || item.title || index}-${index}`} className="flex items-center justify-between border border-gray-100 rounded-lg p-4 hover:bg-gray-50 transition-colors">
+              <div>
+                <p className="font-semibold text-gray-900">{item.title || item.videoTitle || `Analysis ${index + 1}`}</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-xs text-gray-500">
+                    {item.created_at ? new Date(item.created_at).toLocaleString() : 'Recently'}
+                  </span>
+                  {bestPlatform && bestPlatform !== 'Unknown' && (
+                    <span className="text-xs bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full">
+                      {bestPlatform}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-xs text-gray-500">Viral Score</p>
+                <div className="flex items-center justify-end gap-1">
+                  <span className={`text-xl font-semibold ${score >= 80 ? 'text-green-600' : score >= 60 ? 'text-indigo-600' : 'text-amber-600'}`}>
+                    {score ? Math.round(score) : '-'}
+                  </span>
+                  <span className="text-xs text-gray-400">/100</span>
+                </div>
+              </div>
             </div>
-            <div className="text-right">
-              {item.score && <p className="text-xs text-gray-500">Score</p>}
-              <p className="text-xl font-semibold text-indigo-600">
-                {item.score ? Math.round(item.score) : item.status || 'Completed'}
-              </p>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
