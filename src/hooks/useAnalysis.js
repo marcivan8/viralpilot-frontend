@@ -42,7 +42,7 @@ export const useAnalysis = () => {
 
       // Analyser avec les différents services en parallèle (si possible)
       setProgress(20);
-      
+
       // Lancer les analyses en parallèle
       const [emotions, vision, audio, backendResults] = await Promise.allSettled([
         EmotionService.analyzeEmotions(file).catch(err => {
@@ -63,25 +63,28 @@ export const useAnalysis = () => {
       setProgress(90);
 
       // Combiner les résultats
-      const results = backendResults.status === 'fulfilled' ? backendResults.value : {};
-      
+      if (backendResults.status === 'rejected') {
+        throw backendResults.reason;
+      }
+      const results = backendResults.value || {};
+
       // Ajouter les analyses additionnelles
       if (emotions.status === 'fulfilled' && emotions.value) {
         results.emotionAnalysis = emotions.value;
       }
-      
+
       if (vision.status === 'fulfilled' && vision.value) {
         results.visionAnalysis = vision.value;
       }
-      
+
       if (audio.status === 'fulfilled' && audio.value) {
         results.audioAnalysis = audio.value;
       }
-      
+
       clearInterval(progressInterval);
       setProgress(100);
       setAnalysisResults(results);
-      
+
       return results;
     } catch (err) {
       console.error('Analysis error:', err);

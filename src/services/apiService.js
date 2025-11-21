@@ -84,12 +84,12 @@ class ApiService {
         try {
           errorData = await response.json();
         } catch (parseError) {
-          errorData = { 
+          errorData = {
             error: `HTTP Error: ${response.status} ${response.statusText}`,
             status: response.status
           };
         }
-        
+
         console.error('❌ API Error Response:', errorData);
         throw new Error(errorData.error || errorData.message || `HTTP Error: ${response.status}`);
       }
@@ -129,14 +129,14 @@ class ApiService {
         try {
           errorData = await response.json();
         } catch (parseError) {
-          errorData = { 
+          errorData = {
             error: `HTTP Error: ${response.status} ${response.statusText}`,
             status: response.status
           };
         }
-        
+
         console.error('❌ Backend error:', errorData);
-        
+
         // Handle specific error codes
         if (response.status === 401) {
           throw new Error('Authentication failed. Please sign in again.');
@@ -148,8 +148,10 @@ class ApiService {
           throw new Error('File too large. Maximum size: 100MB');
         } else if (response.status === 429) {
           throw new Error('Too many requests. Please try again later.');
+        } else if (response.status >= 500) {
+          throw new Error('A server error occurred while analyzing the video. Please try again later.');
         }
-        
+
         throw new Error(errorData.error || errorData.message || 'Analysis failed');
       }
 
@@ -189,11 +191,11 @@ class ApiService {
           'Content-Type': 'application/json',
         },
       });
-      
+
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
-      
+
       const data = await response.json();
       console.log('✅ Backend is reachable:', data);
       return { status: 'ok', data };
@@ -213,11 +215,11 @@ class ApiService {
           'Content-Type': 'application/json',
         },
       });
-      
+
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
-      
+
       const data = await response.json();
       console.log('✅ Analyze endpoint is healthy:', data);
       return { status: 'ok', data };
