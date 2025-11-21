@@ -164,90 +164,102 @@ const UsageDashboard = ({ userId, language = 'en', onNavigate }) => {
         throw new Error('Authentication required');
       }
 
-      const [usage, historyData] = await Promise.all([
-        ApiService.getUsage(accessToken),
-        ApiService.getAnalysisHistory(accessToken, 100)
-      ]);
+      // 1. Fetch Usage Data (Critical)
+      let usage;
+      try {
+        usage = await ApiService.getUsage(accessToken);
+      } catch (err) {
+        console.error('Failed to fetch usage:', err);
+        // If usage fails, we can't do much, but we'll try to proceed with default
+        usage = {};
+      }
 
       const normalizedUsage = normalizeUsageResponse(usage);
 
-      // Merge history data if available
-      if (historyData && historyData.items) {
-        normalizedUsage.recentAnalyses = historyData.items;
+      // 2. Fetch History Data (Non-Critical)
+      try {
+        const historyData = await ApiService.getAnalysisHistory(accessToken, 100);
 
-        // Update metrics if available from history
-        if (historyData.total !== undefined) {
-          normalizedUsage.metrics.totalAnalyses = historyData.total;
+        // Merge history data if available
+        if (historyData && historyData.items) {
+          normalizedUsage.recentAnalyses = historyData.items;
 
-          // Also update the video analyses quota card
-          const videoQuotaIndex = normalizedUsage.usageCards.findIndex(
-            card => card.key === 'videoAnalyses' || card.key === 'videoanalyses'
-          );
+          // Update metrics if available from history
+          if (historyData.total !== undefined) {
+            normalizedUsage.metrics.totalAnalyses = historyData.total;
 
-          if (videoQuotaIndex !== -1) {
-            const card = normalizedUsage.usageCards[videoQuotaIndex];
-            const limit = card.usage.limit;
-            const used = historyData.total;
-            const remaining = limit > -1 ? Math.max(0, limit - used) : -1;
-            const percentage = limit && limit > 0 ? (used / limit) * 100 : 0;
+            // Also update the video analyses quota card
+            const videoQuotaIndex = normalizedUsage.usageCards.findIndex(
+              card => card.key === 'videoAnalyses' || card.key === 'videoanalyses'
+            );
 
-            normalizedUsage.usageCards[videoQuotaIndex] = {
-              ...card,
-              usage: {
-                ...card.usage,
-                used,
-                remaining,
-                percentage: Math.min(100, Math.max(0, percentage))
+            if (videoQuotaIndex !== -1) {
+              const card = normalizedUsage.usageCards[videoQuotaIndex];
+              const limit = card.usage.limit;
+              const used = historyData.total;
+              const remaining = limit > -1 ? Math.max(0, limit - used) : -1;
+              const percentage = limit && limit > 0 ? (used / limit) * 100 : 0;
+
+              normalizedUsage.usageCards[videoQuotaIndex] = {
+                ...card,
+                usage: {
+                  ...card.usage,
+                  used,
+                  remaining,
+                  percentage: Math.min(100, Math.max(0, percentage))
+                }
+              };
+
+              // Update primary quota reference if it was this card
+              if (normalizedUsage.primaryQuota.key === card.key) {
+                normalizedUsage.primaryQuota = normalizedUsage.usageCards[videoQuotaIndex];
               }
-            };
-
-            // Update primary quota reference if it was this card
-            if (normalizedUsage.primaryQuota.key === card.key) {
-              normalizedUsage.primaryQuota = normalizedUsage.usageCards[videoQuotaIndex];
             }
+            // Calculate daily history (Last 7 days)
+            const last7Days = [...Array(7)].map((_, i) => {
+              const d = new Date();
+              d.setDate(d.getDate() - (6 - i));
+              return d.toISOString().split('T')[0];
+            });
+
+            const dailyCounts = last7Days.map(date => {
+              return historyData.items.filter(item =>
+                item.created_at && item.created_at.startsWith(date)
+              ).length;
+            });
+
+            normalizedUsage.history.daily = dailyCounts;
+
+            // Calculate weekly history (Last 4 weeks)
+            const weeklyCounts = [...Array(4)].map((_, i) => {
+              // Index 0 = 4 weeks ago, Index 3 = Current week
+              const weekEnd = new Date();
+              weekEnd.setDate(weekEnd.getDate() - ((3 - i) * 7));
+              // Set to end of day
+              weekEnd.setHours(23, 59, 59, 999);
+
+              const weekStart = new Date(weekEnd);
+              weekStart.setDate(weekStart.getDate() - 7);
+              // Set to start of day (technically next ms after prev week end)
+
+              return historyData.items.filter(item => {
+                if (!item.created_at) return false;
+                const itemDate = new Date(item.created_at);
+                return itemDate > weekStart && itemDate <= weekEnd;
+              }).length;
+            });
+
+            normalizedUsage.history.weekly = weeklyCounts;
           }
-          // Calculate daily history (Last 7 days)
-          const last7Days = [...Array(7)].map((_, i) => {
-            const d = new Date();
-            d.setDate(d.getDate() - (6 - i));
-            return d.toISOString().split('T')[0];
-          });
-
-          const dailyCounts = last7Days.map(date => {
-            return historyData.items.filter(item =>
-              item.created_at && item.created_at.startsWith(date)
-            ).length;
-          });
-
-          normalizedUsage.history.daily = dailyCounts;
-
-          // Calculate weekly history (Last 4 weeks)
-          const weeklyCounts = [...Array(4)].map((_, i) => {
-            // Index 0 = 4 weeks ago, Index 3 = Current week
-            const weekEnd = new Date();
-            weekEnd.setDate(weekEnd.getDate() - ((3 - i) * 7));
-            // Set to end of day
-            weekEnd.setHours(23, 59, 59, 999);
-
-            const weekStart = new Date(weekEnd);
-            weekStart.setDate(weekStart.getDate() - 7);
-            // Set to start of day (technically next ms after prev week end)
-
-            return historyData.items.filter(item => {
-              if (!item.created_at) return false;
-              const itemDate = new Date(item.created_at);
-              return itemDate > weekStart && itemDate <= weekEnd;
-            }).length;
-          });
-
-          normalizedUsage.history.weekly = weeklyCounts;
         }
+      } catch (historyError) {
+        console.warn('Failed to fetch history data:', historyError);
+        // Continue with usage data only
       }
-
 
       setUsageData(normalizedUsage);
     } catch (error) {
-      console.error('Error fetching usage data:', error);
+      console.error('Error in dashboard data fetch:', error);
       setUsageData(normalizeUsageResponse());
     } finally {
       setLoading(false);
