@@ -289,6 +289,26 @@ const UsageDashboard = ({ userId, language = 'en', onNavigate }) => {
           </button>
         </div>
 
+        {/* Metrics */}
+        {usageData.metrics && (
+          <UsageMetrics metrics={usageData.metrics} />
+        )}
+
+        {/* Quick Actions */}
+        <QuickActions
+          remaining={remainingAnalyses}
+          unlimited={primaryQuota?.usage.limit === -1}
+          disableAnalyze={disableAnalysis}
+          onAnalyze={() => {
+            if (onNavigate) {
+              onNavigate('upload');
+            } else if (typeof window !== 'undefined') {
+              window.location.hash = 'upload';
+            }
+          }}
+          onUpgrade={() => setShowUpgradeModal(true)}
+        />
+
         {/* Current Tier Card */}
         <CurrentTierCard
           tier={usageData.tier}
@@ -316,33 +336,13 @@ const UsageDashboard = ({ userId, language = 'en', onNavigate }) => {
         {/* Usage History Chart */}
         <UsageHistoryChart history={usageData.history} />
 
-        {/* Quick Actions */}
-        <QuickActions
-          remaining={remainingAnalyses}
-          unlimited={primaryQuota?.usage.limit === -1}
-          disableAnalyze={disableAnalysis}
-          onAnalyze={() => {
-            if (onNavigate) {
-              onNavigate('upload');
-            } else if (typeof window !== 'undefined') {
-              window.location.hash = 'upload';
-            }
-          }}
-          onUpgrade={() => setShowUpgradeModal(true)}
-        />
-
-        {/* Metrics */}
-        {usageData.metrics && (
-          <UsageMetrics metrics={usageData.metrics} />
-        )}
+        {/* Analysis History */}
+        <AnalysisHistory items={usageData.recentAnalyses || []} />
 
         {/* Platform Breakdown */}
         {usageData.platformBreakdown?.length > 0 && (
           <PlatformBreakdown data={usageData.platformBreakdown} />
         )}
-
-        {/* Analysis History */}
-        <AnalysisHistory items={usageData.recentAnalyses || []} />
 
         {/* Badges */}
         {usageData.badges?.length > 0 && (
