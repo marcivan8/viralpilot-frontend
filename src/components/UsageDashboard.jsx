@@ -277,6 +277,18 @@ const UsageDashboard = ({ userId, language = 'en', onNavigate }) => {
   return (
     <div className="bg-gradient-to-br from-white via-slate-50 to-gray-50">
       <div className="max-w-7xl mx-auto p-6 space-y-6">
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+          <button
+            onClick={fetchUsageData}
+            disabled={loading}
+            className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+            title="Refresh Data"
+          >
+            <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+          </button>
+        </div>
+
         {/* Current Tier Card */}
         <CurrentTierCard
           tier={usageData.tier}
@@ -329,10 +341,8 @@ const UsageDashboard = ({ userId, language = 'en', onNavigate }) => {
           <PlatformBreakdown data={usageData.platformBreakdown} />
         )}
 
-        {/* Recent Activity */}
-        {usageData.recentAnalyses?.length > 0 && (
-          <RecentActivity items={usageData.recentAnalyses} />
-        )}
+        {/* Analysis History */}
+        <AnalysisHistory items={usageData.recentAnalyses || []} />
 
         {/* Badges */}
         {usageData.badges?.length > 0 && (
@@ -362,14 +372,12 @@ const UsageDashboard = ({ userId, language = 'en', onNavigate }) => {
 // Current Tier Card Component
 const CurrentTierCard = ({ tier, onUpgrade }) => {
   const tierColors = {
-    explorer: 'bg-gray-500',
     creator: 'bg-indigo-500',
     professional: 'bg-purple-500',
     studio: 'bg-gradient-to-r from-amber-500 to-orange-500'
   };
 
   const tierIcons = {
-    explorer: <Star className="w-6 h-6" />,
     creator: <Zap className="w-6 h-6" />,
     professional: <Crown className="w-6 h-6" />,
     studio: <Rocket className="w-6 h-6" />
@@ -684,71 +692,78 @@ const PlatformBreakdown = ({ data }) => {
   );
 };
 
-const RecentActivity = ({ items }) => {
-  const limitedItems = items.slice(0, 5);
-  if (!limitedItems.length) return null;
+const AnalysisHistory = ({ items }) => {
+  // Always render the component, even if empty
+  const limitedItems = items.slice(0, 10); // Show up to 10 items
 
   return (
-
     <div className="bg-white/80 backdrop-blur-sm border border-gray-100 rounded-xl p-6">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-3xl font-artistic text-gray-900">Recent Analyses</h3>
+        <h3 className="text-3xl font-artistic text-gray-900">Analysis History</h3>
         <div className="text-sm text-gray-500 flex items-center gap-2">
           <Clock className="w-4 h-4" />
           Latest activity
         </div>
       </div>
-      <div className="space-y-4">
-        {limitedItems.map((item, index) => {
-          // Extract score and platform from item
-          // Handle different possible data structures
-          const score = item.score ||
-            (item.analysis_results?.score) ||
-            (item.result?.score) ||
-            0;
 
-          const platform = item.platform ||
-            (item.analysis_results?.platform) ||
-            (item.result?.platform) ||
-            'Unknown';
+      {limitedItems.length === 0 ? (
+        <div className="text-center py-8 text-gray-500">
+          <p>No analysis history yet.</p>
+          <p className="text-sm mt-1">Start analyzing videos to see them here!</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {limitedItems.map((item, index) => {
+            // Extract score and platform from item
+            // Handle different possible data structures
+            const score = item.score ||
+              (item.analysis_results?.score) ||
+              (item.result?.score) ||
+              0;
 
-          const insights = item.insights ||
-            (item.analysis_results?.insights) ||
-            (item.result?.insights) ||
-            [];
+            const platform = item.platform ||
+              (item.analysis_results?.platform) ||
+              (item.result?.platform) ||
+              'Unknown';
 
-          const bestPlatform = Array.isArray(insights) && insights.length > 0
-            ? insights[0].platform || platform
-            : platform;
+            const insights = item.insights ||
+              (item.analysis_results?.insights) ||
+              (item.result?.insights) ||
+              [];
 
-          return (
-            <div key={`${item.id || item.title || index}-${index}`} className="flex items-center justify-between border border-gray-100 rounded-lg p-4 hover:bg-gray-50 transition-colors">
-              <div>
-                <p className="font-semibold text-gray-900">{item.title || item.videoTitle || `Analysis ${index + 1}`}</p>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="text-xs text-gray-500">
-                    {item.created_at ? new Date(item.created_at).toLocaleString() : 'Recently'}
-                  </span>
-                  {bestPlatform && bestPlatform !== 'Unknown' && (
-                    <span className="text-xs bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full">
-                      {bestPlatform}
+            const bestPlatform = Array.isArray(insights) && insights.length > 0
+              ? insights[0].platform || platform
+              : platform;
+
+            return (
+              <div key={`${item.id || item.title || index}-${index}`} className="flex items-center justify-between border border-gray-100 rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                <div>
+                  <p className="font-semibold text-gray-900">{item.title || item.videoTitle || `Analysis ${index + 1}`}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-xs text-gray-500">
+                      {item.created_at ? new Date(item.created_at).toLocaleString() : 'Recently'}
                     </span>
-                  )}
+                    {bestPlatform && bestPlatform !== 'Unknown' && (
+                      <span className="text-xs bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full">
+                        {bestPlatform}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs text-gray-500">Viral Score</p>
+                  <div className="flex items-center justify-end gap-1">
+                    <span className={`text-xl font-semibold ${score >= 80 ? 'text-green-600' : score >= 60 ? 'text-indigo-600' : 'text-amber-600'}`}>
+                      {score ? Math.round(score) : '-'}
+                    </span>
+                    <span className="text-xs text-gray-400">/100</span>
+                  </div>
                 </div>
               </div>
-              <div className="text-right">
-                <p className="text-xs text-gray-500">Viral Score</p>
-                <div className="flex items-center justify-end gap-1">
-                  <span className={`text-xl font-semibold ${score >= 80 ? 'text-green-600' : score >= 60 ? 'text-indigo-600' : 'text-amber-600'}`}>
-                    {score ? Math.round(score) : '-'}
-                  </span>
-                  <span className="text-xs text-gray-400">/100</span>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };

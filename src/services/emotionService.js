@@ -22,7 +22,7 @@ class EmotionService {
       try {
         console.log('📦 Loading face-api.js models from CDN...');
         const MODEL_URL_CDN = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
-        
+
         await Promise.all([
           faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL_CDN),
           faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL_CDN),
@@ -51,31 +51,31 @@ class EmotionService {
     return new Promise((resolve, reject) => {
       const video = document.createElement('video');
       const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
       const frames = [];
-      
+
       video.preload = 'metadata';
       video.muted = true;
       video.volume = 0;
-      
+
       video.onloadedmetadata = () => {
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
-        
+
         const duration = video.duration;
         const interval = duration / (frameCount + 1);
-        
+
         let loadedFrames = 0;
-        
+
         const captureFrame = (time) => {
           video.currentTime = time;
         };
-        
+
         video.onseeked = () => {
           ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
           const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
           frames.push(imageData);
-          
+
           loadedFrames++;
           if (loadedFrames < frameCount) {
             captureFrame((loadedFrames + 1) * interval);
@@ -83,22 +83,22 @@ class EmotionService {
             resolve(frames);
           }
         };
-        
+
         video.onerror = (error) => {
           reject(error);
         };
-        
+
         if (duration > 0) {
           captureFrame(interval);
         } else {
           reject(new Error('Could not determine video duration'));
         }
       };
-      
+
       video.onerror = (error) => {
         reject(error);
       };
-      
+
       video.src = URL.createObjectURL(videoFile);
     });
   }
@@ -111,13 +111,13 @@ class EmotionService {
   static async analyzeEmotions(videoFile) {
     try {
       console.log('😊 Starting emotion analysis with face-api.js...');
-      
+
       // Charger les modèles si nécessaire
       await this.loadModels();
-      
+
       // Extraire des frames de la vidéo
       const frames = await this.extractVideoFrames(videoFile, 10);
-      
+
       const allEmotions = {
         happy: [],
         sad: [],
@@ -127,25 +127,25 @@ class EmotionService {
         fearful: [],
         neutral: [],
       };
-      
+
       const detections = [];
-      
+
       // Analyser chaque frame
       for (const frame of frames) {
         const canvas = document.createElement('canvas');
         canvas.width = frame.width;
         canvas.height = frame.height;
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
         ctx.putImageData(frame, 0, 0);
-        
+
         // Détecter les visages et expressions
         const frameDetections = await faceapi
           .detectAllFaces(canvas, new faceapi.TinyFaceDetectorOptions())
           .withFaceLandmarks()
           .withFaceExpressions();
-        
+
         detections.push(...frameDetections);
-        
+
         // Collecter les émotions détectées
         frameDetections.forEach(detection => {
           const expressions = detection.expressions;
@@ -158,7 +158,7 @@ class EmotionService {
           allEmotions.neutral.push(expressions.neutral);
         });
       }
-      
+
       // Calculer les moyennes
       const averageEmotions = {};
       Object.keys(allEmotions).forEach(emotion => {
@@ -169,18 +169,18 @@ class EmotionService {
           averageEmotions[emotion] = 0;
         }
       });
-      
+
       // Déterminer l'émotion dominante
-      const dominantEmotion = Object.keys(averageEmotions).reduce((a, b) => 
+      const dominantEmotion = Object.keys(averageEmotions).reduce((a, b) =>
         averageEmotions[a] > averageEmotions[b] ? a : b
       );
-      
+
       console.log('✅ Emotion analysis completed:', {
         averageEmotions,
         dominantEmotion,
         faceCount: detections.length,
       });
-      
+
       return {
         averageEmotions,
         dominantEmotion,
@@ -202,12 +202,12 @@ class EmotionService {
   static async analyzeImageEmotions(image) {
     try {
       await this.loadModels();
-      
+
       const detections = await faceapi
         .detectAllFaces(image, new faceapi.TinyFaceDetectorOptions())
         .withFaceLandmarks()
         .withFaceExpressions();
-      
+
       if (detections.length === 0) {
         return {
           faceCount: 0,
@@ -215,7 +215,7 @@ class EmotionService {
           message: 'No faces detected',
         };
       }
-      
+
       // Calculer les moyennes pour toutes les détections
       const allExpressions = {
         happy: [],
@@ -226,24 +226,24 @@ class EmotionService {
         fearful: [],
         neutral: [],
       };
-      
+
       detections.forEach(detection => {
         const expressions = detection.expressions;
         Object.keys(allExpressions).forEach(emotion => {
           allExpressions[emotion].push(expressions[emotion]);
         });
       });
-      
+
       const averageEmotions = {};
       Object.keys(allExpressions).forEach(emotion => {
         const values = allExpressions[emotion];
         averageEmotions[emotion] = values.reduce((a, b) => a + b, 0) / values.length;
       });
-      
-      const dominantEmotion = Object.keys(averageEmotions).reduce((a, b) => 
+
+      const dominantEmotion = Object.keys(averageEmotions).reduce((a, b) =>
         averageEmotions[a] > averageEmotions[b] ? a : b
       );
-      
+
       return {
         faceCount: detections.length,
         averageEmotions,
