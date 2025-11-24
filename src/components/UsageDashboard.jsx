@@ -372,12 +372,14 @@ const UsageDashboard = ({ userId, language = 'en', onNavigate }) => {
 // Current Tier Card Component
 const CurrentTierCard = ({ tier, onUpgrade }) => {
   const tierColors = {
+    explorer: 'bg-gray-500',
     creator: 'bg-indigo-500',
     professional: 'bg-purple-500',
     studio: 'bg-gradient-to-r from-amber-500 to-orange-500'
   };
 
   const tierIcons = {
+    explorer: <Star className="w-6 h-6" />,
     creator: <Zap className="w-6 h-6" />,
     professional: <Crown className="w-6 h-6" />,
     studio: <Rocket className="w-6 h-6" />
@@ -392,7 +394,7 @@ const CurrentTierCard = ({ tier, onUpgrade }) => {
   };
 
   return (
-    <div className={`relative overflow-hidden rounded-2xl ${tierColors[tier.id]} text-white p-8`}>
+    <div className={`relative overflow-hidden rounded-2xl ${tierColors[tier.id] || 'bg-gray-500'} text-white p-8`}>
       <div className="absolute top-0 right-0 opacity-10">
         <div className="w-64 h-64 rounded-full bg-white transform translate-x-20 -translate-y-20" />
       </div>
