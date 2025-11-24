@@ -282,7 +282,7 @@ const UsageDashboard = ({ userId, language = 'en', onNavigate }) => {
           <button
             onClick={fetchUsageData}
             disabled={loading}
-            className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+            className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors btn-liquid-glass-secondary"
             title="Refresh Data"
           >
             <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
@@ -448,7 +448,7 @@ const UsageCard = ({ title, icon, usage, color, unlimited = false, onLimit }) =>
   const hasReachedLimit = usage.percentage >= 100;
 
   return (
-    <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-gray-100 p-6 hover:shadow-lg transition-shadow">
+    <div className="card-liquid-glass rounded-xl p-6 hover:shadow-lg transition-shadow">
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
           <div className={`p-2 rounded-lg ${bgColorClasses[color]}`}>
@@ -523,7 +523,7 @@ const UsageHistoryChart = ({ history }) => {
   const maxValue = Math.max(...data, 1);
 
   return (
-    <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-gray-100 p-6">
+    <div className="card-liquid-glass rounded-xl p-6">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-3xl font-artistic text-gray-900">Usage History</h3>
         <div className="flex gap-2">
@@ -590,7 +590,7 @@ const QuickActions = ({ remaining, onAnalyze, onUpgrade, unlimited = false, disa
         <div className="flex gap-3">
           <button
             onClick={onAnalyze}
-            className="bg-white text-indigo-600 px-6 py-3 rounded-lg font-semibold hover:bg-white/90 transition-transform hover:-translate-y-0.5 flex items-center gap-2"
+            className="btn-liquid-glass-secondary text-indigo-600 px-6 py-3 rounded-lg font-semibold hover:bg-white/90 transition-transform hover:-translate-y-0.5 flex items-center gap-2"
 
           >
             <Video className="w-5 h-5" />
@@ -639,7 +639,7 @@ const UsageMetrics = ({ metrics }) => {
   return (
     <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-4">
       {metricCards.map((metric) => (
-        <div key={metric.label} className="bg-white/80 backdrop-blur-sm border border-gray-100 rounded-xl p-4 text-center">
+        <div key={metric.label} className="card-liquid-glass rounded-xl p-4 text-center">
           <p className="text-sm text-gray-500 mb-1">{metric.label}</p>
           <p className="text-2xl font-bold text-gray-900">{metric.value}</p>
         </div>
@@ -652,7 +652,7 @@ const PlatformBreakdown = ({ data }) => {
   if (!data.length) return null;
 
   return (
-    <div className="bg-white/80 backdrop-blur-sm border border-gray-100 rounded-xl p-6">
+    <div className="card-liquid-glass rounded-xl p-6">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-3xl font-artistic text-gray-900">Platform Performance</h3>
         <div className="text-sm text-gray-500 flex items-center gap-2">
@@ -699,7 +699,7 @@ const AnalysisHistory = ({ items }) => {
   const limitedItems = items.slice(0, 10); // Show up to 10 items
 
   return (
-    <div className="bg-white/80 backdrop-blur-sm border border-gray-100 rounded-xl p-6">
+    <div className="card-liquid-glass rounded-xl p-6">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-3xl font-artistic text-gray-900">Analysis History</h3>
         <div className="text-sm text-gray-500 flex items-center gap-2">
@@ -775,7 +775,7 @@ const BadgeShowcase = ({ badges }) => {
   if (!limitedBadges.length) return null;
 
   return (
-    <div className="bg-white/80 backdrop-blur-sm border border-gray-100 rounded-xl p-6">
+    <div className="card-liquid-glass rounded-xl p-6">
       <h3 className="text-3xl font-artistic text-gray-900 mb-4">Achievements</h3>
       <div className="flex flex-wrap gap-3">
         {limitedBadges.map((badge, index) => (
@@ -1025,7 +1025,7 @@ const TierCard = ({ tier, isSelected, isCurrent, onSelect }) => {
 
   return (
     <div
-      className={`relative bg-white/80 backdrop-blur-sm rounded-xl border-2 p-6 cursor-pointer transition-all ${borderColors[tier.color]
+      className={`relative card-liquid-glass rounded-xl border-2 p-6 cursor-pointer transition-all ${borderColors[tier.color]
         } ${isSelected ? 'shadow-lg scale-105' : 'hover:shadow-md'}`}
       onClick={onSelect}
     >
