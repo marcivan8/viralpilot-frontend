@@ -6,9 +6,9 @@ import Logo from "./components/Logo";
 import UsageDashboard from "./components/UsageDashboard";
 import LandingPage from "./components/LandingPage";
 import { SessionWarning, useSessionManager } from "./services/SessionManager";
-import { 
-  Upload, Star, TrendingUp, Target, CheckCircle, AlertCircle, 
-  Shield, Database, ArrowLeft, Sparkles 
+import {
+  Upload, Star, TrendingUp, Target, CheckCircle, AlertCircle,
+  Shield, Database, ArrowLeft, Sparkles
 } from "lucide-react";
 
 // API URL configuration
@@ -27,54 +27,54 @@ const translations = {
     password: "Password",
     fullName: "Full Name",
     forgotPassword: "Forgot Password?",
-    
+
     videoTitle: "Video Title",
     videoTitlePlaceholder: "Enter a catchy title...",
-    description: "Description", 
+    description: "Description",
     descriptionPlaceholder: "Describe your video content...",
     videoFile: "Video File",
     selectVideo: "Select Video",
     changeVideo: "Change Video",
     analyzing: "Analyzing with AI...",
-    
+
     aiConsentTitle: "AI Learning (Optional)",
     aiConsentText: "Allow Viral Pilot to use aggregated analysis data from your videos to improve AI recommendations. Your videos are not stored - only anonymized metrics and insights are used for model enhancement.",
     aiConsentWith: "With consent: Analysis data used for AI improvement",
     aiConsentWithout: "Without consent: Analysis data not used for training",
-    
+
     viralScore: "Viral Potential Score",
     bestPlatform: "Recommended Platform",
-    platformScores: "Platform Scores", 
+    platformScores: "Platform Scores",
     insights: "AI Insights & Tips",
     analyzeAnother: "Analyze Another Video",
-    
+
     launchAnalysis: "Analyze with AI",
     startFree: "Start Free",
     getStarted: "Get Started",
-    
+
     TikTok: "TikTok",
     YouTube: "YouTube",
     YouTubeShorts: "YouTube Shorts",
     Instagram: "Instagram",
     X: "X (Twitter)",
     LinkedIn: "LinkedIn",
-    
+
     exceptional: "🔥 Exceptional viral potential!",
     excellent: "🚀 Excellent viral potential!",
     good: "⭐ Good viral potential",
     moderate: "👍 Moderate viral potential",
     needsWork: "💪 Needs improvements",
-    
+
     usageThisMonth: "Usage this month",
     analysesLeft: "analyses left",
     monthlyLimit: "Monthly limit",
     limitReached: "Monthly limit reached. Your limit will reset next month.",
-    
+
     noAccount: "Don't have an account?",
     haveAccount: "Already have an account?",
     createAccount: "Create your account",
     welcomeBack: "Welcome back",
-    
+
     features: "Features",
     allUsersGet: "All users get:",
     analysesPerMonth: "video analyses per month",
@@ -93,7 +93,7 @@ const translations = {
     password: "Mot de passe",
     fullName: "Nom complet",
     forgotPassword: "Mot de passe oublié ?",
-    
+
     videoTitle: "Titre de la vidéo",
     videoTitlePlaceholder: "Entrez un titre accrocheur...",
     description: "Description",
@@ -102,45 +102,45 @@ const translations = {
     selectVideo: "Sélectionner une vidéo",
     changeVideo: "Changer la vidéo",
     analyzing: "Analyse IA en cours...",
-    
+
     aiConsentTitle: "Apprentissage IA (Optionnel)",
     aiConsentText: "Permettre à Viral Pilot d'utiliser les données d'analyse agrégées de vos vidéos pour améliorer les recommandations IA. Vos vidéos ne sont pas stockées - seules les métriques et insights anonymisés sont utilisés pour l'amélioration du modèle.",
     aiConsentWith: "Avec consentement : Données d'analyse utilisées pour l'amélioration IA",
     aiConsentWithout: "Sans consentement : Données d'analyse non utilisées pour l'entraînement",
-    
+
     viralScore: "Score de Potentiel Viral",
     bestPlatform: "Plateforme Recommandée",
     platformScores: "Scores par Plateforme",
     insights: "Insights IA & Conseils",
     analyzeAnother: "Analyser une autre vidéo",
-    
+
     launchAnalysis: "Analyser avec l'IA",
     startFree: "Commencer Gratuitement",
     getStarted: "Commencer",
-    
+
     TikTok: "TikTok",
-    YouTube: "YouTube", 
+    YouTube: "YouTube",
     YouTubeShorts: "YouTube Shorts",
     Instagram: "Instagram",
     X: "X (Twitter)",
     LinkedIn: "LinkedIn",
-    
+
     exceptional: "🔥 Potentiel viral exceptionnel !",
     excellent: "🚀 Excellent potentiel viral !",
     good: "⭐ Bon potentiel viral",
     moderate: "👍 Potentiel viral modéré",
     needsWork: "💪 Améliorations nécessaires",
-    
+
     usageThisMonth: "Utilisation ce mois-ci",
     analysesLeft: "analyses restantes",
     monthlyLimit: "Limite mensuelle",
     limitReached: "Limite mensuelle atteinte. Votre limite sera réinitialisée le mois prochain.",
-    
+
     noAccount: "Pas de compte ?",
     haveAccount: "Vous avez déjà un compte ?",
     createAccount: "Créez votre compte",
     welcomeBack: "Bon retour",
-    
+
     features: "Fonctionnalités",
     allUsersGet: "Tous les utilisateurs obtiennent :",
     analysesPerMonth: "analyses vidéo par mois",
@@ -159,7 +159,7 @@ const translations = {
     password: "Şifre",
     fullName: "Tam Ad",
     forgotPassword: "Şifremi Unuttum?",
-    
+
     videoTitle: "Video Başlığı",
     videoTitlePlaceholder: "Dikkat çekici bir başlık girin...",
     description: "Açıklama",
@@ -168,45 +168,45 @@ const translations = {
     selectVideo: "Video Seç",
     changeVideo: "Videoyu Değiştir",
     analyzing: "AI ile analiz ediliyor...",
-    
+
     aiConsentTitle: "AI Öğrenme (İsteğe Bağlı)",
     aiConsentText: "Viral Pilot'un AI önerilerini geliştirmek için videolarınızdan toplanan analiz verilerini kullanmasına izin verin. Videolarınız saklanmaz - yalnızca anonimleştirilmiş metrikler ve içgörüler model iyileştirmesi için kullanılır.",
     aiConsentWith: "Onay ile: Analiz verileri AI iyileştirmesi için kullanılır",
     aiConsentWithout: "Onay olmadan: Analiz verileri eğitim için kullanılmaz",
-    
+
     viralScore: "Viral Potansiyel Puanı",
     bestPlatform: "Önerilen Platform",
     platformScores: "Platform Puanları",
     insights: "AI İçgörüleri ve İpuçları",
     analyzeAnother: "Başka Bir Video Analiz Et",
-    
+
     launchAnalysis: "AI ile Analiz Et",
     startFree: "Ücretsiz Başla",
     getStarted: "Başla",
-    
+
     TikTok: "TikTok",
     YouTube: "YouTube",
     YouTubeShorts: "YouTube Shorts",
     Instagram: "Instagram",
     X: "X (Twitter)",
     LinkedIn: "LinkedIn",
-    
+
     exceptional: "🔥 Olağanüstü viral potansiyel!",
     excellent: "🚀 Mükemmel viral potansiyel!",
     good: "⭐ İyi viral potansiyel",
     moderate: "👍 Orta düzey viral potansiyel",
     needsWork: "💪 İyileştirme gerekiyor",
-    
+
     usageThisMonth: "Bu ayki kullanım",
     analysesLeft: "analiz hakkı kaldı",
     monthlyLimit: "Aylık limit",
     limitReached: "Aylık limit doldu. Limitiniz gelecek ay sıfırlanacak.",
-    
+
     noAccount: "Hesabınız yok mu?",
     haveAccount: "Zaten hesabınız var mı?",
     createAccount: "Hesabınızı oluşturun",
     welcomeBack: "Tekrar hoş geldiniz",
-    
+
     features: "Özellikler",
     allUsersGet: "Tüm kullanıcılar şunları alır:",
     analysesPerMonth: "aylık video analizi",
@@ -219,7 +219,7 @@ const translations = {
 // Components
 const AITrainingConsent = ({ consent, setConsent, language }) => {
   const t = (key) => translations[language]?.[key] || translations.en[key] || key;
-  
+
   return (
     <div className="bg-white/60 backdrop-blur-sm border border-gray-200 p-4 rounded-lg mb-4 opacity-90">
       <div className="flex items-start gap-3">
@@ -258,13 +258,13 @@ const UsageDisplay = ({ language }) => {
   const [usage, setUsage] = useState(null);
   const [loading, setLoading] = useState(true);
   const t = (key) => translations[language]?.[key] || translations.en[key] || key;
-  
+
   useEffect(() => {
     if (user) {
       fetchUsage();
     }
   }, [user]);
-  
+
   const fetchUsage = async () => {
     try {
       const token = getAccessToken();
@@ -272,14 +272,14 @@ const UsageDisplay = ({ language }) => {
         setLoading(false);
         return;
       }
-      
+
       const response = await fetch(`${API_BASE_URL}/api/auth/usage`, {
-        headers: { 
+        headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         setUsage(data);
@@ -290,12 +290,12 @@ const UsageDisplay = ({ language }) => {
       setLoading(false);
     }
   };
-  
+
   if (!user || loading) return null;
-  
+
   const currentUsage = usage?.analyses || 0;
   const remaining = usage?.remaining || (20 - currentUsage);
-  
+
   return (
     <div className="bg-white/80 backdrop-blur-sm border border-gray-100 rounded-lg p-4 mb-4 shadow-sm">
       <div className="flex items-center justify-between">
@@ -314,13 +314,13 @@ const UsageDisplay = ({ language }) => {
           </div>
         </div>
       </div>
-      
+
       {remaining === 0 && (
         <div className="mt-3 text-xs text-red-700 bg-red-50 border border-red-200 p-2 rounded">
           {t('limitReached')}
         </div>
       )}
-      
+
       {remaining > 0 && remaining <= 3 && (
         <div className="mt-3 text-xs text-amber-700 bg-amber-50 border border-amber-200 p-2 rounded">
           {remaining} {t('analysesLeft')} {t('monthlyLimit')}
@@ -336,16 +336,16 @@ const AuthModal = ({ show, onClose, language }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const { signIn, signUp } = useAuth();
-  
+
   const t = (key) => translations[language]?.[key] || translations.en[key] || key;
-  
+
   if (!show) return null;
-  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    
+
     try {
       if (isLogin) {
         const { user, session } = await signIn(formData.email, formData.password);
@@ -358,14 +358,14 @@ const AuthModal = ({ show, onClose, language }) => {
       } else {
         const result = await signUp(formData.email, formData.password, formData.fullName);
         console.log('Sign up result:', result);
-        
+
         if (result.user) {
           if (result.user.email_confirmed_at) {
             alert("Account created successfully! You can now sign in.");
           } else {
             alert("Account created! Please check your email to confirm your account, then sign in.");
           }
-          
+
           setIsLogin(true);
           setFormData({ email: formData.email, password: "", fullName: "" });
         } else {
@@ -389,7 +389,7 @@ const AuthModal = ({ show, onClose, language }) => {
             {isLogin ? t('welcomeBack') : t('createAccount')}
           </h2>
         </div>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           {!isLogin && (
             <div>
@@ -399,13 +399,13 @@ const AuthModal = ({ show, onClose, language }) => {
               <input
                 type="text"
                 value={formData.fullName}
-                onChange={(e) => setFormData({...formData, fullName: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 required={!isLogin}
               />
             </div>
           )}
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               {t('email')}
@@ -413,12 +413,12 @@ const AuthModal = ({ show, onClose, language }) => {
             <input
               type="email"
               value={formData.email}
-              onChange={(e) => setFormData({...formData, email: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               required
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               {t('password')}
@@ -426,20 +426,20 @@ const AuthModal = ({ show, onClose, language }) => {
             <input
               type="password"
               value={formData.password}
-              onChange={(e) => setFormData({...formData, password: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               required
               minLength={6}
             />
           </div>
-          
+
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-md text-sm flex items-center gap-2">
               <AlertCircle className="w-4 h-4" />
               {error}
             </div>
           )}
-          
+
           <button
             type="submit"
             disabled={loading}
@@ -448,7 +448,7 @@ const AuthModal = ({ show, onClose, language }) => {
             {loading ? 'Loading...' : (isLogin ? t('login') : t('signup'))}
           </button>
         </form>
-        
+
         <div className="text-center mt-4">
           <button
             type="button"
@@ -464,7 +464,7 @@ const AuthModal = ({ show, onClose, language }) => {
             </span>
           </button>
         </div>
-        
+
         <button
           type="button"
           onClick={onClose}
@@ -483,10 +483,45 @@ const UploadPage = ({ language, onNavigate }) => {
   const [formData, setFormData] = useState({ title: "", description: "", language: language });
   const [uploadedVideo, setUploadedVideo] = useState(null);
   const [aiConsent, setAiConsent] = useState(false);
-  const { analyzeVideo, isAnalyzing, progress, error } = useAnalysisContext();
-  const { user } = useAuth();
-  
+  const { analyzeVideo, isAnalyzing, progress, error: analysisError } = useAnalysisContext();
+  const { user, supabase } = useAuth();
+
+  // Usage Limit State
+  const [canAnalyze, setCanAnalyze] = useState(true);
+  const [usageCount, setUsageCount] = useState(0);
+  const [maxLimit, setMaxLimit] = useState(20);
+  const [checkingLimits, setCheckingLimits] = useState(true);
+
   const t = (key) => translations[language]?.[key] || translations.en[key] || key;
+
+  // Check limits on mount
+  useEffect(() => {
+    const checkLimits = async () => {
+      if (!user || !supabase) return;
+
+      try {
+        const { data, error } = await supabase
+          .rpc('check_usage_limits', { user_id_param: user.id });
+
+        if (error) {
+          console.error('Error checking limits:', error);
+          // Fallback to allow if check fails (or handle strictly)
+          setCanAnalyze(true);
+        } else if (data && data.length > 0) {
+          setCanAnalyze(data[0].can_analyze);
+          setUsageCount(data[0].current_usage);
+          setMaxLimit(data[0].max_limit);
+          console.log(`Usage: ${data[0].current_usage}/${data[0].max_limit}, Allowed: ${data[0].can_analyze}`);
+        }
+      } catch (err) {
+        console.error('Failed to check limits:', err);
+      } finally {
+        setCheckingLimits(false);
+      }
+    };
+
+    checkLimits();
+  }, [user, supabase]);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -502,15 +537,20 @@ const UploadPage = ({ language, onNavigate }) => {
   };
 
   const handleAnalyze = async () => {
+    if (!canAnalyze) {
+      alert(t('limitReached'));
+      return;
+    }
+
     if (!uploadedVideo || !formData.title || !formData.description) {
       alert("Please fill all fields and select a video");
       return;
     }
-    
+
     try {
       // ✅ Attendez que l'analyse soit complète
       await analyzeVideo(uploadedVideo, formData, aiConsent);
-      
+
       // ✅ Navigation APRÈS que l'analyse est terminée
       onNavigate('results');
     } catch (err) {
@@ -535,9 +575,40 @@ const UploadPage = ({ language, onNavigate }) => {
           <h2 className="text-3xl font-artistic mb-2">Upload Your Video</h2>
           <p className="text-gray-600">Get AI-powered insights to maximize your viral potential</p>
         </div>
-        
-        <UsageDisplay language={language} />
-        
+
+        {/* Usage Display (Replaced with new logic) */}
+        <div className="bg-white/80 backdrop-blur-sm border border-gray-100 rounded-lg p-4 mb-4 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Target className="w-5 h-5 text-indigo-500" />
+              <span className="text-sm font-medium text-gray-700">
+                {t('usageThisMonth')}
+              </span>
+            </div>
+            <div className="text-right">
+              {checkingLimits ? (
+                <span className="text-xs text-gray-500">Loading...</span>
+              ) : (
+                <>
+                  <div className="text-sm font-semibold text-gray-900">
+                    {usageCount}/{maxLimit}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {Math.max(0, maxLimit - usageCount)} {t('analysesLeft')}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+
+          {!canAnalyze && !checkingLimits && (
+            <div className="mt-3 text-xs text-red-700 bg-red-50 border border-red-200 p-2 rounded flex items-center gap-2">
+              <AlertCircle className="w-4 h-4" />
+              {t('limitReached')}
+            </div>
+          )}
+        </div>
+
         <div className="bg-white/80 backdrop-blur-sm p-6 rounded-lg border border-gray-100 shadow-sm">
           <form className="space-y-6">
             <div>
@@ -547,76 +618,93 @@ const UploadPage = ({ language, onNavigate }) => {
               <input
                 type="text"
                 value={formData.title}
-                onChange={(e) => setFormData({...formData, title: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 placeholder={t('videoTitlePlaceholder')}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 maxLength={100}
+                disabled={!canAnalyze}
               />
               <div className="text-xs text-gray-500 mt-1">{formData.title.length}/100</div>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium mb-2 text-gray-700">
                 {t('description')}
               </label>
               <textarea
                 value={formData.description}
-                onChange={(e) => setFormData({...formData, description: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 placeholder={t('descriptionPlaceholder')}
                 rows={4}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 maxLength={500}
+                disabled={!canAnalyze}
               />
               <div className="text-xs text-gray-500 mt-1">{formData.description.length}/500</div>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium mb-2 text-gray-700">
                 {t('videoFile')}
               </label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
-                <Upload className="w-10 h-10 mx-auto mb-4 text-gray-400" />
+              <div className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${!canAnalyze ? 'bg-gray-50 border-gray-200 cursor-not-allowed' : 'border-gray-300 hover:border-gray-400'}`}>
+                <Upload className={`w-10 h-10 mx-auto mb-4 ${!canAnalyze ? 'text-gray-300' : 'text-gray-400'}`} />
                 <input
                   type="file"
                   accept="video/*"
                   onChange={handleFileChange}
                   className="hidden"
                   id="video-upload"
+                  disabled={!canAnalyze}
                 />
-                <label htmlFor="video-upload" className="cursor-pointer">
-                  <span className="text-indigo-600 hover:text-indigo-500 font-medium">
+                <label htmlFor="video-upload" className={!canAnalyze ? 'cursor-not-allowed' : 'cursor-pointer'}>
+                  <span className={`font-medium ${!canAnalyze ? 'text-gray-400' : 'text-indigo-600 hover:text-indigo-500'}`}>
                     {uploadedVideo ? uploadedVideo.name : t('selectVideo')}
                   </span>
                   <p className="text-xs text-gray-500 mt-1">MP4, MOV, AVI up to 100MB</p>
                 </label>
               </div>
             </div>
-            
+
             <AITrainingConsent consent={aiConsent} setConsent={setAiConsent} language={language} />
-            
-            {error && (
+
+            {analysisError && (
               <div className="bg-red-50 text-red-700 p-3 rounded-md flex items-center gap-2">
                 <AlertCircle className="w-5 h-5" />
-                <span className="text-sm">{error}</span>
+                <span className="text-sm">{analysisError}</span>
               </div>
             )}
-            
-            <button 
+
+            <button
               type="button"
               onClick={handleAnalyze}
-              className="btn-liquid-glass w-full px-4 py-3 rounded-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
-              disabled={isAnalyzing}
+              className={`btn-liquid-glass w-full px-4 py-3 rounded-lg font-medium transition-all flex items-center justify-center gap-2
+                ${(!canAnalyze || isAnalyzing) ? 'opacity-50 cursor-not-allowed hover:translate-y-0' : ''}
+              `}
+              disabled={isAnalyzing || !canAnalyze || checkingLimits}
             >
-              {isAnalyzing 
-                ? `${t('analyzing')} ${progress > 0 ? `(${progress}%)` : ''}` 
-                : t('launchAnalysis')
-              }
+              {isAnalyzing ? (
+                <>
+                  <span className="animate-spin">⏳</span>
+                  {`${t('analyzing')} ${progress > 0 ? `(${progress}%)` : ''}`}
+                </>
+              ) : !canAnalyze ? (
+                <>
+                  <Lock className="w-4 h-4" />
+                  {t('limitReached')}
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4" />
+                  {t('launchAnalysis')}
+                </>
+              )}
             </button>
           </form>
         </div>
-        
+
         <div className="text-center mt-6">
-          <button 
+          <button
             onClick={() => onNavigate('landing')}
             className="text-gray-600 hover:text-gray-800 font-medium"
           >
@@ -631,19 +719,19 @@ const UploadPage = ({ language, onNavigate }) => {
 const ResultsPage = ({ language, onNavigate }) => {
   const { analysisResults: results, resetAnalysis } = useAnalysisContext();
   const t = (key) => translations[language]?.[key] || translations.en[key] || key;
-  
+
   // ✅ Vérifier si les résultats existent au montage du composant
   useEffect(() => {
     if (!results) {
       console.log('No results available');
     }
   }, [results]);
-  
+
   if (!results) {
     return (
       <div className="container mx-auto px-6 py-20 text-center">
         <h2 className="text-2xl font-semibold mb-4">No results available</h2>
-        <button 
+        <button
           onClick={() => onNavigate('upload')}
           className="btn-liquid-glass px-6 py-2 rounded-lg transition-all"
         >
@@ -655,7 +743,7 @@ const ResultsPage = ({ language, onNavigate }) => {
 
   const getScoreColor = (score) => {
     if (score >= 85) return "text-green-600";
-    if (score >= 70) return "text-blue-600"; 
+    if (score >= 70) return "text-blue-600";
     if (score >= 55) return "text-yellow-600";
     return "text-red-600";
   };
@@ -673,7 +761,7 @@ const ResultsPage = ({ language, onNavigate }) => {
       <section className="container mx-auto px-6 py-20 max-w-4xl">
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-3xl font-artistic">Analysis Results</h2>
-          <button 
+          <button
             onClick={() => onNavigate('upload')}
             className="flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-medium"
           >
@@ -681,7 +769,7 @@ const ResultsPage = ({ language, onNavigate }) => {
             {t('analyzeAnother')}
           </button>
         </div>
-        
+
         <div className="grid md:grid-cols-2 gap-6 mb-8">
           <div className="bg-white/80 backdrop-blur-sm p-6 rounded-lg border border-gray-100 shadow-sm text-center hover:shadow-md transition-shadow">
             <h3 className="text-lg font-semibold mb-4">{t('viralScore')}</h3>
@@ -690,7 +778,7 @@ const ResultsPage = ({ language, onNavigate }) => {
             </div>
             <p className="text-sm text-gray-600">{getScoreMessage(results.viralityScore)}</p>
           </div>
-          
+
           <div className="bg-white/80 backdrop-blur-sm p-6 rounded-lg border border-gray-100 shadow-sm text-center hover:shadow-md transition-shadow">
             <h3 className="text-lg font-semibold mb-4">{t('bestPlatform')}</h3>
             <div className="text-2xl font-semibold text-indigo-600 mb-2">
@@ -699,7 +787,7 @@ const ResultsPage = ({ language, onNavigate }) => {
             <p className="text-sm text-gray-600">Highest viral potential here</p>
           </div>
         </div>
-        
+
         <div className="bg-white/80 backdrop-blur-sm p-6 rounded-lg border border-gray-100 shadow-sm mb-8">
           <h3 className="text-lg font-semibold mb-4">{t('platformScores')}</h3>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -713,7 +801,7 @@ const ResultsPage = ({ language, onNavigate }) => {
             ))}
           </div>
         </div>
-        
+
         <div className="bg-white/80 backdrop-blur-sm p-6 rounded-lg border border-gray-100 shadow-sm">
           <h3 className="text-lg font-semibold mb-4">{t('insights')}</h3>
           <div className="space-y-3">
@@ -739,21 +827,21 @@ const TermsPage = ({ language, onNavigate }) => {
         <div className="bg-white/80 backdrop-blur-sm p-8 rounded-lg border border-gray-100 shadow-sm prose max-w-none">
           <h2>1. Acceptance of Terms</h2>
           <p>By accessing and using Viral Pilot, you accept and agree to be bound by the terms and provision of this agreement.</p>
-          
+
           <h2>2. Use License</h2>
           <p>All users receive 20 video analyses per month. This limit resets monthly.</p>
-          
+
           <h2>3. Video Content</h2>
           <p>You retain all rights to your video content. By uploading videos, you grant us permission to analyze them using AI.</p>
-          
+
           <h2>4. Privacy</h2>
           <p>Your use of our service is also governed by our Privacy Policy.</p>
-          
+
           <h2>5. Limitations</h2>
           <p>In no event shall Viral Pilot or its suppliers be liable for any damages arising out of the use or inability to use the materials on Viral Pilot.</p>
         </div>
         <div className="text-center mt-8">
-          <button 
+          <button
             onClick={() => onNavigate('landing')}
             className="text-indigo-600 hover:text-indigo-800 font-medium"
           >
@@ -773,21 +861,21 @@ const PrivacyPage = ({ language, onNavigate }) => {
         <div className="bg-white/80 backdrop-blur-sm p-8 rounded-lg border border-gray-100 shadow-sm prose max-w-none">
           <h2>1. Information We Collect</h2>
           <p>We collect information you provide directly to us, such as when you create an account or upload a video.</p>
-          
+
           <h2>2. How We Use Your Information</h2>
           <p>We use the information to provide, maintain, and improve our services, including AI analysis of your videos.</p>
-          
+
           <h2>3. Data Storage</h2>
           <p>Videos are stored securely. Without AI training consent, videos are automatically deleted after 30 days.</p>
-          
+
           <h2>4. Data Security</h2>
           <p>We implement appropriate technical and organizational measures to protect your personal information.</p>
-          
+
           <h2>5. Your Rights</h2>
           <p>You have the right to access, update, or delete your personal information at any time.</p>
         </div>
         <div className="text-center mt-8">
-          <button 
+          <button
             onClick={() => onNavigate('landing')}
             className="text-indigo-600 hover:text-indigo-800 font-medium"
           >
@@ -831,57 +919,57 @@ const AppContent = () => {
   }
 
   return (
-    <Layout 
-      language={language} 
-      setLanguage={setLanguage} 
+    <Layout
+      language={language}
+      setLanguage={setLanguage}
       onAuthClick={handleShowAuth}
       onNavigate={handleNavigate}
     >
       {currentPage === "landing" && (
-        <LandingPage 
-          language={language} 
-          onShowAuth={handleShowAuth} 
+        <LandingPage
+          language={language}
+          onShowAuth={handleShowAuth}
           onNavigate={handleNavigate}
         />
       )}
       {currentPage === "upload" && (
-        <UploadPage 
-          language={language} 
+        <UploadPage
+          language={language}
           onNavigate={handleNavigate}
         />
       )}
       {currentPage === "results" && (
-                <ResultsPage 
-          language={language} 
+        <ResultsPage
+          language={language}
           onNavigate={handleNavigate}
         />
       )}
       {currentPage === "terms" && (
-        <TermsPage 
-          language={language} 
+        <TermsPage
+          language={language}
           onNavigate={handleNavigate}
         />
       )}
       {currentPage === "privacy" && (
-        <PrivacyPage 
-          language={language} 
+        <PrivacyPage
+          language={language}
           onNavigate={handleNavigate}
         />
       )}
       {currentPage === "dashboard" && user && (
-        <UsageDashboard 
+        <UsageDashboard
           userId={user.id}
           language={language}
           onNavigate={handleNavigate}
         />
       )}
-      
-      <AuthModal 
+
+      <AuthModal
         show={showAuth}
         onClose={handleCloseAuth}
         language={language}
       />
-      
+
       {/* Session Warning Modal - Only show for authenticated users */}
       {user && (
         <SessionWarning
