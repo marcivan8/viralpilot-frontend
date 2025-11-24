@@ -49,8 +49,10 @@ const normalizeUsageResponse = (data = {}) => {
   const tierData = {
     ...DEFAULT_TIER,
     ...data.tier,
+    id: (data.tier?.id === 'explorer' ? 'creator' : data.tier?.id) || DEFAULT_TIER.id,
+    name: (data.tier?.id === 'explorer' ? 'Creator' : data.tier?.name) || DEFAULT_TIER.name,
     icon: data.tier?.icon || data.tier?.emoji || data.tier?.symbol || DEFAULT_TIER.icon,
-    color: data.tier?.color || DEFAULT_TIER.color
+    color: (data.tier?.id === 'explorer' ? 'indigo' : data.tier?.color) || DEFAULT_TIER.color
   };
 
   const quotasSource = data.quotas || data.limits || {};
