@@ -175,24 +175,42 @@ const UsageDashboard = ({ userId, language = 'en', onNavigate }) => {
         const historyData = await ApiService.getAnalysisHistory(accessToken, 100);
         if (historyData && historyData.items) {
           normalizedUsage.recentAnalyses = historyData.items;
-          if (historyData.total !== undefined) {
-            normalizedUsage.metrics.totalAnalyses = historyData.total;
-            // Update video quota logic here similar to original...
-            // (Simplified for brevity, assuming backend sync is better, but keeping basic update)
-            const videoQuotaIndex = normalizedUsage.usageCards.findIndex(
-              card => card.key.toLowerCase().includes('video')
-            );
-            if (videoQuotaIndex !== -1) {
-              const card = normalizedUsage.usageCards[videoQuotaIndex];
-              if (card.usage.limit > 0) {
-                card.usage.used = historyData.total;
-                card.usage.remaining = Math.max(0, card.usage.limit - historyData.total);
-                card.usage.percentage = (historyData.total / card.usage.limit) * 100;
+
+          // Calculate monthly usage from history (Client-side calculation for immediate consistency)
+          const now = new Date();
+          const currentMonth = now.getMonth();
+          const currentYear = now.getFullYear();
+
+          const monthlyAnalysesCount = historyData.items.filter(item => {
+            if (!item.created_at) return false;
+            const itemDate = new Date(item.created_at);
+            return itemDate.getMonth() === currentMonth && itemDate.getFullYear() === currentYear;
+          }).length;
+
+          // Update video quota with calculated monthly count
+          const videoQuotaIndex = normalizedUsage.usageCards.findIndex(
+            card => card.key.toLowerCase().includes('video')
+          );
+
+          if (videoQuotaIndex !== -1) {
+            const card = normalizedUsage.usageCards[videoQuotaIndex];
+            if (card.usage.limit > 0) {
+              // Use the calculated monthly count
+              card.usage.used = monthlyAnalysesCount;
+              card.usage.remaining = Math.max(0, card.usage.limit - monthlyAnalysesCount);
+              card.usage.percentage = (monthlyAnalysesCount / card.usage.limit) * 100;
+
+              // Also update the primary quota reference if it matches
+              if (normalizedUsage.primaryQuota.key === card.key) {
+                normalizedUsage.primaryQuota = { ...card };
               }
             }
           }
-          // Calculate daily/weekly history (Simplified logic from original)
-          // ... (Keeping it simple for now to focus on UI)
+
+          // Update total analyses metric if available (Lifetime total)
+          if (historyData.total !== undefined) {
+            normalizedUsage.metrics.totalAnalyses = historyData.total;
+          }
         }
       } catch (e) {
         console.warn('History fetch failed', e);
@@ -686,10 +704,10 @@ const UpgradeModal = ({ currentTier, feature, onClose, onUpgrade }) => {
                 onClick={() => onUpgrade(tier.id)}
                 disabled={currentTier.id === tier.id}
                 className={`w-full py-3 rounded-xl font-semibold transition-colors ${currentTier.id === tier.id
-                    ? 'bg-slate-100 text-slate-400 cursor-default'
-                    : tier.popular
-                      ? 'bg-indigo-600 text-white hover:bg-indigo-700'
-                      : 'bg-white border-2 border-slate-200 text-slate-700 hover:border-indigo-600 hover:text-indigo-600'
+                  ? 'bg-slate-100 text-slate-400 cursor-default'
+                  : tier.popular
+                    ? 'bg-indigo-600 text-white hover:bg-indigo-700'
+                    : 'bg-white border-2 border-slate-200 text-slate-700 hover:border-indigo-600 hover:text-indigo-600'
                   }`}
               >
                 {currentTier.id === tier.id ? 'Current Plan' : 'Upgrade'}
