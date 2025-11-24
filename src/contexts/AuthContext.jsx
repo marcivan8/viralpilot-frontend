@@ -1,15 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
-
-// Validation des variables d'environnement
-if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
-  console.error('Missing Supabase environment variables');
-}
-
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL || '',
-  import.meta.env.VITE_SUPABASE_ANON_KEY || ''
-);
+import { supabase } from '../services/supabaseClient';
 
 const AuthContext = createContext();
 
@@ -81,7 +71,7 @@ export const AuthProvider = ({ children }) => {
         email: email.trim(),
         password,
         options: {
-          data: { 
+          data: {
             full_name: fullName?.trim() || '',
             name: fullName?.trim() || ''
           }

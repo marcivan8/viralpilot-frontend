@@ -1,4 +1,5 @@
 // Dynamically detect backend API URL
+import { supabase } from './supabaseClient';
 const getApiUrl = () => {
   // ✅ 1. Explicit environment variable takes priority
   if (import.meta.env.VITE_API_BASE_URL) {
@@ -158,6 +159,22 @@ class ApiService {
 
       const data = await response.json();
       console.log('✅ Analysis successful');
+
+      // Log the action to Supabase
+      try {
+        const user = (await supabase.auth.getUser()).data.user;
+        if (user) {
+          await this.logAction(user.id, 'analyze_video', {
+            fileName: formData.get('video')?.name,
+            fileSize: formData.get('video')?.size,
+            analysisId: data.analysisId || data.id
+          });
+        }
+      } catch (logError) {
+        console.warn('⚠️ Failed to log action:', logError);
+        // Don't fail the main request if logging fails
+      }
+
       return data;
     } catch (error) {
       console.error('❌ analyzeVideo failed:', error);
@@ -227,6 +244,28 @@ class ApiService {
     } catch (error) {
       console.error('❌ Analyze endpoint is NOT healthy:', error);
       return { status: 'error', error: error.message };
+    }
+  }
+
+  static async logAction(userId, action, details = {}) {
+    try {
+      console.log('📝 Logging action:', action);
+      const { error } = await supabase
+        .from('user_logs')
+        .insert([
+          {
+            user_id: userId,
+            action: action,
+            details: details,
+            created_at: new Date().toISOString()
+          }
+        ]);
+
+      if (error) throw error;
+      console.log('✅ Action logged successfully');
+    } catch (error) {
+      console.error('❌ Error logging action:', error);
+      // We don't throw here to avoid disrupting the user flow
     }
   }
 }
