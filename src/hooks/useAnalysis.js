@@ -12,10 +12,14 @@ export const useAnalysis = () => {
   const [progress, setProgress] = useState(0);
   const { getAccessToken } = useAuth();
 
-  const analyzeVideo = useCallback(async (file, formData, aiConsent = false) => {
-    if (!file || !formData.title || !formData.description) {
-      throw new Error('Missing required data');
+  const analyzeVideo = useCallback(async (file, formData = {}, aiConsent = false) => {
+    if (!file) {
+      throw new Error('No video file selected');
     }
+
+    // Default values if formData is missing (Instant Analysis flow)
+    const title = formData.title || file.name;
+    const description = formData.description || '';
 
     setIsAnalyzing(true);
     setError(null);
@@ -35,8 +39,8 @@ export const useAnalysis = () => {
       // Préparer FormData
       const uploadData = new FormData();
       uploadData.append('video', file);
-      uploadData.append('title', formData.title.trim());
-      uploadData.append('description', formData.description.trim());
+      uploadData.append('title', title.trim());
+      uploadData.append('description', description.trim());
       uploadData.append('language', formData.language || 'en');
       uploadData.append('ai_training_consent', aiConsent.toString());
 
