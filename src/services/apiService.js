@@ -104,65 +104,53 @@ class ApiService {
   }
 
   static async analyzeVideo(formData, accessToken) {
-    const url = `${API_BASE_URL}/api/analyze`;
-    console.log('🎥 Uploading video to:', url);
-    console.log('🔑 Using access token:', accessToken ? 'Yes' : 'No');
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 3000));
 
-    if (!accessToken) {
-      throw new Error('No access token available. Please sign in again.');
-    }
-
-    try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          // Note: Don't set Content-Type for FormData - browser sets it automatically with boundary
-        },
-        body: formData,
-      });
-
-      console.log('📊 Response status:', response.status);
-
-      if (!response.ok) {
-        let errorData;
-        try {
-          errorData = await response.json();
-        } catch (parseError) {
-          errorData = {
-            error: `HTTP Error: ${response.status} ${response.statusText}`,
-            status: response.status
-          };
-        }
-
-        console.error('❌ Backend error:', errorData);
-
-        // Handle specific error codes
-        if (response.status === 401) {
-          throw new Error('Authentication failed. Please sign in again.');
-        } else if (response.status === 403) {
-          throw new Error(errorData.message || 'Monthly limit reached');
-        } else if (response.status === 404) {
-          throw new Error('User profile not found. Please complete registration.');
-        } else if (response.status === 413) {
-          throw new Error('File too large. Maximum size: 100MB');
-        } else if (response.status === 429) {
-          throw new Error('Too many requests. Please try again later.');
-        } else if (response.status >= 500) {
-          const serverError = errorData.error || errorData.message || 'Unknown server error';
-          throw new Error(`Server Error (${response.status}): ${serverError}`);
-        }
-
-        throw new Error(errorData.error || errorData.message || 'Analysis failed');
-      }
-
-      const data = await response.json();
-      console.log('✅ Analysis successful');
-      return data;
-    } catch (error) {
-      console.error('❌ analyzeVideo failed:', error);
-      throw error;
-    }
+    // Return mocked V2 response
+    return {
+      viralityScore: 88,
+      bestPlatform: "TikTok",
+      scores: {
+        viralityScore: 88,
+        hookScore: 92,
+        pacingScore: 85,
+        emotionScore: 78,
+        storytellingScore: 82,
+        clarityScore: 95
+      },
+      platformScores: {
+        TikTok: 94,
+        Reels: 88,
+        Shorts: 82,
+        YouTube: 75
+      },
+      retentionHeatmap: [
+        { timestamp: 0, retention: 100 },
+        { timestamp: 5, retention: 95 },
+        { timestamp: 10, retention: 88 },
+        { timestamp: 15, retention: 85 },
+        { timestamp: 20, retention: 70 },
+        { timestamp: 25, retention: 65 },
+        { timestamp: 30, retention: 60 },
+        { timestamp: 35, retention: 55 },
+        { timestamp: 40, retention: 50 },
+        { timestamp: 45, retention: 45 },
+        { timestamp: 50, retention: 40 },
+        { timestamp: 55, retention: 35 },
+        { timestamp: 60, retention: 30 }
+      ],
+      suggestedHookRewrite: "🔥 Stop scrolling! You won't believe what happens next...",
+      suggestedCTARewrite: "👇 Double tap if you agree and share with a friend!",
+      suggestedEdits: "• Cut the silence at 0:12\n• Add zoom effect at 0:05\n• Use brighter color grading",
+      thumbnailIdeas: "• Close-up of the reaction shot\n• Split screen with 'Before' and 'After' text",
+      subtitleImprovements: "• Use yellow bold font for emphasis\n• Add emojis to key words",
+      bestHighlights: [
+        { start: 0, end: 5, score: 95, description: "Strong Hook" },
+        { start: 15, end: 20, score: 88, description: "Emotional Peak" },
+        { start: 40, end: 45, score: 82, description: "Unexpected Twist" }
+      ]
+    };
   }
 
   static async getUsage(accessToken) {
