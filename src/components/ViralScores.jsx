@@ -63,15 +63,15 @@ const PlatformScore = ({ platform, score }) => {
     };
 
     return (
-        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100">
-            <div className="flex items-center gap-3">
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold ${getPlatformColor(platform)}`}>
+        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100 gap-3">
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+                <div className={`w-8 h-8 rounded-lg flex-shrink-0 flex items-center justify-center text-xs font-bold ${getPlatformColor(platform)}`}>
                     {platform[0]}
                 </div>
-                <span className="font-medium text-gray-700">{platform}</span>
+                <span className="font-medium text-gray-700 truncate">{platform}</span>
             </div>
-            <div className="flex items-center gap-2">
-                <div className="h-2 w-24 bg-gray-200 rounded-full overflow-hidden">
+            <div className="flex items-center gap-2 flex-shrink-0">
+                <div className="h-2 w-16 sm:w-20 md:w-24 bg-gray-200 rounded-full overflow-hidden">
                     <div
                         className="h-full bg-brand-500 rounded-full"
                         style={{ width: `${score}%` }}
