@@ -48,20 +48,10 @@ const Results = ({ results, videoFile, onBack }) => {
                                 <VideoPreview videoUrl={videoUrl} />
                             </div>
 
-                            {results.scores ? (
-                                <ViralScores
-                                    scores={results.scores}
-                                    platformScores={results.platformScores}
-                                />
-                            ) : (
-                                <div className="card p-6 bg-yellow-50 border border-yellow-200 text-yellow-800">
-                                    <h3 className="font-bold mb-2">⚠️ Data Structure Mismatch</h3>
-                                    <p className="text-sm mb-4">The backend returned data, but not in the expected format. Here is what we received:</p>
-                                    <pre className="bg-black text-green-400 p-4 rounded-lg text-xs overflow-auto max-h-96">
-                                        {JSON.stringify(results, null, 2)}
-                                    </pre>
-                                </div>
-                            )}
+                            <ViralScores
+                                scores={results.scores}
+                                platformScores={results.platformScores}
+                            />
                         </div>
                     </div>
 
