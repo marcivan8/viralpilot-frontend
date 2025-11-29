@@ -3,7 +3,7 @@ import Navigation from '../components/Navigation';
 import UploadCard from '../components/UploadCard';
 import { Sparkles, TrendingUp, Zap } from 'lucide-react';
 
-const Home = ({ onFileSelect, isAnalyzing, error }) => {
+const Home = ({ onFileSelect, isAnalyzing, error, onLogin }) => {
     return (
         <div className="min-h-screen bg-slate-50 relative overflow-hidden">
             {/* Background Elements */}
@@ -13,7 +13,7 @@ const Home = ({ onFileSelect, isAnalyzing, error }) => {
                 <div className="absolute top-40 -left-20 w-72 h-72 bg-brand-200/30 rounded-full blur-3xl animate-pulse-slow delay-1000" />
             </div>
 
-            <Navigation />
+            <Navigation onLogin={onLogin} />
 
             <main className="relative z-10 pt-32 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
                 <div className="text-center max-w-3xl mx-auto mb-16">

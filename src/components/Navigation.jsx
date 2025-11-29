@@ -3,7 +3,7 @@ import Logo from './Logo';
 import { useAuth } from '../contexts/AuthContext';
 import { LogOut, User } from 'lucide-react';
 
-const Navigation = () => {
+const Navigation = ({ onLogin }) => {
     const { user, signOut } = useAuth();
 
     return (
@@ -30,9 +30,12 @@ const Navigation = () => {
                                 </button>
                             </>
                         ) : (
-                            <div className="text-sm font-medium text-gray-500">
-                                Guest Mode
-                            </div>
+                            <button
+                                onClick={onLogin}
+                                className="text-sm font-semibold text-gray-700 hover:text-brand-600 transition-colors px-4 py-2 rounded-full hover:bg-gray-50"
+                            >
+                                Sign In
+                            </button>
                         )}
                     </div>
                 </div>

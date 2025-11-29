@@ -7,15 +7,15 @@ import ActionSuggestions from '../components/ActionSuggestions';
 import Highlights from '../components/Highlights';
 import { ArrowLeft, Download, Share2 } from 'lucide-react';
 
-const Results = ({ results, videoFile, onBack }) => {
+const Results = ({ results, videoFile, onBack, onLogin }) => {
     console.log('📊 Results Page Received Data:', results);
     if (!results) return null;
 
     const videoUrl = videoFile ? URL.createObjectURL(videoFile) : null;
 
     return (
-        <div className="min-h-screen bg-slate-50 pb-20">
-            <Navigation />
+        <div className="min-h-screen bg-slate-50 relative pb-20">
+            <Navigation onLogin={onLogin} />
 
             <main className="pt-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
                 {/* Header */}

@@ -3,6 +3,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { AnalysisProvider, useAnalysisContext } from "./contexts/AnalysisContext";
 import Home from "./pages/Home";
 import Results from "./pages/Results";
+import Auth from "./pages/Auth";
 import LoadingState from "./components/LoadingState";
 
 // Main App Component
@@ -37,11 +38,16 @@ const AppContent = () => {
         <LoadingState progress={progress} status="Analyzing video content..." />
       )}
 
+      {currentPage === 'auth' && (
+        <Auth onBack={() => setCurrentPage('home')} />
+      )}
+
       {currentPage === 'home' && (
         <Home
           onFileSelect={handleFileSelect}
           isAnalyzing={isAnalyzing}
           error={error}
+          onLogin={() => setCurrentPage('auth')}
         />
       )}
 
@@ -50,6 +56,7 @@ const AppContent = () => {
           results={analysisResults}
           videoFile={uploadedFile}
           onBack={handleBack}
+          onLogin={() => setCurrentPage('auth')}
         />
       )}
     </>
