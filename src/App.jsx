@@ -41,6 +41,7 @@ const AppContent = () => {
         <Home
           onFileSelect={handleFileSelect}
           isAnalyzing={isAnalyzing}
+          error={error}
         />
       )}
 

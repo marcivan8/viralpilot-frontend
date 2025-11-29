@@ -3,7 +3,7 @@ import Navigation from '../components/Navigation';
 import UploadCard from '../components/UploadCard';
 import { Sparkles, TrendingUp, Zap } from 'lucide-react';
 
-const Home = ({ onFileSelect, isAnalyzing }) => {
+const Home = ({ onFileSelect, isAnalyzing, error }) => {
     return (
         <div className="min-h-screen bg-slate-50 relative overflow-hidden">
             {/* Background Elements */}
@@ -38,6 +38,12 @@ const Home = ({ onFileSelect, isAnalyzing }) => {
                 <div className="max-w-2xl mx-auto relative">
                     <div className="absolute -inset-1 bg-gradient-to-r from-brand-500 to-accent-500 rounded-[2rem] blur opacity-20 animate-pulse" />
                     <div className="relative bg-white rounded-[1.8rem] shadow-2xl shadow-brand-500/10 p-2">
+                        {error && (
+                            <div className="absolute -top-16 left-0 right-0 mx-auto max-w-md bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl flex items-center gap-3 shadow-sm animate-bounce">
+                                <span className="text-xl">⚠️</span>
+                                <p className="text-sm font-medium">{error}</p>
+                            </div>
+                        )}
                         <UploadCard onFileSelect={onFileSelect} disabled={isAnalyzing} />
                     </div>
                 </div>
