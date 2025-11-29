@@ -148,80 +148,8 @@ class ApiService {
       return data;
 
     } catch (error) {
-      console.error('❌ analyzeVideo failed (using fallback mock for demo):', error);
-
-      // FALLBACK MOCK DATA FOR DEMO IF BACKEND FAILS
-      // This ensures the UI still works even if the backend is down or unreachable
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate delay
-
-      // Generate slightly random scores to make it feel "alive"
-      const randomScore = Math.floor(Math.random() * 30) + 60; // 60-90
-
-      // Randomize suggestions
-      const hooks = [
-        "🔥 Stop scrolling! You won't believe what happens next...",
-        "🤫 The secret nobody tells you about...",
-        "🤯 I bet you didn't know this fact...",
-        "⚠️ Don't make this common mistake!",
-        "👀 Watch this before you try it yourself..."
-      ];
-
-      const ctas = [
-        "👇 Double tap if you agree and share with a friend!",
-        "💬 Comment 'YES' if you want part 2!",
-        "👉 Follow for more tips like this!",
-        "💾 Save this video for later reference.",
-        "🔄 Share this with someone who needs to see it."
-      ];
-
-      const edits = [
-        "• Cut the silence at 0:12\n• Add zoom effect at 0:05\n• Use brighter color grading",
-        "• Add background music to build tension\n• Use a faster cut at the beginning\n• Add text overlay for key points",
-        "• Remove the shaky footage at 0:08\n• Increase the volume of the voiceover\n• Add a transition effect at 0:15",
-        "• Use a split screen for comparison\n• Add sound effects for emphasis\n• Brighten the shadows in the intro"
-      ];
-
-      return {
-        viralityScore: randomScore,
-        bestPlatform: Math.random() > 0.5 ? "TikTok" : "Reels",
-        scores: {
-          viralityScore: randomScore,
-          hookScore: Math.floor(Math.random() * 20) + 70,
-          pacingScore: Math.floor(Math.random() * 20) + 70,
-          emotionScore: Math.floor(Math.random() * 20) + 70,
-          storytellingScore: Math.floor(Math.random() * 20) + 70,
-          clarityScore: Math.floor(Math.random() * 20) + 70
-        },
-        platformScores: {
-          TikTok: Math.floor(Math.random() * 20) + 75,
-          Reels: Math.floor(Math.random() * 20) + 70,
-          Shorts: Math.floor(Math.random() * 20) + 65,
-          YouTube: Math.floor(Math.random() * 20) + 60
-        },
-        retentionHeatmap: [
-          { timestamp: 0, retention: 100 },
-          { timestamp: 5, retention: 90 + Math.random() * 5 },
-          { timestamp: 10, retention: 80 + Math.random() * 10 },
-          { timestamp: 15, retention: 70 + Math.random() * 10 },
-          { timestamp: 20, retention: 60 + Math.random() * 10 },
-          { timestamp: 25, retention: 50 + Math.random() * 10 },
-          { timestamp: 30, retention: 40 + Math.random() * 10 },
-          { timestamp: 35, retention: 30 + Math.random() * 10 },
-          { timestamp: 40, retention: 20 + Math.random() * 10 },
-          { timestamp: 45, retention: 15 + Math.random() * 5 },
-          { timestamp: 50, retention: 10 + Math.random() * 5 }
-        ],
-        suggestedHookRewrite: hooks[Math.floor(Math.random() * hooks.length)],
-        suggestedCTARewrite: ctas[Math.floor(Math.random() * ctas.length)],
-        suggestedEdits: edits[Math.floor(Math.random() * edits.length)],
-        thumbnailIdeas: "• Close-up of the reaction shot\n• Split screen with 'Before' and 'After' text",
-        subtitleImprovements: "• Use yellow bold font for emphasis\n• Add emojis to key words",
-        bestHighlights: [
-          { start: Math.floor(Math.random() * 5), end: Math.floor(Math.random() * 5) + 5, score: 90 + Math.floor(Math.random() * 10), description: "Strong Hook" },
-          { start: 15, end: 20, score: 80 + Math.floor(Math.random() * 10), description: "Emotional Peak" },
-          { start: 35, end: 40, score: 85 + Math.floor(Math.random() * 10), description: "Key Moment" }
-        ]
-      };
+      console.error('❌ analyzeVideo failed:', error);
+      throw error;
     }
   }
 
