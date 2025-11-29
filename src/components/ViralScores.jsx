@@ -63,21 +63,22 @@ const PlatformScore = ({ platform, score }) => {
     };
 
     return (
-        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100 gap-3">
-            <div className="flex items-center gap-2 min-w-0 flex-1">
-                <div className={`w-8 h-8 rounded-lg flex-shrink-0 flex items-center justify-center text-xs font-bold ${getPlatformColor(platform)}`}>
+        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100 gap-4 hover:border-brand-200 transition-colors">
+            <div className="flex items-center gap-3 min-w-0 w-1/3">
+                <div className={`w-10 h-10 rounded-lg flex-shrink-0 flex items-center justify-center text-sm font-bold shadow-sm ${getPlatformColor(platform)}`}>
                     {platform[0]}
                 </div>
-                <span className="font-medium text-gray-700 truncate">{platform}</span>
+                <span className="font-semibold text-gray-700 truncate">{platform}</span>
             </div>
-            <div className="flex items-center gap-2 flex-shrink-0">
-                <div className="h-2 w-16 sm:w-20 md:w-24 bg-gray-200 rounded-full overflow-hidden">
+
+            <div className="flex items-center gap-3 flex-1 justify-end">
+                <div className="h-2.5 w-full max-w-[120px] bg-gray-200 rounded-full overflow-hidden">
                     <div
-                        className="h-full bg-brand-500 rounded-full"
+                        className="h-full bg-brand-500 rounded-full transition-all duration-1000 ease-out"
                         style={{ width: `${score}%` }}
                     />
                 </div>
-                <span className="font-bold text-gray-900 w-8 text-right">{score}</span>
+                <span className="font-bold text-gray-900 w-9 text-right">{score}</span>
             </div>
         </div>
     );

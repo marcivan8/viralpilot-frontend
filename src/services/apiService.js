@@ -157,6 +157,30 @@ class ApiService {
       // Generate slightly random scores to make it feel "alive"
       const randomScore = Math.floor(Math.random() * 30) + 60; // 60-90
 
+      // Randomize suggestions
+      const hooks = [
+        "🔥 Stop scrolling! You won't believe what happens next...",
+        "🤫 The secret nobody tells you about...",
+        "🤯 I bet you didn't know this fact...",
+        "⚠️ Don't make this common mistake!",
+        "👀 Watch this before you try it yourself..."
+      ];
+
+      const ctas = [
+        "👇 Double tap if you agree and share with a friend!",
+        "💬 Comment 'YES' if you want part 2!",
+        "👉 Follow for more tips like this!",
+        "💾 Save this video for later reference.",
+        "🔄 Share this with someone who needs to see it."
+      ];
+
+      const edits = [
+        "• Cut the silence at 0:12\n• Add zoom effect at 0:05\n• Use brighter color grading",
+        "• Add background music to build tension\n• Use a faster cut at the beginning\n• Add text overlay for key points",
+        "• Remove the shaky footage at 0:08\n• Increase the volume of the voiceover\n• Add a transition effect at 0:15",
+        "• Use a split screen for comparison\n• Add sound effects for emphasis\n• Brighten the shadows in the intro"
+      ];
+
       return {
         viralityScore: randomScore,
         bestPlatform: Math.random() > 0.5 ? "TikTok" : "Reels",
@@ -187,15 +211,15 @@ class ApiService {
           { timestamp: 45, retention: 15 + Math.random() * 5 },
           { timestamp: 50, retention: 10 + Math.random() * 5 }
         ],
-        suggestedHookRewrite: "🔥 Stop scrolling! You won't believe what happens next...",
-        suggestedCTARewrite: "👇 Double tap if you agree and share with a friend!",
-        suggestedEdits: "• Cut the silence at 0:12\n• Add zoom effect at 0:05\n• Use brighter color grading",
+        suggestedHookRewrite: hooks[Math.floor(Math.random() * hooks.length)],
+        suggestedCTARewrite: ctas[Math.floor(Math.random() * ctas.length)],
+        suggestedEdits: edits[Math.floor(Math.random() * edits.length)],
         thumbnailIdeas: "• Close-up of the reaction shot\n• Split screen with 'Before' and 'After' text",
         subtitleImprovements: "• Use yellow bold font for emphasis\n• Add emojis to key words",
         bestHighlights: [
-          { start: 0, end: 5, score: 95, description: "Strong Hook" },
-          { start: 15, end: 20, score: 88, description: "Emotional Peak" },
-          { start: 40, end: 45, score: 82, description: "Unexpected Twist" }
+          { start: Math.floor(Math.random() * 5), end: Math.floor(Math.random() * 5) + 5, score: 90 + Math.floor(Math.random() * 10), description: "Strong Hook" },
+          { start: 15, end: 20, score: 80 + Math.floor(Math.random() * 10), description: "Emotional Peak" },
+          { start: 35, end: 40, score: 85 + Math.floor(Math.random() * 10), description: "Key Moment" }
         ]
       };
     }
