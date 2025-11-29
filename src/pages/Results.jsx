@@ -8,6 +8,7 @@ import Highlights from '../components/Highlights';
 import { ArrowLeft, Download, Share2 } from 'lucide-react';
 
 const Results = ({ results, videoFile, onBack }) => {
+    console.log('📊 Results Page Received Data:', results);
     if (!results) return null;
 
     const videoUrl = videoFile ? URL.createObjectURL(videoFile) : null;

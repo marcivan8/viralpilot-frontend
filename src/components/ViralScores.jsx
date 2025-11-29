@@ -85,6 +85,11 @@ const PlatformScore = ({ platform, score }) => {
 };
 
 const ViralScores = ({ scores, platformScores }) => {
+    if (!scores || !platformScores) {
+        console.warn('ViralScores: Missing data', { scores, platformScores });
+        return null;
+    }
+
     return (
         <div className="space-y-8">
             {/* Main Viral Score */}
