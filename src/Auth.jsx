@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { createClient } from "@supabase/supabase-js";
-import { LogIn, UserPlus } from "lucide-react";
+import { LogIn, UserPlus, CheckSquare, Square } from "lucide-react";
+import { TermsOfService, PrivacyPolicy } from "./components/LegalDocs";
 
 // ===== Supabase Config =====
 const supabase = createClient(
@@ -62,10 +63,19 @@ export default function Auth({ onAuthSuccess }) {
   const [form, setForm] = useState({ email: "", password: "", fullName: "" });
   const [loading, setLoading] = useState(false);
   const [language, setLanguage] = useState("en");
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false);
   const t = useT(language);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!isLogin && !agreedToTerms) {
+      alert("You must agree to the Terms of Service and Privacy Policy to create an account.");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -82,6 +92,7 @@ export default function Auth({ onAuthSuccess }) {
         );
         onAuthSuccess();
       } else {
+        // Sign Up Flow
         const { data, error } = await supabase.auth.signUp({
           email: form.email,
           password: form.password,
@@ -89,9 +100,38 @@ export default function Auth({ onAuthSuccess }) {
             data: { full_name: form.fullName },
           },
         });
+
         if (error) throw error;
-        alert("Signup successful! Please check your email to confirm.");
-        setIsLogin(true);
+
+        // SEAMLESS LOGIN LOGIC
+        // If session is present, user is already logged in (email confirmation might be disabled or optional)
+        if (data.session) {
+          localStorage.setItem("viral_pilot_token", data.session.access_token);
+          localStorage.setItem(
+            "viral_pilot_user",
+            JSON.stringify(data.user.user_metadata)
+          );
+          onAuthSuccess();
+        } else {
+          // Attempt immediate login just in case
+          const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
+            email: form.email,
+            password: form.password,
+          });
+
+          if (loginData?.session) {
+            localStorage.setItem("viral_pilot_token", loginData.session.access_token);
+            localStorage.setItem(
+              "viral_pilot_user",
+              JSON.stringify(loginData.user.user_metadata)
+            );
+            onAuthSuccess();
+          } else {
+            // Fallback: Email confirmation is strictly required
+            alert("Signup successful! Confirmation email sent. Please check your inbox to verify your account, then log in.");
+            setIsLogin(true);
+          }
+        }
       }
     } catch (err) {
       alert(err.message);
@@ -146,6 +186,24 @@ export default function Auth({ onAuthSuccess }) {
             required
           />
 
+          {!isLogin && (
+            <div className="flex items-start gap-2 mt-4 text-sm text-gray-600">
+              <button
+                type="button"
+                onClick={() => setAgreedToTerms(!agreedToTerms)}
+                className="mt-0.5 text-blue-600 flex-shrink-0"
+              >
+                {agreedToTerms ? <CheckSquare className="w-5 h-5" /> : <Square className="w-5 h-5" />}
+              </button>
+              <div className="leading-snug">
+                I agree to the{" "}
+                <button type="button" onClick={() => setShowTerms(true)} className="text-blue-600 hover:underline font-medium">Terms of Service</button>
+                {" "}and{" "}
+                <button type="button" onClick={() => setShowPrivacy(true)} className="text-blue-600 hover:underline font-medium">Privacy Policy</button>.
+              </div>
+            </div>
+          )}
+
           <button
             type="submit"
             disabled={loading}
@@ -181,6 +239,9 @@ export default function Auth({ onAuthSuccess }) {
           )}
         </div>
       </div>
+
+      <TermsOfService isOpen={showTerms} onClose={() => setShowTerms(false)} />
+      <PrivacyPolicy isOpen={showPrivacy} onClose={() => setShowPrivacy(false)} />
     </div>
   );
 }

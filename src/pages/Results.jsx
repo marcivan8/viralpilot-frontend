@@ -6,6 +6,7 @@ import RetentionHeatmap from '../components/RetentionHeatmap';
 import ActionSuggestions from '../components/ActionSuggestions';
 import Highlights from '../components/Highlights';
 import { ArrowLeft, Download, Share2 } from 'lucide-react';
+import PredictionCard from '../components/PredictionCard';
 
 const Results = ({ results, videoFile, onBack, onLogin }) => {
     console.log('📊 Results Page Received Data:', results);
@@ -57,6 +58,7 @@ const Results = ({ results, videoFile, onBack, onLogin }) => {
 
                     {/* Right Column - Deep Analysis */}
                     <div className="lg:col-span-8 space-y-8">
+                        <PredictionCard prediction={results.prediction} />
                         <RetentionHeatmap data={results.retentionHeatmap} />
 
                         <div className="grid md:grid-cols-2 gap-8">

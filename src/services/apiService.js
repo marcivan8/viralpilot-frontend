@@ -210,6 +210,11 @@ class ApiService {
           }
           return points;
         })(),
+        prediction: {
+          views: rawData.prediction?.views || 0,
+          viralityScore: rawData.prediction?.viralityScore || 0,
+          assessment: rawData.prediction?.assessment || 'No assessment available',
+        },
         suggestedHookRewrite: rawData.suggestions?.hookRewrite || '',
         suggestedCTARewrite: rawData.suggestions?.ctaRewrite || '',
         suggestedEdits: rawData.suggestions?.editingTips?.join('\n• ') || '',
