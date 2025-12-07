@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import Results from "./pages/Results";
 import Auth from "./pages/Auth";
 import LoadingState from "./components/LoadingState";
+import CookieConsent from "./components/CookieConsent";
 
 // Main App Component
 const AppContent = () => {
@@ -59,6 +60,8 @@ const AppContent = () => {
           onLogin={() => setCurrentPage('auth')}
         />
       )}
+
+      <CookieConsent />
     </>
   );
 };
