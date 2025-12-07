@@ -220,12 +220,73 @@ class ApiService {
         suggestedEdits: rawData.suggestions?.editingTips?.join('\n• ') || '',
         thumbnailIdeas: rawData.suggestions?.editingTips?.[0] || 'Use a high contrast close-up',
         subtitleImprovements: 'Use bold yellow font for key phrases',
-        bestHighlights: rawData.insights?.map((insight, index) => ({
-          start: index * 10,
-          end: (index * 10) + 5,
-          score: 80 + index,
-          description: insight
-        })) || []
+        bestHighlights: (() => {
+          // 1. Use existing backend highlights if available
+          if (rawData.highlights && rawData.highlights.length > 0) {
+            return rawData.highlights.map(h => ({
+              start: h.start || 0,
+              end: h.end || 0,
+              score: h.score || 85,
+              description: h.description || 'Viral Moment'
+            }));
+          }
+
+          // 2. Fallback: Smart Generation based on Structure & Duration
+          const duration = rawData.metadata?.duration || 60;
+          const structure = rawData.details?.structure?.sections || {};
+          const generatedHighlights = [];
+
+          // Highlight 1: The Hook (Critical for engagement)
+          // Usually the first 3-5 seconds
+          generatedHighlights.push({
+            start: 0,
+            end: structure.intro?.end || Math.min(5, duration * 0.1),
+            score: rawData.details?.hook?.score || 90,
+            description: "🔥 The Hook: Crucial opening moments"
+          });
+
+          // Highlight 2: peak engagement point (often 60-70% through)
+          // Or specifically where the 'climax' is if defined
+          const climaxStart = structure.climax?.start || (duration * 0.6);
+          const climaxEnd = structure.climax?.end || (climaxStart + 5);
+
+          if (climaxStart < duration) {
+            generatedHighlights.push({
+              start: Math.floor(climaxStart),
+              end: Math.min(duration, Math.floor(climaxEnd)),
+              score: 88,
+              description: "⚡ Peak Engagement: High intensity segment"
+            });
+          }
+
+          // Highlight 3: Call to Action / Strong Finish
+          const outroStart = structure.outro?.start || (duration * 0.9);
+          if (outroStart < duration) {
+            generatedHighlights.push({
+              start: Math.floor(outroStart),
+              end: Math.floor(duration),
+              score: 85,
+              description: "🎯 Strong Finish: Effective CTA placement"
+            });
+          }
+
+          // Add Audio Peaks if available from backend (simulated check)
+          if (rawData.audioAnalysis?.loudest_moment) {
+            const peakTime = rawData.audioAnalysis.loudest_moment;
+            // Check if we already covered this time
+            const covered = generatedHighlights.some(h => peakTime >= h.start && peakTime <= h.end);
+            if (!covered) {
+              generatedHighlights.push({
+                start: Math.max(0, peakTime - 2),
+                end: Math.min(duration, peakTime + 3),
+                score: 87,
+                description: "🔊 Audio Peak: Loudest/most energetic moment"
+              });
+            }
+          }
+
+          return generatedHighlights.sort((a, b) => b.score - a.score).slice(0, 3);
+        })() || []
       };
 
       console.log('✨ Transformed Data:', transformedData);

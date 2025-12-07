@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import Navigation from '../components/Navigation';
 import VideoPreview from '../components/VideoPreview';
 import ViralScores from '../components/ViralScores';
@@ -10,6 +10,18 @@ import PredictionCard from '../components/PredictionCard';
 
 const Results = ({ results, videoFile, onBack, onLogin }) => {
     console.log('📊 Results Page Received Data:', results);
+    const videoRef = useRef(null);
+
+    // Function to jump to a specific timestamp in the video
+    const handlePlayHighlight = (timestamp) => {
+        if (videoRef.current) {
+            videoRef.current.currentTime = timestamp;
+            videoRef.current.play();
+            // Scroll to top to see video if needed
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
+
     if (!results) return null;
 
     const videoUrl = videoFile ? URL.createObjectURL(videoFile) : null;
@@ -46,7 +58,7 @@ const Results = ({ results, videoFile, onBack, onLogin }) => {
                     <div className="lg:col-span-4 space-y-8">
                         <div className="sticky top-24 space-y-8">
                             <div className="card p-1 bg-white shadow-xl">
-                                <VideoPreview videoUrl={videoUrl} />
+                                <VideoPreview ref={videoRef} videoUrl={videoUrl} />
                             </div>
 
                             <ViralScores
@@ -67,7 +79,10 @@ const Results = ({ results, videoFile, onBack, onLogin }) => {
                             </div>
                         </div>
 
-                        <Highlights highlights={results.bestHighlights} />
+                        <Highlights
+                            highlights={results.bestHighlights}
+                            onPlayHighlight={handlePlayHighlight}
+                        />
                     </div>
                 </div>
             </main>
