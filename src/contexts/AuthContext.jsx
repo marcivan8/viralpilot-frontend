@@ -134,7 +134,6 @@ export const AuthProvider = ({ children }) => {
     signOut,
     resetPassword,
     getAccessToken,
-    getAccessToken,
     isAuthenticated: !!user,
     supabase // Expose supabase client for RPC calls
   };
