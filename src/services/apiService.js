@@ -103,14 +103,10 @@ class ApiService {
     }
   }
 
-  static async analyzeVideo(formData, accessToken) {
+  static async analyzeVideo(formData, accessToken, clientDuration) {
     const url = `${API_BASE_URL}/analyze`;
     console.log('🎥 Uploading video to:', url);
     console.log('🔑 Using access token:', accessToken ? 'Yes' : 'No');
-
-    // If no token, we can't call the backend properly, but for demo purposes we might want to allow it
-    // However, the backend likely requires auth.
-    // Let's try to call the backend first.
 
     try {
       if (!accessToken) {
@@ -121,7 +117,6 @@ class ApiService {
         method: 'POST',
         headers: {
           Authorization: accessToken ? `Bearer ${accessToken}` : '',
-          // Note: Don't set Content-Type for FormData - browser sets it automatically with boundary
         },
         body: formData,
       });
@@ -129,7 +124,6 @@ class ApiService {
       console.log('📊 Response status:', response.status);
 
       if (!response.ok) {
-        // If backend fails, throw error to trigger fallback or handle it
         let errorData;
         try {
           errorData = await response.json();
@@ -168,7 +162,7 @@ class ApiService {
         retentionHeatmap: (() => {
           if (rawData.retentionHeatmap) return rawData.retentionHeatmap;
 
-          const duration = rawData.metadata?.duration || 60;
+          const duration = rawData.metadata?.duration || clientDuration || 60;
           const points = [];
           const interval = Math.max(1, Math.floor(duration / 10)); // ~10 points
 
@@ -183,26 +177,27 @@ class ApiService {
               // Intro: Sharp drop then stabilize (Hook effect)
               // Drop from 100 to ~70-80 depending on hook score
               const hookScore = rawData.details?.hook?.score || 50;
-              const dropRate = 100 - (hookScore / 2); // Higher score = less drop
+              const dropRate = 100 - (hookScore / 2);
               const progress = t / introEnd;
               retention = 100 - (progress * (100 - dropRate));
             } else if (t >= outroStart) {
               // Outro: Drop off
               const progress = (t - outroStart) / (duration - outroStart);
-              retention = 60 - (progress * 40); // Drop from ~60 to 20
+              retention = 60 - (progress * 40);
             } else {
               // Body: Gradual decline
-              // Start from where intro left off
               const hookScore = rawData.details?.hook?.score || 50;
               const startRetention = 50 + (hookScore / 2);
               const bodyDuration = outroStart - introEnd;
-              const progress = (t - introEnd) / bodyDuration;
-              retention = startRetention - (progress * 15); // Lose ~15% during body
+              if (bodyDuration > 0) {
+                const progress = (t - introEnd) / bodyDuration;
+                retention = startRetention - (progress * 15);
+              } else {
+                retention = startRetention;
+              }
             }
 
-            // Add some noise
             retention += (Math.random() * 5) - 2.5;
-
             points.push({
               timestamp: Math.round(t),
               retention: Math.max(0, Math.min(100, Math.round(retention)))
@@ -219,7 +214,10 @@ class ApiService {
         suggestedCTARewrite: rawData.suggestions?.ctaRewrite || '',
         suggestedEdits: rawData.suggestions?.editingTips?.join('\n• ') || '',
         thumbnailIdeas: rawData.suggestions?.editingTips?.[0] || 'Use a high contrast close-up',
-        subtitleImprovements: 'Use bold yellow font for key phrases',
+
+        // Only show if available from backend
+        subtitleImprovements: rawData.suggestions?.subtitleImprovements || null,
+
         bestHighlights: (() => {
           // 1. Use existing backend highlights if available
           if (rawData.highlights && rawData.highlights.length > 0) {
@@ -231,16 +229,18 @@ class ApiService {
             }));
           }
 
-          // 2. Fallback: Smart Generation based on Structure & Duration
-          const duration = rawData.metadata?.duration || 60;
+          // 2. Fallback: Smart Generation using client duration
+          const duration = rawData.metadata?.duration || clientDuration || 60;
           const structure = rawData.details?.structure?.sections || {};
           const generatedHighlights = [];
 
-          // Highlight 1: The Hook (Critical for engagement)
-          // Usually the first 3-5 seconds
+          // Debug duration usage
+          console.log(`⏱ Using duration: ${duration}s for highlights generation`);
+
+          // Highlight 1: The Hook
           generatedHighlights.push({
             start: 0,
-            end: structure.intro?.end || Math.min(5, duration * 0.1),
+            end: structure.intro?.end || Math.min(5, Math.ceil(duration * 0.1)),
             score: rawData.details?.hook?.score || 90,
             description: "🔥 The Hook: Crucial opening moments"
           });

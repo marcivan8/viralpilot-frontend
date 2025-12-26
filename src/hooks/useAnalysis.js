@@ -36,7 +36,7 @@ export const useAnalysis = () => {
         throw new Error('Authentication required');
       }
 
-      // Préparer FormData
+      // Prepare FormData
       const uploadData = new FormData();
       uploadData.append('video', file);
       uploadData.append('title', title.trim());
@@ -44,10 +44,30 @@ export const useAnalysis = () => {
       uploadData.append('language', formData.language || 'en');
       uploadData.append('ai_training_consent', aiConsent.toString());
 
-      // Analyser avec les différents services en parallèle (si possible)
+      // Get accurate video duration from file
+      const getVideoDuration = (file) =>
+        new Promise((resolve) => {
+          const video = document.createElement('video');
+          video.preload = 'metadata';
+          video.onloadedmetadata = () => {
+            window.URL.revokeObjectURL(video.src);
+            resolve(video.duration);
+          };
+          video.src = URL.createObjectURL(file);
+        });
+
+      let clientDuration = 60; // default fallback
+      try {
+        clientDuration = await getVideoDuration(file);
+      } catch (e) {
+        console.warn('Could not detect file duration', e);
+      }
+      uploadData.append('duration', clientDuration); // Send to backend if needed
+
+      // Analyze with different services in parallel
       setProgress(20);
 
-      // Lancer les analyses en parallèle
+      // Launch analyses
       const [emotions, vision, audio, backendResults] = await Promise.allSettled([
         EmotionService.analyzeEmotions(file).catch(err => {
           console.warn('Emotion analysis failed:', err);
@@ -61,7 +81,7 @@ export const useAnalysis = () => {
           console.warn('Audio analysis failed:', err);
           return null;
         }),
-        ApiService.analyzeVideo(uploadData, accessToken),
+        ApiService.analyzeVideo(uploadData, accessToken, clientDuration), // Pass clientDuration
       ]);
 
       setProgress(90);
